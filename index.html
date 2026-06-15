@@ -326,6 +326,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn icon-only" onclick="agD(1)"><i class="ti ti-chevron-right"></i></button>
     </div>
     <button class="btn p" onclick="openRes()"><i class="ti ti-plus"></i> Nueva reserva</button>
+    <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Bloqueo / Evento</button>
   </div>
   <div style="display:flex;gap:14px;margin-bottom:1rem;font-size:12px;flex-wrap:wrap;align-items:center">
     <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:var(--gray-light);border:1px solid var(--border)"></div><span style="color:var(--text2);font-weight:500">Libre</span></div>
@@ -333,6 +334,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(245,158,11,.12);border-left:3px solid var(--amber)"></div><span style="color:var(--text2);font-weight:500">Incompleta</span></div>
     <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:rgba(163,230,53,.2);border-left:3px solid var(--green)"></div><span style="color:var(--text2);font-weight:500">En juego</span></div>
     <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:var(--gray-light)"></div><span style="color:var(--text2);font-weight:500">Cerrada</span></div>
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:#E2E8F0;border-left:3px solid #64748B"></div><span style="color:var(--text2);font-weight:500">Mantenimiento</span></div>
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:#EEEDFE;border-left:3px solid #7C6FE8"></div><span style="color:var(--text2);font-weight:500">Clase</span></div>
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:#FCE7F3;border-left:3px solid #EC4899"></div><span style="color:var(--text2);font-weight:500">Cumpleaños</span></div>
+    <div style="display:flex;align-items:center;gap:5px"><div style="width:12px;height:12px;border-radius:3px;background:#FEF3C7;border-left:3px solid #F59E0B"></div><span style="color:var(--text2);font-weight:500">Evento</span></div>
   </div>
   <!-- MÉTRICAS COMPACTAS -->
   <div id="ag-stats" class="g4" style="margin-bottom:.875rem"></div>
@@ -394,6 +399,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="g2" style="gap:1rem;margin-bottom:1.25rem">
     <div class="card"><div class="card-title">Por método de pago</div><div id="cmetodos"></div></div>
     <div class="card"><div class="card-title">Productos más vendidos</div><div id="cprods"></div></div>
+  </div>
+  <div class="card" id="cblq-card" style="margin-bottom:1.25rem">
+    <div class="card-title">Otros ingresos (clases, eventos, arriendos especiales)</div>
+    <div id="cblq"></div>
   </div>
   <div class="card" style="padding:0;overflow:auto">
     <div style="padding:1rem 1.25rem;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)">Historial de turnos</div>
@@ -714,6 +723,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div><lbl>Nivel</lbl><select id="j-nivel"></select></div>
       <div><lbl>Disponibilidad horaria</lbl><select id="j-disp"><option>Mañana</option><option>Tarde</option><option>Noche</option><option value="Flexible">Flexible</option></select></div>
     </div>
+    <div class="fr c2">
+      <div><lbl>Lado preferido</lbl><select id="j-lado"><option value="">No definido</option><option>Drive</option><option>Revés</option><option>Ambos</option></select></div>
+      <div></div>
+    </div>
     <div class="fr"><lbl>Preferencias / notas</lbl><textarea id="j-notas" rows="2" placeholder="Ej: prefiere noche, no jueves..."></textarea></div>
     <div style="display:flex;gap:8px;justify-content:flex-end">
       <button class="btn" onclick="cM('m-jug')">Cancelar</button>
@@ -769,11 +782,57 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div>
 </div>
 
+<div class="mbg hidden" id="m-bloqueo">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header">
+      <div class="modal-title" id="m-bloqueo-title">Nuevo bloqueo / evento</div>
+      <button class="btn icon-only" onclick="cM('m-bloqueo')"><i class="ti ti-x"></i></button>
+    </div>
+    <input type="hidden" id="bl-id">
+    <div class="fr">
+      <lbl>Tipo</lbl>
+      <div id="bl-tipos" style="display:flex;gap:8px;flex-wrap:wrap"></div>
+    </div>
+    <div class="fr"><lbl id="bl-desc-lbl">Motivo / descripción</lbl><input id="bl-desc" placeholder="Ej: Mantención de red"></div>
+    <div class="fr c2">
+      <div><lbl>Fecha</lbl><input type="date" id="bl-fecha"></div>
+      <div><lbl>Cancha</lbl><select id="bl-cancha"><option value="todas">Todas las canchas</option></select></div>
+    </div>
+    <div class="fr c2">
+      <div><lbl>Hora inicio</lbl><input type="time" id="bl-inicio"></div>
+      <div><lbl>Hora fin</lbl><input type="time" id="bl-fin"></div>
+    </div>
+    <div class="fr">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer;color:var(--navy)">
+        <input type="checkbox" id="bl-genIngreso" style="width:auto" onchange="tgBloqIngreso()">
+        ¿Este bloque genera ingreso para el club?
+      </label>
+      <div id="bl-ingreso-wrap" class="hidden" style="margin-top:8px">
+        <lbl id="bl-valor-lbl">Valor del bloque $</lbl>
+        <input type="number" id="bl-valor" placeholder="Ej: 15000">
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Se sumará a los ingresos de Caja en la fecha indicada.</div>
+      </div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+      <button class="btn d sm hidden" id="bl-del-btn" onclick="delBloqueo()"><i class="ti ti-trash"></i> Eliminar</button>
+      <div style="flex:1"></div>
+      <button class="btn" onclick="cM('m-bloqueo')">Cancelar</button>
+      <button class="btn p" onclick="saveBloqueo()"><i class="ti ti-device-floppy"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
 <script>
 const NIVELES=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',caja:'Caja',deudas:'Deudas',config:'Configuración'};
-let D={canchas:[],productos:[],reservas:[],jugadores:[],deudas:[],promos:[],cfg:{ini:'08:30',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',alto:'17:30'}};
+const BLOQ_TIPOS={
+  mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},
+  clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},
+  cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},
+  evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}
+};
+let D={canchas:[],productos:[],reservas:[],jugadores:[],deudas:[],promos:[],bloqueos:[],cfg:{ini:'08:30',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',alto:'17:30'}};
 let cRid=null,cQty={},cAsig={},cSJ=null,cSC=null,agOff=0,cajaT='hoy',sRid=null,eRid=null,agCtx='',role=null,dSel=null;
 
 function sv(){try{localStorage.setItem('cf-demo-v1',JSON.stringify(D));}catch(e){}}
@@ -791,7 +850,7 @@ function ld(){
     {id:7,nombre:'Barra energética',cat:'Alimentos',cod:'7804001',precio:1800,costo:900,stock:15,smin:5,und:'unidad'},
     {id:8,nombre:'Bandana',cat:'Accesorios',cod:'7803002',precio:4500,costo:2000,stock:6,smin:2,und:'unidad'}
   ];
-  if(!D.jugadores)D.jugadores=[];if(!D.reservas)D.reservas=[];if(!D.deudas)D.deudas=[];if(!D.promos)D.promos=[];
+  if(!D.jugadores)D.jugadores=[];if(!D.reservas)D.reservas=[];if(!D.deudas)D.deudas=[];if(!D.promos)D.promos=[];if(!D.bloqueos)D.bloqueos=[];
   // Cargar demo si no hay datos de esta versión
   const needsDemo=!D.jugadores.length||!D._demoLoaded;
   if(needsDemo){loadDemoData();D._demoLoaded=true;}
@@ -875,6 +934,12 @@ function rAg(){
     const alto=isAlto(sl.start);
     h+=`<tr><td class="hcol">${sl.label}${alto?`<span class="pa" style="margin-left:6px;font-size:9px">alto</span>`:''}</td>`;
     canchas.forEach(c=>{
+      const bl=findBloqueo(dstr,c.id,sl.start,D.cfg.dur||90);
+      if(bl){
+        const bt=BLOQ_TIPOS[bl.tipo]||BLOQ_TIPOS.evento;
+        h+=`<td><div class="slot" style="background:${bt.bg};border-left:3px solid ${bt.border};cursor:pointer" onclick="openBloqueo('${bl.id}')"><div style="text-align:center;width:100%;color:${bt.text}"><div style="font-size:12px;font-weight:700"><i class="ti ${bt.icon}" style="margin-right:4px"></i>${bt.label}</div><div style="font-size:10px;opacity:.85;margin-top:2px">${bl.titulo||(bl.canchaId==='todas'?'Todas las canchas':'')}</div></div></div></td>`;
+        return;
+      }
       const r=D.reservas.find(x=>x.fecha===dstr&&x.canchaId===c.id&&x.horario===sl.start);
       if(r){
         const jugs=(r.jugadores||[]).filter(j=>j);const fa=4-jugs.length;
@@ -894,6 +959,97 @@ function rAg(){
 }
 
 function clkLibre(fecha,horario,cid){openRes(fecha,horario,cid);}
+
+// ── BLOQUEOS / EVENTOS DE CANCHA ───────────────────────
+function timeToMin(t){const[h,m]=(t||'00:00').split(':').map(Number);return h*60+m;}
+function findBloqueo(dstr,cid,slotStart,dur){
+  const sStart=timeToMin(slotStart),sEnd=sStart+dur;
+  return (D.bloqueos||[]).find(b=>{
+    if(b.fecha!==dstr)return false;
+    if(b.canchaId!=='todas'&&b.canchaId!==cid)return false;
+    const bStart=timeToMin(b.horaInicio),bEnd=timeToMin(b.horaFin);
+    return sStart<bEnd&&sEnd>bStart;
+  });
+}
+function tgBloqIngreso(){
+  g('bl-ingreso-wrap').classList.toggle('hidden',!g('bl-genIngreso').checked);
+}
+function openBloqueo(id){
+  g('bl-id').value='';
+  const tiposHtml=Object.entries(BLOQ_TIPOS).map(([k,t])=>
+    `<label class="bl-tipo-opt" data-tipo="${k}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600;flex:1;min-width:120px;justify-content:center" onclick="selBloqTipo('${k}')">
+      <i class="ti ${t.icon}"></i>${t.label}
+    </label>`).join('');
+  g('bl-tipos').innerHTML=tiposHtml;
+  const csel=g('bl-cancha');
+  csel.innerHTML='<option value="todas">Todas las canchas</option>'+D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  if(id){
+    const b=(D.bloqueos||[]).find(x=>x.id===id);if(!b)return;
+    g('m-bloqueo-title').textContent='Editar bloqueo / evento';
+    g('bl-id').value=b.id;
+    selBloqTipo(b.tipo,true);
+    g('bl-desc').value=b.titulo||'';
+    g('bl-fecha').value=b.fecha;
+    csel.value=b.canchaId;
+    g('bl-inicio').value=b.horaInicio;
+    g('bl-fin').value=b.horaFin;
+    g('bl-genIngreso').checked=!!b.genIngreso;
+    g('bl-valor').value=b.valor||'';
+    tgBloqIngreso();
+    g('bl-del-btn').classList.remove('hidden');
+  }else{
+    g('m-bloqueo-title').textContent='Nuevo bloqueo / evento';
+    selBloqTipo('mantenimiento',true);
+    g('bl-desc').value='';
+    g('bl-fecha').value=ds(getAF());
+    csel.value='todas';
+    g('bl-inicio').value='';g('bl-fin').value='';
+    g('bl-genIngreso').checked=false;g('bl-valor').value='';
+    tgBloqIngreso();
+    g('bl-del-btn').classList.add('hidden');
+  }
+  g('m-bloqueo').classList.remove('hidden');
+}
+function selBloqTipo(tipo,silent){
+  g('bl-tipos').dataset.sel=tipo;
+  document.querySelectorAll('.bl-tipo-opt').forEach(el=>{
+    const on=el.dataset.tipo===tipo;
+    el.style.borderColor=on?BLOQ_TIPOS[el.dataset.tipo].border:'var(--border)';
+    el.style.background=on?BLOQ_TIPOS[el.dataset.tipo].bg:'';
+    el.style.color=on?BLOQ_TIPOS[el.dataset.tipo].text:'';
+  });
+  const labels={mantenimiento:'Motivo / descripción',clase:'Profesor / detalle de la clase',cumpleanos:'Nombre del cumpleañero',evento:'Descripción del evento'};
+  g('bl-desc-lbl').textContent=labels[tipo]||'Motivo / descripción';
+  const placeholders={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase con Prof. Pedro - Grupo intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno / actividad club'};
+  g('bl-desc').placeholder=placeholders[tipo]||'';
+  const valLabels={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo del bloque $',evento:'Valor cobrado por el evento $'};
+  g('bl-valor-lbl').textContent=valLabels[tipo]||'Valor del bloque $';
+}
+function saveBloqueo(){
+  const tipo=g('bl-tipos').dataset.sel||'mantenimiento';
+  const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
+  if(!fecha||!hi||!hf){alert('Completa fecha, hora de inicio y hora de fin.');return;}
+  if(timeToMin(hf)<=timeToMin(hi)){alert('La hora de fin debe ser posterior a la hora de inicio.');return;}
+  const canchaVal=g('bl-cancha').value;
+  const genIngreso=g('bl-genIngreso').checked;
+  const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
+  const datos={
+    tipo,titulo:g('bl-desc').value.trim(),fecha,
+    canchaId:canchaVal==='todas'?'todas':parseInt(canchaVal),
+    horaInicio:hi,horaFin:hf,genIngreso,valor
+  };
+  const eid=g('bl-id').value;
+  if(eid){const idx=D.bloqueos.findIndex(b=>b.id===eid);if(idx>=0)D.bloqueos[idx]={...D.bloqueos[idx],...datos};}
+  else{datos.id='bl'+Date.now();D.bloqueos.push(datos);}
+  sv();rAg();rCaja();cM('m-bloqueo');
+}
+function delBloqueo(){
+  const eid=g('bl-id').value;if(!eid)return;
+  if(!confirm('¿Eliminar este bloqueo/evento?'))return;
+  D.bloqueos=D.bloqueos.filter(b=>b.id!==eid);
+  sv();rAg();rCaja();cM('m-bloqueo');
+}
+
 function clkSlot(rid){
   sRid=rid;const r=D.reservas.find(x=>x.id===rid);if(!r)return;
   const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};
@@ -1722,7 +1878,7 @@ function rJ(){
       <span style="background:${nc.b};color:${nc.t};font-size:10px;padding:3px 9px;border-radius:20px;white-space:nowrap;font-weight:700;flex-shrink:0">${j.nivel||'—'}</span>
     </div>
     ${j.telefono?`<div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px"><i class="ti ti-phone" style="font-size:13px"></i>${j.telefono}</div>`:''}
-    <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px"><i class="ti ti-clock" style="font-size:13px"></i>${j.disponibilidad||'Flexible'}</div>
+    <div style="font-size:12px;color:var(--text2);display:flex;align-items:center;gap:5px"><i class="ti ti-clock" style="font-size:13px"></i>${j.disponibilidad||'Flexible'}${j.lado?` <span style="color:var(--text3)">·</span> <i class="ti ti-arrow-autofit-right" style="font-size:13px"></i>${j.lado}`:''}</div>
     ${j.notas?`<div style="font-size:11px;color:var(--text3);background:var(--gray-light);padding:6px 8px;border-radius:6px">${j.notas}</div>`:''}
     <div style="font-size:11px;color:var(--text3);display:flex;align-items:center;gap:5px"><i class="ti ti-history" style="font-size:12px"></i>${(j.hist||[]).length} partidas jugadas</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:2px">
@@ -1735,18 +1891,18 @@ function rJ(){
 function openJ(){
   g('m-jug-title').textContent='Nuevo jugador';g('ej-id').value='';
   ['j-nombre','j-tel','j-notas'].forEach(id=>g(id).value='');
-  g('j-nivel').value=NIVELES[0];g('j-disp').value='Flexible';g('m-jug').classList.remove('hidden');
+  g('j-nivel').value=NIVELES[0];g('j-disp').value='Flexible';g('j-lado').value='';g('m-jug').classList.remove('hidden');
 }
 function editJ(id){
   const j=D.jugadores.find(x=>x.id===id);if(!j)return;
   g('m-jug-title').textContent='Editar jugador';g('ej-id').value=id;
   g('j-nombre').value=j.nombre;g('j-tel').value=j.telefono||'';
-  g('j-nivel').value=j.nivel||NIVELES[0];g('j-disp').value=j.disponibilidad||'Flexible';g('j-notas').value=j.notas||'';
+  g('j-nivel').value=j.nivel||NIVELES[0];g('j-disp').value=j.disponibilidad||'Flexible';g('j-lado').value=j.lado||'';g('j-notas').value=j.notas||'';
   g('m-jug').classList.remove('hidden');
 }
 function saveJ(){
   const nombre=g('j-nombre').value.trim();if(!nombre){alert('El nombre es obligatorio');return;}
-  const datos={nombre,telefono:g('j-tel').value.trim(),nivel:g('j-nivel').value,disponibilidad:g('j-disp').value,notas:g('j-notas').value.trim()};
+  const datos={nombre,telefono:g('j-tel').value.trim(),nivel:g('j-nivel').value,disponibilidad:g('j-disp').value,lado:g('j-lado').value,notas:g('j-notas').value.trim()};
   const eid=g('ej-id').value;
   if(eid){const idx=D.jugadores.findIndex(j=>j.id===eid);if(idx>=0)D.jugadores[idx]={...D.jugadores[idx],...datos};else{datos.id=eid;datos.hist=[];D.jugadores.push(datos);}}
   else{datos.id='j'+Date.now();datos.hist=[];D.jugadores.push(datos);}
@@ -1816,11 +1972,23 @@ function rCaja(){
   const res=D.reservas.filter(r=>{if(r.estado!=='cerrado'||!r.cierreAt)return false;const d=new Date(r.cierreAt);if(cajaT==='hoy')return d.toDateString()===now.toDateString();if(cajaT==='semana')return(now-d)/86400000<7;if(cajaT==='mes')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
   let tC=0,tP=0,tCob=0;const pV={};const mets={};
   res.forEach(r=>{const pc=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario);tC+=pc;(r.productos||[]).forEach(p=>{tP+=p.precio*p.qty;if(!pV[p.nombre])pV[p.nombre]=0;pV[p.nombre]+=p.qty;});const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);tCob+=cob;(r.pagos||[]).forEach(p=>{if(!mets[p.metodo])mets[p.metodo]=0;mets[p.metodo]+=p.monto;});});
-  const tot=tC+tP;
-  g('cmet').innerHTML=[{l:'Total facturado',v:fmt(tot),s:cajaT},{l:'Total cobrado',v:fmt(tCob),s:'recibido'},{l:'Pendiente',v:fmt(Math.max(0,tot-tCob)),s:'por cobrar'},{l:'Turnos cerrados',v:res.length,s:cajaT}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
+  const blq=(D.bloqueos||[]).filter(b=>{if(!b.genIngreso||!b.valor)return false;const d=new Date(b.fecha+'T00:00:00');if(cajaT==='hoy')return d.toDateString()===now.toDateString();if(cajaT==='semana')return(now-d)/86400000<7&&d<=now;if(cajaT==='mes')return d.getMonth()===now.getMonth()&&d.getFullYear()===now.getFullYear();});
+  const tBlq=blq.reduce((s,b)=>s+(b.valor||0),0);
+  const tot=tC+tP+tBlq;
+  g('cmet').innerHTML=[{l:'Total facturado',v:fmt(tot),s:cajaT},{l:'Total cobrado',v:fmt(tCob+tBlq),s:'recibido'},{l:'Pendiente',v:fmt(Math.max(0,tot-(tCob+tBlq))),s:'por cobrar'},{l:'Turnos cerrados',v:res.length,s:cajaT}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
   g('cmetodos').innerHTML=Object.keys(mets).length?Object.entries(mets).map(([m,v])=>`<div class="sl"><span style="color:var(--text2);font-weight:600">${m}</span><span style="font-weight:700;font-family:Poppins,sans-serif">${fmt(v)}</span></div>`).join('')+`<div class="sl tot"><span>Total cobrado</span><span style="font-family:Poppins,sans-serif">${fmt(tCob)}</span></div>`:'<p style="font-size:12px;color:var(--text3)">Sin datos para el período.</p>';
   const sp=Object.entries(pV).sort((a,b)=>b[1]-a[1]).slice(0,6);
   g('cprods').innerHTML=sp.length?sp.map(([n,q])=>`<div class="sl"><span style="color:var(--text2);font-weight:600">${n}</span><span style="font-weight:600">${q} uds</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin ventas.</p>';
+  if(blq.length){
+    g('cblq-card').classList.remove('hidden');
+    g('cblq').innerHTML=blq.map(b=>{
+      const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;
+      const c=b.canchaId==='todas'?'Todas las canchas':(D.canchas.find(x=>x.id===b.canchaId)||{nombre:'?'}).nombre;
+      return`<div class="sl"><span style="color:var(--text2);font-weight:600"><i class="ti ${bt.icon}" style="margin-right:5px;color:${bt.text}"></i>${bt.label}${b.titulo?' · '+b.titulo:''} <span style="color:var(--text3);font-size:11px">(${c} · ${b.fecha} · ${b.horaInicio}-${b.horaFin})</span></span><span style="font-weight:700;font-family:Poppins,sans-serif">${fmt(b.valor)}</span></div>`;
+    }).join('')+`<div class="sl tot"><span>Total otros ingresos</span><span style="font-family:Poppins,sans-serif">${fmt(tBlq)}</span></div>`;
+  }else{
+    g('cblq-card').classList.add('hidden');
+  }
   g('chist').innerHTML=[...res].reverse().slice(0,30).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const pc=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario);const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const tot2=pc+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,tot2-cob);return`<tr><td style="font-weight:600">${c.nombre}</td><td>${r.horario}</td><td style="color:var(--text3)">${r.fecha}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(pc)}</td><td>${fmt(tp)}</td><td style="font-family:Poppins,sans-serif;font-weight:700;color:var(--navy)">${fmt(tot2)}</td><td style="color:#3d6b0a;font-weight:600">${fmt(cob)}</td><td style="${pend>0?'color:#92400E;font-weight:700':''}">${fmt(pend)||'—'}</td><td style="font-size:11px">${r.pagos&&r.pagos.length?[...new Set(r.pagos.map(p=>p.metodo))].join('/'):'—'}</td></tr>`;}).join('')||'<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:1.5rem">Sin turnos cerrados en este período.</td></tr>';
 }
 
