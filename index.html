@@ -266,6 +266,14 @@ tr:hover td{background:rgba(242,244,247,.7)}
 
 <!-- APP -->
 <div id="main-app" class="hidden">
+<div id="demo-fab" style="position:fixed;bottom:18px;right:18px;z-index:150">
+  <button onclick="if(confirm('¿Restaurar todos los datos de demo? Se perderá lo que hayas modificado.')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"
+    title="Restaurar datos de demo"
+    style="display:flex;align-items:center;gap:6px;background:#0D1B2A;color:#A3E635;border:none;border-radius:24px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(13,27,42,.25);font-family:Inter,sans-serif">
+    <i class="ti ti-refresh" style="font-size:14px"></i> Restaurar demo
+  </button>
+</div>
+
 <div class="layout">
 
 <!-- SIDEBAR -->
@@ -461,6 +469,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
       </div>
       <button class="btn p" onclick="saveConfig()"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
     </div>
+  </div>
+  <div class="card" style="margin-bottom:1.25rem">
+    <div class="card-title">Datos del club</div>
+    <div><lbl>Nombre del club</lbl><input id="cfg-club" value="" style="max-width:320px" onchange="D.cfg.clubNombre=this.value;sv();"></div>
   </div>
   <div class="card" style="margin-bottom:1.25rem">
     <div class="card-title">Promociones de cancha</div>
@@ -783,8 +795,9 @@ function ld(){
   // Cargar demo si no hay datos de esta versión
   const needsDemo=!D.jugadores.length||!D._demoLoaded;
   if(needsDemo){loadDemoData();D._demoLoaded=true;}
-  if(!D.cfg)D.cfg={ini:'08:30',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',alto:'17:30'};
+  if(!D.cfg)D.cfg={ini:'08:30',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',alto:'17:30',clubNombre:'Club Pádel Las Torres'};
   ['pAdmin','pRecep','alto','ini','fin'].forEach(k=>{if(!D.cfg[k])D.cfg[k]=k==='pAdmin'?'1234':k==='pRecep'?'5678':k==='alto'?'17:30':k==='ini'?'08:30':'23:30';});
+  if(!D.cfg.clubNombre)D.cfg.clubNombre='Club Pádel Las Torres';
   ['j-nivel','jfnivel'].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=(id==='jfnivel'?'<option value="">Todos los niveles</option>':'')+NIVELES.map(n=>`<option value="${n}">${n}</option>`).join('');});
 }
 const g=id=>document.getElementById(id);
@@ -1662,7 +1675,7 @@ function openCD(){
   </div>`;
   g('m-cierreD').classList.remove('hidden');
 }
-function printCD(){const c=g('printCD').innerHTML;const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Cierre CanchaFlow</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{font-family:Poppins,Inter,sans-serif;padding:2rem;max-width:900px;margin:0 auto}@media print{body{padding:.5rem}}</style></head><body>${c}<script>window.onload=function(){window.print()};<\/script></body></html>`);w.document.close();}
+function printCD(){const c=g('printCD').innerHTML;const w=window.open('','_blank');w.document.write(`<!DOCTYPE html><html><head><title>Cierre - ${D.cfg.clubNombre||'CanchaFlow'}</title><link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&family=Inter:wght@400;600&display=swap" rel="stylesheet"><style>*{box-sizing:border-box}body{font-family:Poppins,Inter,sans-serif;padding:2rem;max-width:900px;margin:0 auto}@media print{body{padding:.5rem}}</style></head><body>${c}<script>window.onload=function(){window.print()};<\/script></body></html>`);w.document.close();}
 
 function rT(){
   const ab=[...D.reservas.filter(r=>r.estado==='abierto')].sort((a,b)=>a.canchaId-b.canchaId);
@@ -1793,7 +1806,7 @@ function delPromo(id){
   D.promos=(D.promos||[]).filter(p=>p.id!==id);sv();rPromos();
 }
 
-function rCfg(){g('cfg-ini').value=D.cfg.ini||'08:30';g('cfg-fin').value=D.cfg.fin||'23:30';g('cfg-dur').value=D.cfg.dur||90;g('cfg-alto').value=D.cfg.alto||'17:30';}
+function rCfg(){g('cfg-ini').value=D.cfg.ini||'08:30';g('cfg-fin').value=D.cfg.fin||'23:30';g('cfg-dur').value=D.cfg.dur||90;g('cfg-alto').value=D.cfg.alto||'17:30';g('cfg-club').value=D.cfg.clubNombre||'Club Pádel Las Torres';}
 function saveConfig(){D.cfg.ini=g('cfg-ini').value;D.cfg.fin=g('cfg-fin').value;D.cfg.dur=parseInt(g('cfg-dur').value)||90;D.cfg.alto=g('cfg-alto').value;sv();rAll();alert('Configuración guardada.');}
 function chPin(rol){const np=g('pin-'+rol).value;if(np.length===4&&/^\d+$/.test(np)){if(rol==='admin')D.cfg.pAdmin=np;else D.cfg.pRecep=np;sv();g('pin-'+rol).value='';alert('PIN actualizado.');}else alert('El PIN debe tener exactamente 4 dígitos.');}
 
