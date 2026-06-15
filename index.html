@@ -274,7 +274,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div class="sb-logo-text">
       <div class="sb-logo-icon"><i class="ti ti-ball-tennis"></i></div>
       <div>
-        <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span></div>
+        <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span> <span style="background:#A3E635;color:#0D1B2A;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;letter-spacing:.05em;vertical-align:middle">DEMO</span></div>
         <div class="sb-sub">CONTROL TOTAL DE TU CLUB</div>
       </div>
     </div>
@@ -480,7 +480,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div><strong>Recepcionista:</strong> <code>recepcion@canchaflow.cl</code> / <code>demo123</code></div>
     </div>
     <div style="font-size:11px;color:var(--tt);margin-top:8px">En producción las credenciales se gestionan desde el backend.</div>
-    <button class="btn d sm" style="margin-top:12px" onclick="if(confirm('¿Restaurar datos de demo?')){{localStorage.removeItem('cf-demo-v1');location.reload();}}"><i class="ti ti-refresh"></i> Restaurar datos de demo</button>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn secondary sm" onclick="g('m-tour').classList.remove('hidden')"><i class="ti ti-route"></i> Ver tour de bienvenida</button>
+      <button class="btn d sm" onclick="if(confirm('¿Restaurar datos de demo?')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"><i class="ti ti-refresh"></i> Restaurar datos de demo</button>
+    </div>
   </div></div>
 
   </div>
@@ -609,6 +612,43 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
     <div style="display:flex;justify-content:flex-end;margin-top:12px">
       <button class="btn p" onclick="saveCom()"><i class="ti ti-device-floppy"></i> Guardar comanda</button>
+    </div>
+  </div>
+</div>
+
+<div class="mbg hidden" id="m-tour">
+  <div class="modal" style="max-width:380px">
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
+      <div style="width:40px;height:40px;border-radius:50%;background:rgba(163,230,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
+        <i class="ti ti-ball-tennis" style="font-size:20px;color:#3d6b0a"></i>
+      </div>
+      <div>
+        <div style="font-family:Poppins,sans-serif;font-weight:700;font-size:16px;color:var(--navy)">Bienvenido a CanchaFlow</div>
+        <div style="font-size:12px;color:var(--ts)">Demo interactiva</div>
+      </div>
+    </div>
+    <p style="font-size:14px;line-height:1.6;color:var(--tp);margin:0 0 1.25rem">
+      Este es un sistema de gestión para clubes de pádel. Te dejamos 3 pasos para que veas el flujo principal: cobro por jugador.
+    </p>
+    <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem">
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rm);background:var(--bs)">
+        <div style="width:24px;height:24px;border-radius:50%;background:rgba(31,79,163,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--blue)">1</div>
+        <span style="font-size:13px">Abre la <strong>comanda</strong> de un turno en <strong>Turnos</strong></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rm);background:var(--bs)">
+        <div style="width:24px;height:24px;border-radius:50%;background:rgba(31,79,163,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--blue)">2</div>
+        <span style="font-size:13px">Asigna productos por jugador y <strong>cierra el turno</strong></span>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:10px 12px;border-radius:var(--rm);background:var(--bs)">
+        <div style="width:24px;height:24px;border-radius:50%;background:rgba(31,79,163,.1);display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:12px;font-weight:700;color:var(--blue)">3</div>
+        <span style="font-size:13px">Revisa la <strong>deuda generada</strong> en el módulo Deudas</span>
+      </div>
+    </div>
+    <div style="background:var(--bs);border-radius:var(--rm);padding:10px 12px;font-size:11px;color:var(--ts);margin-bottom:1.25rem;line-height:1.7">
+      <i class="ti ti-info-circle"></i> Esto es una <strong>demo</strong> — todos los datos son ficticios y puedes explorar libremente. Si algo se desordena, usa "Restaurar datos de demo" en Configuración.
+    </div>
+    <div style="display:flex;justify-content:flex-end">
+      <button class="btn p" onclick="cM('m-tour')" style="width:100%;justify-content:center"><i class="ti ti-check"></i> Entendido, empezar</button>
     </div>
   </div>
 </div>
@@ -781,6 +821,10 @@ function doLogin(){
   if(g('sb-urole'))g('sb-urole').textContent=u.desc;
   document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
   rAll();
+  if(!localStorage.getItem('cf-tour-seen')){
+    g('m-tour').classList.remove('hidden');
+    localStorage.setItem('cf-tour-seen','1');
+  }
 }
 function doLogout(){
   role=null;
@@ -1902,6 +1946,9 @@ function crearDeudaDesdeTurno(reserva){
 function loadDemoData(){
   const HOY=new Date().toISOString().slice(0,10);
   const AYER=new Date(Date.now()-86400000).toISOString().slice(0,10);
+  const ANTEAYER=new Date(Date.now()-2*86400000).toISOString().slice(0,10);
+  const MANANA=new Date(Date.now()+86400000).toISOString().slice(0,10);
+  const PASADO=new Date(Date.now()+2*86400000).toISOString().slice(0,10);
   D.canchas=[
     {id:1,nombre:'Cancha 1',pN:20000,pA:24000},
     {id:2,nombre:'Cancha 2',pN:20000,pA:24000}
@@ -1928,11 +1975,17 @@ function loadDemoData(){
   ];
   // Reservas de hoy
   D.reservas=[
-    {id:'r1',canchaId:1,horario:'08:30',fecha:HOY,contacto:'Álvaro Martínez',jugadores:['Álvaro Martínez','Rodrigo Silva','',''],notas:'',pOv:undefined,productos:[{id:5,nombre:'Pelotas pádel x3',precio:8500,qty:1,jugador:null}],pagos:[{monto:20000,metodo:'Transferencia',quien:'Álvaro Martínez',fecha:'2026-06-03T09:00:00Z'}],estado:'cerrado',creadoAt:'2026-06-03T08:00:00Z',aperturaAt:'2026-06-03T08:30:00Z',cierreAt:'2026-06-03T10:10:00Z'},
-    {id:'r2',canchaId:1,horario:'10:00',fecha:HOY,contacto:'Álvaro Martínez',jugadores:['Álvaro Martínez','Rodrigo Silva','Constanza Pérez','Diego Fuentes'],notas:'',pOv:undefined,productos:[{id:2,nombre:'Gatorade',precio:2500,qty:2,jugador:null},{id:1,nombre:'Agua mineral',precio:1500,qty:2,jugador:null}],pagos:[{monto:28000,metodo:'Efectivo',quien:'Álvaro Martínez',fecha:'2026-06-03T11:40:00Z'}],estado:'cerrado',creadoAt:'2026-06-03T09:30:00Z',aperturaAt:'2026-06-03T10:00:00Z',cierreAt:'2026-06-03T11:45:00Z'},
-    {id:'r3',canchaId:2,horario:'14:30',fecha:HOY,contacto:'Benjamín Ardissoni',jugadores:['Benjamín Ardissoni','','',''],notas:'Faltan 3 jugadores',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:'2026-06-03T09:00:00Z',aperturaAt:null,cierreAt:null},
-    {id:'r4',canchaId:1,horario:'16:00',fecha:HOY,contacto:'Valentina Torres',jugadores:['Valentina Torres','Camila Rojas','Sebastián Mora',''],notas:'',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:'2026-06-03T10:00:00Z',aperturaAt:null,cierreAt:null},
-    {id:'r5',canchaId:2,horario:'19:00',fecha:HOY,contacto:'Diego Fuentes',jugadores:['Diego Fuentes','Rodrigo Silva','Álvaro Martínez','Benjamín Ardissoni'],notas:'Partido ranking',pOv:24000,productos:[],pagos:[],estado:'reservada',creadoAt:'2026-06-03T08:00:00Z',aperturaAt:null,cierreAt:null}
+    {id:'r1',canchaId:1,horario:'08:30',fecha:HOY,contacto:'Álvaro Martínez',jugadores:['Álvaro Martínez','Rodrigo Silva','',''],notas:'',pOv:undefined,productos:[{id:5,nombre:'Pelotas pádel x3',precio:8500,qty:1,jugador:null}],pagos:[{monto:20000,metodo:'Transferencia',quien:'Álvaro Martínez',fecha:HOY+'T09:00:00Z'}],estado:'cerrado',creadoAt:HOY+'T08:00:00Z',aperturaAt:HOY+'T08:30:00Z',cierreAt:HOY+'T10:10:00Z'},
+    {id:'r2',canchaId:1,horario:'10:00',fecha:HOY,contacto:'Álvaro Martínez',jugadores:['Álvaro Martínez','Rodrigo Silva','Constanza Pérez','Diego Fuentes'],notas:'',pOv:undefined,productos:[{id:2,nombre:'Gatorade',precio:2500,qty:2,jugador:null},{id:1,nombre:'Agua mineral',precio:1500,qty:2,jugador:null}],pagos:[{monto:28000,metodo:'Efectivo',quien:'Álvaro Martínez',fecha:HOY+'T11:40:00Z'}],estado:'cerrado',creadoAt:HOY+'T09:30:00Z',aperturaAt:HOY+'T10:00:00Z',cierreAt:HOY+'T11:45:00Z'},
+    {id:'r3',canchaId:2,horario:'14:30',fecha:HOY,contacto:'Benjamín Ardissoni',jugadores:['Benjamín Ardissoni','','',''],notas:'Faltan 3 jugadores',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T09:00:00Z',aperturaAt:null,cierreAt:null},
+    {id:'r4',canchaId:1,horario:'16:00',fecha:HOY,contacto:'Valentina Torres',jugadores:['Valentina Torres','Camila Rojas','Sebastián Mora',''],notas:'',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T10:00:00Z',aperturaAt:null,cierreAt:null},
+    {id:'r5',canchaId:2,horario:'19:00',fecha:HOY,contacto:'Diego Fuentes',jugadores:['Diego Fuentes','Rodrigo Silva','Álvaro Martínez','Benjamín Ardissoni'],notas:'Partido ranking',pOv:24000,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T08:00:00Z',aperturaAt:null,cierreAt:null},
+    {id:'r6',canchaId:1,horario:'09:00',fecha:AYER,contacto:'Camila Rojas',jugadores:['Camila Rojas','Valentina Torres','Constanza Pérez','Sebastián Mora'],notas:'',pOv:undefined,productos:[{id:1,nombre:'Agua mineral',precio:1500,qty:4,jugador:null}],pagos:[{monto:26000,metodo:'Transferencia',quien:'Camila Rojas',fecha:AYER+'T11:00:00Z'}],estado:'cerrado',creadoAt:AYER+'T08:30:00Z',aperturaAt:AYER+'T09:00:00Z',cierreAt:AYER+'T10:45:00Z'},
+    {id:'r7',canchaId:2,horario:'18:00',fecha:AYER,contacto:'Diego Fuentes',jugadores:['Diego Fuentes','Sebastián Mora','',''],notas:'',pOv:undefined,productos:[{id:3,nombre:'Cerveza lata',precio:2000,qty:2,jugador:null}],pagos:[{monto:12000,metodo:'Efectivo',quien:'Diego Fuentes',fecha:AYER+'T19:35:00Z'}],estado:'cerrado',creadoAt:AYER+'T17:30:00Z',aperturaAt:AYER+'T18:00:00Z',cierreAt:AYER+'T19:35:00Z'},
+    {id:'r8',canchaId:1,horario:'20:30',fecha:ANTEAYER,contacto:'Sebastián Mora',jugadores:['Sebastián Mora','Camila Rojas','',''],notas:'',pOv:undefined,productos:[],pagos:[{monto:3000,metodo:'Efectivo',quien:'Sebastián Mora',fecha:ANTEAYER+'T22:05:00Z'}],estado:'cerrado',creadoAt:ANTEAYER+'T20:00:00Z',aperturaAt:ANTEAYER+'T20:30:00Z',cierreAt:ANTEAYER+'T22:05:00Z'},
+    {id:'r9',canchaId:1,horario:'09:00',fecha:MANANA,contacto:'Rodrigo Silva',jugadores:['Rodrigo Silva','Álvaro Martínez','',''],notas:'',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T12:00:00Z',aperturaAt:null,cierreAt:null},
+    {id:'r10',canchaId:2,horario:'17:30',fecha:MANANA,contacto:'Valentina Torres',jugadores:['Valentina Torres','Camila Rojas','Constanza Pérez','Diego Fuentes'],notas:'Promo martes',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T13:00:00Z',aperturaAt:null,cierreAt:null},
+    {id:'r11',canchaId:1,horario:'19:00',fecha:PASADO,contacto:'Benjamín Ardissoni',jugadores:['Benjamín Ardissoni','Rodrigo Silva','',''],notas:'',pOv:undefined,productos:[],pagos:[],estado:'reservada',creadoAt:HOY+'T14:00:00Z',aperturaAt:null,cierreAt:null}
   ];
   // Deudas conectadas a jugadores
   D.promos=[
@@ -1941,8 +1994,8 @@ function loadDemoData(){
     {id:'p3',nombre:'Cancha cortesía',desc:'Turno gratis',tipo:'fijo',valor:0}
   ];
   D.deudas=[
-    {id:'d1',jugador:'Benjamín Ardissoni',telefono:'+56912345678',fecha:HOY,concepto:'Turno 08:30 - Cancha 1',monto:14250,pagado:0,estado:'Pendiente',bloqueado:false},
-    {id:'d2',jugador:'Sebastián Mora',telefono:'+56989012345',fecha:AYER,concepto:'Turno 20:30 - Cancha 2',monto:6000,pagado:3000,estado:'Abono parcial',bloqueado:false},
+    {id:'d1',jugador:'Constanza Pérez',telefono:'+56934567890',fecha:HOY,concepto:'Turno 10:00 - Cancha 1',monto:7000,pagado:0,estado:'Pendiente',bloqueado:false},
+    {id:'d2',jugador:'Sebastián Mora',telefono:'+56989012345',fecha:ANTEAYER,concepto:'Turno 20:30 - Cancha 1',monto:7000,pagado:3000,estado:'Abono parcial',bloqueado:false},
     {id:'d3',jugador:'Camila Rojas',telefono:'+56978901234',fecha:new Date(Date.now()-18*86400000).toISOString().slice(0,10),concepto:'Turno 19:00 - Cancha 1',monto:20000,pagado:0,estado:'Vencida',bloqueado:true}
   ];
   sv();
