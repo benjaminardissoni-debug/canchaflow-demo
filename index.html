@@ -144,6 +144,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-block-time{font-size:10px;font-weight:700;opacity:.75;margin-bottom:2px}
 .ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-block-meta{font-size:10px;opacity:.82;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-block-meta2{font-size:10px;opacity:.82;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-conflict{outline:2px solid rgba(229,62,62,.35);outline-offset:1px}
 .agenda-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:8px}
 .agenda-date{display:flex;align-items:center;gap:8px;min-width:260px;position:relative}
@@ -968,26 +969,31 @@ function rAg(){
     for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad,freeH=Math.max(58,slotDur*pxPerMin-5);h+=`<div class="ag-free" title="Crear reserva ${minToTime(m)}" style="top:${top}px;height:${freeH}px" onclick="clkLibre('${dstr}','${minToTime(m)}',${c.id})" ondblclick="event.stopPropagation();openBloqueo(null,'${dstr}','${minToTime(m)}',${c.id})"></div>`;}
     const evs=[];
     D.reservas.filter(r=>r.fecha===dstr&&r.canchaId===c.id).forEach(r=>{
-      const jugs=(r.jugadores||[]).filter(j=>j),fa=4-jugs.length;
+      const jugsArr=r.jugadores||[];const jugs=jugsArr.filter(j=>j),fa=4-jugs.length;
       let cls='reservada';if(r.estado==='abierto')cls='abierto';else if(r.estado==='cerrado')cls='cerrado';else if(fa>0)cls='incompleta';
-      evs.push({kind:'reserva',id:r.id,start:timeToMin(r.horario),end:getReservaEnd(r),cls,title:r.estado==='abierto'?'En juego':r.estado==='cerrado'?'Cerrada':fa>0?`Faltan ${fa}`:'Reservada',meta:jugs.length?jugs[0]+(jugs.length>1?` +${jugs.length-1}`:''):'Sin jugadores'});
+      const p1=[jugsArr[0],jugsArr[1]].filter(Boolean).join(' / ');const p2=[jugsArr[2],jugsArr[3]].filter(Boolean).join(' / ');
+      const metaTxt=p1&&p2?`${p1} vs ${p2}`:(p1||p2||'Sin jugadores');
+      evs.push({kind:'reserva',id:r.id,start:timeToMin(r.horario),end:getReservaEnd(r),cls,title:r.estado==='abierto'?'En juego':r.estado==='cerrado'?'Cerrada':fa>0?`Faltan ${fa}`:'Reservada',meta:metaTxt});
     });
     (D.bloqueos||[]).filter(b=>b.fecha===dstr&&(b.canchaId==='todas'||b.canchaId===c.id)).forEach(b=>{
       const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;
-      const metaTxt=b.tipo==='clase'?[b.profesor,b.titulo].filter(Boolean).join(' · ')||'Sin profesor':(b.titulo||'');
-      evs.push({kind:'bloqueo',id:b.id,start:timeToMin(b.horaInicio),end:timeToMin(b.horaFin),cls:b.tipo||'evento',icon:bt.icon,title:bt.label,meta:metaTxt});
+      let metaTxt,meta2Txt='';
+      if(b.tipo==='clase'){metaTxt=b.profesor?('Prof. '+b.profesor.replace(/^Prof\.\s*/i,'')):'Sin profesor';const als=(b.alumnos||[]).filter(Boolean);meta2Txt=als.length?als.join(', '):'';}
+      else metaTxt=b.titulo||'';
+      evs.push({kind:'bloqueo',id:b.id,start:timeToMin(b.horaInicio),end:timeToMin(b.horaFin),cls:b.tipo||'evento',icon:bt.icon,title:bt.label,meta:metaTxt,meta2:meta2Txt});
     });
     layoutAgendaEvents(evs).forEach(ev=>{
       const dur=Math.max(0,ev.end-ev.start),isShort=ev.kind==='bloqueo'&&dur<(slotDur-5);
       const vGap=isShort?7:5,hInset=isShort?18:7;
       const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+(vGap/2));
-      const height=Math.max(isShort?38:56,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
+      const minH=(isShort?38:56)+(ev.meta2?14:0);
+      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
       const width=(100/ev.lanes),left=ev.lane*width;
       const click=ev.kind==='reserva'?`clkSlot('${ev.id}')`:`openBloqueo('${ev.id}')`;
       h+=`<div class="ag-block ${ev.cls}${isShort?' short':''}${ev.conflict?' ag-conflict':''}" style="top:${top}px;height:${height}px;left:calc(${left}% + ${hInset}px);width:calc(${width}% - ${hInset*2}px)" onclick="${click}">
         <div class="ag-block-time">${minToTime(ev.start)}–${minToTime(ev.end)}</div>
         <div class="ag-block-title">${ev.icon?`<i class="ti ${ev.icon}" style="margin-right:4px"></i>`:''}${ev.title}</div>
-        <div class="ag-block-meta">${ev.meta}</div>
+        <div class="ag-block-meta">${ev.meta}</div>${ev.meta2?`<div class="ag-block-meta2">${ev.meta2}</div>`:''}
       </div>`;
     });
     h+=`</div>`;
@@ -1102,7 +1108,10 @@ function editRes(id){const r=D.reservas.find(x=>x.id===id);if(!r)return;cM('m-sl
 
 function bJI(vals=[]){
   const w=g('res-jugs');w.innerHTML='';
-  for(let i=0;i<4;i++){const d=document.createElement('div');d.style.position='relative';d.innerHTML=`<input placeholder="Jugador ${i+1}" value="${vals[i]||''}" id="rj${i}" oninput="sugJ(${i})" autocomplete="off"><div id="rjd${i}" class="jdrop hidden"></div>`;w.appendChild(d);}
+  for(let i=0;i<4;i++){
+    if(i===0||i===2){const lbl=document.createElement('div');lbl.style.gridColumn='1 / -1';lbl.style.fontSize='11px';lbl.style.fontWeight='600';lbl.style.color='#7C8AA0';lbl.style.marginTop=i===2?'4px':'0';lbl.textContent=i===0?'Pareja 1':'Pareja 2';w.appendChild(lbl);}
+    const d=document.createElement('div');d.style.position='relative';d.innerHTML=`<input placeholder="Jugador ${i+1}" value="${vals[i]||''}" id="rj${i}" oninput="sugJ(${i})" autocomplete="off"><div id="rjd${i}" class="jdrop hidden"></div>`;w.appendChild(d);
+  }
 }
 function sugJ(i){
   const val=g('rj'+i).value.toLowerCase();const drop=g('rjd'+i);if(!val){drop.classList.add('hidden');return;}
