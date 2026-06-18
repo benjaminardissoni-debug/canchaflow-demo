@@ -225,21 +225,17 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div style="position:relative;margin-top:4px"><i class="ti ti-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3)"></i>
       <input id="login-pass" type="password" value="" placeholder="Contraseña" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
     <div id="lerr" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:10px;text-align:center">⚠ Correo o contraseña incorrectos.</div>
-    <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar a la demo</button>
-    <div style="background:var(--gray-light);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--text2);margin-top:1.25rem;text-align:left;line-height:1.8">
-      <strong>Acceso demo:</strong><br>Admin → <code>demo@canchaflow.cl</code> / <code>demo123</code><br>Recepción → <code>recepcion@canchaflow.cl</code> / <code>demo123</code></div>
+    <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
+
   </div>
 </div>
 <!-- APP -->
 <div id="main-app" class="hidden">
-<div id="demo-fab" style="position:fixed;bottom:18px;right:18px;z-index:150">
-  <button onclick="if(confirm('¿Restaurar todos los datos de demo?')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"
-    style="display:flex;align-items:center;gap:6px;background:#0D1B2A;color:#A3E635;border:none;border-radius:24px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(13,27,42,.25);font-family:Inter,sans-serif">
-    <i class="ti ti-refresh" style="font-size:14px"></i> Restaurar demo</button></div>
+
 <div class="layout">
 <div class="sidebar">
   <div class="sb-logo"><div class="sb-logo-text"><div class="sb-logo-icon"><i class="ti ti-ball-tennis"></i></div><div>
-    <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span> <span style="background:#A3E635;color:#0D1B2A;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;letter-spacing:.05em;vertical-align:middle">DEMO</span></div>
+    <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span></div>
     <div class="sb-sub">CONTROL TOTAL DE TU CLUB</div></div></div></div>
   <nav class="sb-nav">
     <div class="sb-section">Operación</div>
@@ -468,17 +464,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn p" onclick="addPromo()"><i class="ti ti-plus"></i></button>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title">Acceso demo</div>
-    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:2">
-      <div><strong>Administrador:</strong> <code>demo@canchaflow.cl</code> / <code>demo123</code></div>
-      <div><strong>Recepcionista:</strong> <code>recepcion@canchaflow.cl</code> / <code>demo123</code></div>
-    </div>
-    <div style="display:flex;gap:8px;margin-top:12px">
-      <button class="btn secondary sm" onclick="g('m-tour').classList.remove('hidden')"><i class="ti ti-route"></i> Ver tour</button>
-      <button class="btn d sm" onclick="if(confirm('¿Restaurar datos de demo?')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"><i class="ti ti-refresh"></i> Restaurar demo</button>
-    </div>
-  </div>
+
 </div>
   </div>
 </div>
@@ -723,7 +709,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
       <div style="width:40px;height:40px;border-radius:50%;background:rgba(163,230,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <i class="ti ti-ball-tennis" style="font-size:20px;color:#3d6b0a"></i></div>
-      <div><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:16px">Bienvenido a CanchaFlow</div><div style="font-size:12px;color:var(--text3)">Demo interactiva</div></div>
+      <div><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:16px">Bienvenido a CanchaFlow</div><div style="font-size:12px;color:var(--text3)">Sistema de gestión</div></div>
     </div>
     <p style="font-size:14px;line-height:1.6;margin:0 0 1.25rem">Sistema de gestión para clubes de pádel. 3 pasos para ver el flujo principal:</p>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem">
@@ -2109,4 +2095,3 @@ g('main-app').classList.add('hidden');
 </script>
 </body>
 </html>
-actualizado
