@@ -208,23 +208,31 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .cjug-opt.sel-deuda{background:#FEF3C7;border-color:var(--amber);color:#92400E}
 .cjug-opt.sel-cubierto{background:var(--cyan-light);border-color:var(--cyan);color:var(--cyan-dark)}
 .cjug-opt.sel-cortesia{background:rgba(163,230,53,.2);border-color:var(--green);color:#3d6b0a}
+
+/* Barra inferior móvil */
+.mob-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom)}
+.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:3px;padding:8px 4px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:10px;font-family:Inter,sans-serif;font-weight:500}
+.mob-tab i{font-size:20px}
+.mob-tab.active{color:var(--cyan-dark)}
+.mob-mas-panel{display:none;position:fixed;bottom:56px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:199;padding:8px 0 12px;box-shadow:0 -4px 20px rgba(0,0,0,.1)}
+.mob-mas-panel.visible{display:block}
+.mob-mas-item{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--text);text-align:left;font-family:Inter,sans-serif}
+.mob-mas-item i{font-size:20px;color:var(--text2);width:24px}
 @media print{.sidebar,.btn,.mbg{display:none!important}body{background:#fff}.main{margin-left:0}.content{padding:0;max-width:100%}}
 @media(max-width:768px){
-  .sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:100}
-  .sidebar.open{transform:translateX(0)}
-  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
-  .sb-overlay.open{display:block}
+  .sidebar{display:none}
   .main{margin-left:0}
   .g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}
   .topbar{padding:.6rem .75rem}
-  .mob-menu-btn{display:flex!important}
   .ag-mob-nav{display:flex!important}
   .topbar-right .btn span{display:none}
+  .mob-tabbar{display:flex!important}
+  .content{padding-bottom:70px}
 }
 @media(min-width:769px){
-  .mob-menu-btn{display:none!important}
   .ag-mob-nav{display:none!important}
-  .sb-overlay{display:none!important}
+  .mob-tabbar{display:none!important}
+  .mob-mas-panel{display:none!important}
 }
 </style>
 </head>
@@ -272,9 +280,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div></div>
 </div>
 <div class="main">
-  <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
   <div class="topbar">
-    <button class="mob-menu-btn" onclick="openSidebar()" style="background:none;border:none;cursor:pointer;padding:4px 8px 4px 0;color:var(--text)"><i class="ti ti-menu-2" style="font-size:22px"></i></button>
     <div class="topbar-title" id="topbar-title">Agenda</div>
     <div class="topbar-right"><span id="rbadge" class="rbadge"></span></div>
   </div>
@@ -495,6 +501,30 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div>
 </div>
 </div>
+</div>
+<!-- BARRA INFERIOR MÓVIL -->
+<div class="mob-tabbar" id="mob-tabbar">
+  <button class="mob-tab" onclick="S('agenda');setMobTab('agenda')" id="mtab-agenda">
+    <i class="ti ti-calendar-month"></i><span>Agenda</span>
+  </button>
+  <button class="mob-tab" onclick="S('turnos');setMobTab('turnos')" id="mtab-turnos">
+    <i class="ti ti-clock"></i><span>Turnos</span>
+  </button>
+  <button class="mob-tab" onclick="S('jugadores');setMobTab('jugadores')" id="mtab-jugadores">
+    <i class="ti ti-users"></i><span>Jugadores</span>
+  </button>
+  <button class="mob-tab" onclick="toggleMobMas()" id="mtab-mas">
+    <i class="ti ti-dots"></i><span>Más</span>
+  </button>
+</div>
+<!-- PANEL MÁS (móvil) -->
+<div class="mob-mas-panel hidden" id="mob-mas-panel">
+  <div style="padding:16px 12px 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Gestión</div>
+  <button class="mob-mas-item" onclick="S('inventario');closeMobMas()"><i class="ti ti-box"></i> Inventario</button>
+  <button class="mob-mas-item" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
+  <button class="mob-mas-item" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
+  <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
+  <button class="mob-mas-item" onclick="S('config');closeMobMas()"><i class="ti ti-settings"></i> Configuración</button>
 </div>
 <!-- MODALES -->
 <div class="mbg hidden" id="m-pin">
@@ -986,6 +1016,9 @@ async function syncReservaCompleta(rid){
 
 function openSidebar(){document.querySelector('.sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
 function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
+function setMobTab(s){document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('active'));const el=document.getElementById('mtab-'+s);if(el)el.classList.add('active');closeMobMas();}
+function toggleMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.toggle('visible');const t=document.getElementById('mtab-mas');t.classList.toggle('active');}
+function closeMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.remove('visible');document.getElementById('mtab-mas').classList.remove('active');}
 // Navegación de canchas en móvil
 let mobCanchaIdx=0;
 function mobCanchaNav(dir){
@@ -1033,7 +1066,7 @@ function S(s){
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
-  if(window.innerWidth<=768)closeSidebar();
+  if(window.innerWidth<=768){const tabs=['agenda','turnos','jugadores'];if(tabs.includes(s))setMobTab(s);}
 }
 function cM(id){g(id).classList.add('hidden');}
 function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();}
