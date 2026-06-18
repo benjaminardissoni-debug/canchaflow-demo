@@ -224,10 +224,37 @@ tr:hover td{background:rgba(242,244,247,.7)}
   .main{margin-left:0}
   .g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}
   .topbar{padding:.6rem .75rem}
-  .ag-mob-nav{display:flex!important}
+  .ag-mob-nav{display:flex!important;flex-direction:column;gap:8px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--border)}
   .topbar-right .btn span{display:none}
   .mob-tabbar{display:flex!important}
   .content{padding-bottom:70px}
+
+  /* Barra de navegación de canchas (fila superior) */
+  .ag-mob-nav-row{display:flex;align-items:center;justify-content:space-between}
+  .ag-mob-arrow{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px}
+  .ag-mob-lbl{font-weight:700;font-size:13px;font-family:Poppins,sans-serif}
+
+  /* Selector segmentado 2 canchas / 1 cancha / Lista */
+  .ag-mob-modes{display:flex;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:3px;gap:2px}
+  .ag-mob-mode-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:7px 4px;background:none;border:none;border-radius:9px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text3);font-family:Inter,sans-serif}
+  .ag-mob-mode-btn i{font-size:14px}
+  .ag-mob-mode-btn.active{background:var(--cyan-light);color:var(--cyan-dark)}
+
+  /* Agenda compacta */
+  .ag-wrap{overflow-x:hidden;border-radius:18px}
+  .ag-cal{min-width:100%}
+  .agenda-toolbar{grid-template-columns:1fr;gap:8px}
+  .agenda-actions{display:none}
+  .ag-legend{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}
+  .ag-head-time{padding:8px 6px;font-size:10px}
+  .ag-head-court{padding:8px 6px}
+  .ag-head-court .cn{font-size:12px}
+  .ag-head-court .cp span{font-size:10px}
+  .ag-time span{right:6px;font-size:11px}
+  .ag-block{padding:6px 7px}
+  .ag-block-time{font-size:10px}
+  .ag-block-title{font-size:12px}
+  .ag-block-meta{font-size:10px}
 }
 @media(min-width:769px){
   .ag-mob-nav{display:none!important}
@@ -311,10 +338,17 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
   </div>
   <div id="ag-stats" class="hidden"></div>
-  <div class="ag-mob-nav" style="align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--border)">
-    <button onclick="mobCanchaNav(-1)" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px"><i class="ti ti-chevron-left"></i></button>
-    <span id="mob-cancha-lbl" style="font-weight:700;font-size:13px;font-family:Poppins,sans-serif"></span>
-    <button onclick="mobCanchaNav(1)" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px"><i class="ti ti-chevron-right"></i></button>
+  <div class="ag-mob-nav">
+    <div class="ag-mob-nav-row">
+      <button onclick="mobCanchaNav(-1)" class="ag-mob-arrow"><i class="ti ti-chevron-left"></i></button>
+      <span id="mob-cancha-lbl" class="ag-mob-lbl"></span>
+      <button onclick="mobCanchaNav(1)" class="ag-mob-arrow"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div class="ag-mob-modes">
+      <button class="ag-mob-mode-btn" id="agmode-two" onclick="setMobAgendaMode('two')"><i class="ti ti-layout-columns"></i> 2 canchas</button>
+      <button class="ag-mob-mode-btn" id="agmode-one" onclick="setMobAgendaMode('one')"><i class="ti ti-square"></i> 1 cancha</button>
+      <button class="ag-mob-mode-btn" id="agmode-list" onclick="setMobAgendaMode('list')"><i class="ti ti-list"></i> Lista</button>
+    </div>
   </div>
   <div class="ag-wrap"><div class="ag-cal" id="ag-tbl"></div></div>
 </div>
@@ -1019,17 +1053,43 @@ function closeSidebar(){document.querySelector('.sidebar').classList.remove('ope
 function setMobTab(s){document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('active'));const el=document.getElementById('mtab-'+s);if(el)el.classList.add('active');closeMobMas();}
 function toggleMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.toggle('visible');const t=document.getElementById('mtab-mas');t.classList.toggle('active');}
 function closeMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.remove('visible');document.getElementById('mtab-mas').classList.remove('active');}
-// Navegación de canchas en móvil
+// Navegación de canchas en móvil: grupo visible (2 canchas / 1 cancha / lista)
 let mobCanchaIdx=0;
+let mobAgendaMode='two'; // 'two' | 'one' | 'list'
+function groupSize(){return mobAgendaMode==='one'?1:2;} // 'list' usa tamaño 1 por ahora (placeholder)
+function getMobileVisibleCanchas(){
+  const n=groupSize();
+  if(!D.canchas.length)return[];
+  return D.canchas.slice(mobCanchaIdx,mobCanchaIdx+n);
+}
 function mobCanchaNav(dir){
   if(!D.canchas.length)return;
-  mobCanchaIdx=Math.max(0,Math.min(D.canchas.length-1,mobCanchaIdx+dir));
+  const n=groupSize();
+  const maxStart=Math.max(0,D.canchas.length-n);
+  mobCanchaIdx=Math.max(0,Math.min(maxStart,mobCanchaIdx+dir*n));
   rAg();
 }
+function setMobAgendaMode(mode){
+  mobAgendaMode=mode;
+  // Reencuadrar el índice actual al nuevo tamaño de grupo para no dejarlo "a medias"
+  const n=groupSize();
+  const maxStart=Math.max(0,D.canchas.length-n);
+  mobCanchaIdx=Math.max(0,Math.min(maxStart,Math.floor(mobCanchaIdx/n)*n));
+  document.querySelectorAll('.ag-mob-mode-btn').forEach(b=>b.classList.remove('active'));
+  const btn=document.getElementById('agmode-'+mode);if(btn)btn.classList.add('active');
+  rAg();
+}
+function updateMobAgendaLabel(){
+  const lbl=document.getElementById('mob-cancha-lbl');if(!lbl)return;
+  const vis=getMobileVisibleCanchas();
+  lbl.textContent=vis.map(c=>c.nombre).join(' – ')||'';
+}
 function initMobCancha(){
-  const lbl=document.getElementById('mob-cancha-lbl');
   if(window.innerWidth<=768){
-    if(lbl&&D.canchas[mobCanchaIdx])lbl.textContent=D.canchas[mobCanchaIdx].nombre;
+    const btn=document.getElementById('agmode-'+mobAgendaMode);
+    document.querySelectorAll('.ag-mob-mode-btn').forEach(b=>b.classList.remove('active'));
+    if(btn)btn.classList.add('active');
+    updateMobAgendaLabel();
   }
 }
 function updSelNiveles(){
@@ -1148,18 +1208,21 @@ function rAg(){
   const f=getAF();const dstr=ds(f);const fer=isFeriado(dstr);const finde=!fer&&isFinde(dstr);
   g('ag-lbl').innerHTML=fmtD(f)+(agOff===0?' · hoy':'')+(fer?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> ${fer.nombre}</span>`:'')+(finde?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> Fin de semana</span>`:'');
   const isMobile=window.innerWidth<=768;
-  const canchas=isMobile?(D.canchas[mobCanchaIdx]?[D.canchas[mobCanchaIdx]]:[...D.canchas]):[...D.canchas];
+  const mobVis=isMobile?getMobileVisibleCanchas():[];
+  const canchas=isMobile?(mobVis.length?mobVis:[...D.canchas]):[...D.canchas];
   const tramos=D.cfg.tramos||[];
   const slotDur=D.cfg.dur||90;
   const startDay=timeToMin(D.cfg.ini||'07:00'),endDay=timeToMin(D.cfg.fin||'23:30'),pxPerMin=.8,topPad=12,bodyH=Math.max(620,(endDay-startDay)*pxPerMin+topPad+12);
-  let h=`<div class="ag-head" style="grid-template-columns:${isMobile?'70px':'110px'} repeat(${canchas.length},${isMobile?'1fr':'minmax(190px,1fr)'})"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
+  const mobTimeCol=mobAgendaMode==='two'?'64px':'70px';
+  const mobCourtCol=mobAgendaMode==='two'?'minmax(0,1fr)':'1fr';
+  let h=`<div class="ag-head" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'})"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
     let pInfo;
     if(fer){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Feriado: ${fmt(D.cfg.precioFeriado||24000)} todo el día</span>`;}
     else if(finde){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Fin de semana: ${fmt(D.cfg.precioFinSemana||24000)} todo el día</span>`;}
     else pInfo=tramos.length?tramos.map(t=>`<span class="pm" style="font-size:11px">${t.nombre}: ${fmt(t.precio)}</span>`).join(' '):`<span class="pn">${fmt(c.pN||0)}</span> <span style="color:rgba(255,255,255,.4);font-size:11px">·</span> <span class="pa">${fmt(c.pA||0)} >${D.cfg.alto||'17:30'}</span>`;
     return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
   }).join('')}</div>`;
-  h+=`<div class="ag-body" style="grid-template-columns:${isMobile?'70px':'110px'} repeat(${canchas.length},${isMobile?'1fr':'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
+  h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
   for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}–${minToTime(Math.min(m+slotDur,endDay))}</span></div>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
