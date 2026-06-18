@@ -209,7 +209,23 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .cjug-opt.sel-cubierto{background:var(--cyan-light);border-color:var(--cyan);color:var(--cyan-dark)}
 .cjug-opt.sel-cortesia{background:rgba(163,230,53,.2);border-color:var(--green);color:#3d6b0a}
 @media print{.sidebar,.btn,.mbg{display:none!important}body{background:#fff}.main{margin-left:0}.content{padding:0;max-width:100%}}
-@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}}
+@media(max-width:768px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;z-index:100}
+  .sidebar.open{transform:translateX(0)}
+  .sb-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.45);z-index:99}
+  .sb-overlay.open{display:block}
+  .main{margin-left:0}
+  .g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}
+  .topbar{padding:.6rem .75rem}
+  .mob-menu-btn{display:flex!important}
+  .ag-mob-nav{display:flex!important}
+  .topbar-right .btn span{display:none}
+}
+@media(min-width:769px){
+  .mob-menu-btn{display:none!important}
+  .ag-mob-nav{display:none!important}
+  .sb-overlay{display:none!important}
+}
 </style>
 </head>
 <body>
@@ -256,7 +272,12 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div></div>
 </div>
 <div class="main">
-  <div class="topbar"><div class="topbar-title" id="topbar-title">Agenda</div><div class="topbar-right"><span id="rbadge" class="rbadge"></span></div></div>
+  <div class="sb-overlay" id="sb-overlay" onclick="closeSidebar()"></div>
+  <div class="topbar">
+    <button class="mob-menu-btn" onclick="openSidebar()" style="display:none;background:none;border:none;cursor:pointer;padding:4px 8px 4px 0;color:var(--text)"><i class="ti ti-menu-2" style="font-size:22px"></i></button>
+    <div class="topbar-title" id="topbar-title">Agenda</div>
+    <div class="topbar-right"><span id="rbadge" class="rbadge"></span></div>
+  </div>
   <div class="content">
 <!-- AGENDA -->
 <div class="sec active" id="sec-agenda">
@@ -284,6 +305,11 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
   </div>
   <div id="ag-stats" class="hidden"></div>
+  <div class="ag-mob-nav" style="display:none;align-items:center;justify-content:space-between;padding:8px 12px;background:var(--card);border-bottom:1px solid var(--border)">
+    <button onclick="mobCanchaNav(-1)" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px"><i class="ti ti-chevron-left"></i></button>
+    <span id="mob-cancha-lbl" style="font-weight:700;font-size:13px;font-family:Poppins,sans-serif"></span>
+    <button onclick="mobCanchaNav(1)" style="background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px"><i class="ti ti-chevron-right"></i></button>
+  </div>
   <div class="ag-wrap"><div class="ag-cal" id="ag-tbl"></div></div>
 </div>
 <!-- TURNOS -->
@@ -958,6 +984,24 @@ async function syncReservaCompleta(rid){
   return true;
 }
 
+function openSidebar(){document.querySelector('.sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
+function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
+// Navegación de canchas en móvil
+let mobCanchaIdx=0;
+function mobCanchaNav(dir){
+  const cols=document.querySelectorAll('.ag-daycol');
+  const heads=document.querySelectorAll('.ag-head-court');
+  if(!cols.length)return;
+  mobCanchaIdx=Math.max(0,Math.min(cols.length-1,mobCanchaIdx+dir));
+  cols.forEach((c,i)=>c.style.display=i===mobCanchaIdx?'':'none');
+  heads.forEach((h,i)=>h.style.display=i===mobCanchaIdx?'':'none');
+  const lbl=document.getElementById('mob-cancha-lbl');
+  if(lbl&&D.canchas[mobCanchaIdx])lbl.textContent=D.canchas[mobCanchaIdx].nombre;
+}
+function initMobCancha(){
+  if(window.innerWidth<=768){mobCanchaIdx=0;mobCanchaNav(0);}
+  else{document.querySelectorAll('.ag-daycol').forEach(c=>c.style.display='');document.querySelectorAll('.ag-head-court').forEach(h=>h.style.display='');}
+}
 function updSelNiveles(){
   const nivs=getNiveles();
   ['j-nivel','jfnivel'].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=(id==='jfnivel'?'<option value="">Todos los niveles</option>':'')+nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});
@@ -989,6 +1033,7 @@ function S(s){
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
+  if(window.innerWidth<=768)closeSidebar();
 }
 function cM(id){g(id).classList.add('hidden');}
 function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();}
@@ -1125,6 +1170,7 @@ function rAg(){
   g('ag-tbl').innerHTML=h;
   const rh=D.reservas.filter(r=>r.fecha===dstr),blh=(D.bloqueos||[]).filter(b=>b.fecha===dstr);const inc=rh.filter(r=>r.estado!=='cerrado'&&(r.jugadores||[]).filter(j=>j).length<4).length;
   g('ag-stats').innerHTML=[{l:'Reservas',v:rh.length,s:'en el día'},{l:'Clases / eventos',v:blh.length,s:'bloques editables'},{l:'En juego',v:rh.filter(r=>r.estado==='abierto').length,s:'activas ahora'},{l:'Incompletas',v:inc,s:'buscan partner',w:inc>0}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv" style="${m.w?'color:#F59E0B':''}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
+  initMobCancha();
 }
 function clkLibre(fecha,horario,cid){openRes(fecha,horario,cid);}
 
