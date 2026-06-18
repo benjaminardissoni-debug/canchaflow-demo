@@ -1022,18 +1022,15 @@ function closeMobMas(){const p=document.getElementById('mob-mas-panel');p.classL
 // Navegación de canchas en móvil
 let mobCanchaIdx=0;
 function mobCanchaNav(dir){
-  const cols=document.querySelectorAll('.ag-daycol');
-  const heads=document.querySelectorAll('.ag-head-court');
-  if(!cols.length)return;
-  mobCanchaIdx=Math.max(0,Math.min(cols.length-1,mobCanchaIdx+dir));
-  cols.forEach((c,i)=>c.style.display=i===mobCanchaIdx?'':'none');
-  heads.forEach((h,i)=>h.style.display=i===mobCanchaIdx?'':'none');
-  const lbl=document.getElementById('mob-cancha-lbl');
-  if(lbl&&D.canchas[mobCanchaIdx])lbl.textContent=D.canchas[mobCanchaIdx].nombre;
+  if(!D.canchas.length)return;
+  mobCanchaIdx=Math.max(0,Math.min(D.canchas.length-1,mobCanchaIdx+dir));
+  rAg();
 }
 function initMobCancha(){
-  if(window.innerWidth<=768){mobCanchaIdx=0;mobCanchaNav(0);}
-  else{document.querySelectorAll('.ag-daycol').forEach(c=>c.style.display='');document.querySelectorAll('.ag-head-court').forEach(h=>h.style.display='');}
+  const lbl=document.getElementById('mob-cancha-lbl');
+  if(window.innerWidth<=768){
+    if(lbl&&D.canchas[mobCanchaIdx])lbl.textContent=D.canchas[mobCanchaIdx].nombre;
+  }
 }
 function updSelNiveles(){
   const nivs=getNiveles();
@@ -1150,18 +1147,19 @@ function describeConflict(conflict){
 function rAg(){
   const f=getAF();const dstr=ds(f);const fer=isFeriado(dstr);const finde=!fer&&isFinde(dstr);
   g('ag-lbl').innerHTML=fmtD(f)+(agOff===0?' · hoy':'')+(fer?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> ${fer.nombre}</span>`:'')+(finde?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> Fin de semana</span>`:'');
-  const canchas=[...D.canchas];
+  const isMobile=window.innerWidth<=768;
+  const canchas=isMobile?(D.canchas[mobCanchaIdx]?[D.canchas[mobCanchaIdx]]:[...D.canchas]):[...D.canchas];
   const tramos=D.cfg.tramos||[];
   const slotDur=D.cfg.dur||90;
   const startDay=timeToMin(D.cfg.ini||'07:00'),endDay=timeToMin(D.cfg.fin||'23:30'),pxPerMin=.8,topPad=12,bodyH=Math.max(620,(endDay-startDay)*pxPerMin+topPad+12);
-  let h=`<div class="ag-head" style="grid-template-columns:110px repeat(${canchas.length},minmax(190px,1fr))"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
+  let h=`<div class="ag-head" style="grid-template-columns:${isMobile?'70px':'110px'} repeat(${canchas.length},${isMobile?'1fr':'minmax(190px,1fr)'})"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
     let pInfo;
     if(fer){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Feriado: ${fmt(D.cfg.precioFeriado||24000)} todo el día</span>`;}
     else if(finde){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Fin de semana: ${fmt(D.cfg.precioFinSemana||24000)} todo el día</span>`;}
     else pInfo=tramos.length?tramos.map(t=>`<span class="pm" style="font-size:11px">${t.nombre}: ${fmt(t.precio)}</span>`).join(' '):`<span class="pn">${fmt(c.pN||0)}</span> <span style="color:rgba(255,255,255,.4);font-size:11px">·</span> <span class="pa">${fmt(c.pA||0)} >${D.cfg.alto||'17:30'}</span>`;
     return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
   }).join('')}</div>`;
-  h+=`<div class="ag-body" style="grid-template-columns:110px repeat(${canchas.length},minmax(190px,1fr));height:${bodyH}px"><div class="ag-timecol">`;
+  h+=`<div class="ag-body" style="grid-template-columns:${isMobile?'70px':'110px'} repeat(${canchas.length},${isMobile?'1fr':'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
   for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}–${minToTime(Math.min(m+slotDur,endDay))}</span></div>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
