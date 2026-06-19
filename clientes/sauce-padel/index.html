@@ -1142,7 +1142,7 @@ async function doLogin(){
   const u=rolMap[perfil.rol]||rolMap.recepcion;
   role=u.rol;g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
   g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
-  if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
+  _auditEmail=data.user.email;_auditNombre=perfil.nombre||email;if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
   document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
   await cargarDatosDesdeSupabase();
   rAll();
@@ -1164,11 +1164,12 @@ async function rHistorial(){
     </tr>`;
   }).join('');
 }
+let _auditEmail='';let _auditNombre='';
 async function audit(accion, entidad, detalle){
   try{
     await sb.from('audit_log').insert({
-      usuario_email: D.perfil?.email||'',
-      usuario_nombre: D.perfil?.nombre||'',
+      usuario_email: _auditEmail||D.perfil?.email||'',
+      usuario_nombre: _auditNombre||D.perfil?.nombre||'',
       accion, entidad, detalle
     });
   }catch(e){}
@@ -2295,7 +2296,7 @@ function loadDemoData(){
   if(session&&session.user){
     const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
     if(perfil){
-      role=perfil.rol;D.perfil=perfil;D.perfil.email=session.user.email;
+      role=perfil.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
       try{D=JSON.parse(localStorage.getItem('cf-data-v1'))||D;}catch(e){}
       await cargarDatosDesdeSupabase();
       rAll();
