@@ -1595,7 +1595,7 @@ function openCortesia(jugador){
   box.appendChild(btnRow);overlay.appendChild(box);overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};document.body.appendChild(overlay);
 }
 function volcarProductosARserva(r){
-  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:(p.cat!=='Pelotas'&&cSJ)?cSJ:null}));
+  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:(p.cat!=='Pelotas'&&cSJ)?[cSJ]:cAsig[p.id]||[],jugador:null}));
 }
 function aplicarPromo(jugador,promoId){
   const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const promo=D.promos.find(p=>p.id===promoId);if(!promo)return;
