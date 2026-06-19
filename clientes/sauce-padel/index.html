@@ -1781,7 +1781,7 @@ async function confCierre(){
   r.estado='cerrado';r.cierreAt=new Date().toISOString();
   const ok=await syncReservaCompleta(cRid);
   if(!ok){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
-  const cancha=D.canchas.find(x=>x.id===r.canchaId);audit('Cerró turno','reserva',`${cancha?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  audit('Cerró turno','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
   for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
   if(deudasNuevas.length){
     const{data,error}=await sb.from('deudas').insert(deudasNuevas).select();
