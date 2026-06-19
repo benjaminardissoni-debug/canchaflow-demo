@@ -11,6 +11,12 @@
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
+/* feedback táctil visual */
+.btn:active,.btn:active *{transform:scale(0.96);opacity:0.85;transition:transform 0.08s,opacity 0.08s}
+.ag-free:active,.ag-res:active,.ag-blq:active,.ag-clase:active{transform:scale(0.97);opacity:0.8;transition:transform 0.08s,opacity 0.08s}
+.nb:active,.sb-nav-item:active{transform:scale(0.94);transition:transform 0.08s}
+.btn{transition:transform 0.08s,opacity 0.08s,background 0.15s}
+.ag-free,.ag-res,.ag-blq,.ag-clase{transition:transform 0.08s,opacity 0.08s}
 :root{
   --navy:#0D1B2A;--blue:#1F4FA3;--green:#A3E635;--green-dark:#7ab81f;
   --cyan:#0EA5E9;--cyan-dark:#0284C7;--cyan-light:#E0F2FE;
