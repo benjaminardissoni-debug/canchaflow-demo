@@ -1173,7 +1173,7 @@ async function audit(accion, entidad, detalle){
     });
   }catch(e){}
 }
-async function doLogout(){await sb.auth.signOut();role=null;g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
   if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
