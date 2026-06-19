@@ -2347,7 +2347,7 @@ async function mostrarBannerSuscripcion(){
   const hoyStr=new Date().toISOString().slice(0,10);
   const cerradoHoy=localStorage.getItem('sub-banner-cerrado')===hoyStr;
   const configs={
-    marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 CanchaFlow en período de marcha blanca. El primer ciclo de pago comienza el 1 de julio.',closeable:true},
+    marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 Bienvenido a CanchaFlow. Estás en período de prueba gratuita. Tu primera mensualidad comienza el 1 de julio.',closeable:true},
     por_vencer:{bg:'#dbeafe',color:'#1e40af',txt:'⏰ Tu suscripción vence pronto. Recuerda regularizar el pago para mantener activo el servicio.',closeable:true},
     vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Suscripción pendiente de pago. Puedes regularizar en los próximos días para mantener el servicio activo.',closeable:true},
     limitado:{bg:'#fee2e2',color:'#991b1b',txt:'🔒 Servicio temporalmente limitado por pago pendiente. Regulariza la mensualidad para continuar usando CanchaFlow.',closeable:false},
