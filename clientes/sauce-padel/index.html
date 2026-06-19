@@ -265,7 +265,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </head>
 <body>
 <!-- LOGIN -->
-<div id="login-screen" class="login-wrap">
+<div id="login-screen" class="login-wrap" style="display:none">
   <div class="login-box">
     <div class="login-logo"><div class="login-icon"><i class="ti ti-ball-tennis"></i></div><div class="login-brand"><span class="c">Cancha</span><span class="f">Flow</span></div></div>
     <div class="login-tagline">CONTROL TOTAL DE TU CLUB</div>
@@ -2245,7 +2245,7 @@ function loadDemoData(){
       return;
     }
   }
-  ld();g('main-app').classList.add('hidden');
+  ld();g('login-screen').style.display='flex';g('main-app').classList.add('hidden');
 })();
 </script>
 </body>
