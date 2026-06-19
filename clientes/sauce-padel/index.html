@@ -304,7 +304,8 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb ao" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
-    <button class="nb ao" onclick="S('config')" id="nav-config"><i class="ti ti-settings"></i>Configuración</button>
+    <button class="nb ao" onclick="S('historial')" id="nav-historial"><i class="ti ti-history"></i>Historial</button>
+      <button class="nb ao" onclick="S('config')" id="nav-config"><i class="ti ti-settings"></i>Configuración</button>
   </nav>
   <div class="sb-footer"><div class="sb-user">
     <div class="sb-avatar"><i class="ti ti-user"></i></div>
@@ -449,6 +450,29 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div>
 </div>
 <!-- CONFIG -->
+<div class="sec" id="sec-historial">
+  <div style="padding:16px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
+      <h2 style="font-size:18px;font-weight:700;color:var(--navy)">Historial de actividad</h2>
+      <select id="hist-filtro" onchange="rHistorial()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
+        <option value="7">Últimos 7 días</option>
+        <option value="30">Últimos 30 días</option>
+        <option value="90">Últimos 90 días</option>
+      </select>
+    </div>
+    <div id="hist-tabla" style="overflow-x:auto">
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="background:var(--bg);border-bottom:2px solid var(--border)">
+          <th style="padding:10px;text-align:left;color:var(--text3)">Fecha/Hora</th>
+          <th style="padding:10px;text-align:left;color:var(--text3)">Usuario</th>
+          <th style="padding:10px;text-align:left;color:var(--text3)">Acción</th>
+          <th style="padding:10px;text-align:left;color:var(--text3)">Detalle</th>
+        </tr></thead>
+        <tbody id="hist-body"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Cargando...</td></tr></tbody>
+      </table>
+    </div>
+  </div>
+</div>
 <div class="sec" id="sec-config">
   <div class="g2" style="margin-bottom:1.25rem">
     <div class="card">
@@ -564,7 +588,8 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <button class="mob-mas-item ao" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
   <button class="mob-mas-item ao" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
   <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
-  <button class="mob-mas-item ao" onclick="S('config');closeMobMas()"><i class="ti ti-settings"></i> Configuración</button>
+  <button class="mob-mas-item ao" onclick="S('historial');closeMobMas()"><i class="ti ti-history"></i> Historial</button>
+      <button class="mob-mas-item ao" onclick="S('config');closeMobMas()"><i class="ti ti-settings"></i> Configuración</button>
 </div>
 <!-- MODALES -->
 <div class="mbg hidden" id="m-pin">
@@ -820,7 +845,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',clases:'Clases',caja:'Caja',deudas:'Deudas',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -1122,6 +1147,23 @@ async function doLogin(){
   await cargarDatosDesdeSupabase();
   rAll();
 }
+async function rHistorial(){
+  const dias=parseInt(g('hist-filtro')?.value||'7');
+  const desde=new Date();desde.setDate(desde.getDate()-dias);
+  const{data,error}=await sb.from('audit_log').select('*').gte('created_at',desde.toISOString()).order('created_at',{ascending:false}).limit(200);
+  const body=g('hist-body');
+  if(error||!data?.length){body.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Sin actividad en este período</td></tr>';return;}
+  body.innerHTML=data.map(r=>{
+    const f=new Date(r.created_at);
+    const fecha=f.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})+' '+f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
+    return `<tr style="border-bottom:1px solid var(--border)">
+      <td style="padding:10px;color:var(--text3);white-space:nowrap">${fecha}</td>
+      <td style="padding:10px;font-weight:500">${r.usuario_nombre||r.usuario_email||'-'}</td>
+      <td style="padding:10px">${r.accion||'-'}</td>
+      <td style="padding:10px;color:var(--text3)">${r.detalle||'-'}</td>
+    </tr>`;
+  }).join('');
+}
 async function audit(accion, entidad, detalle){
   try{
     await sb.from('audit_log').insert({
@@ -1134,7 +1176,7 @@ async function audit(accion, entidad, detalle){
 async function doLogout(){await sb.auth.signOut();role=null;g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
-  if(s==='clases')setTimeout(rClases,50);
+  if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
