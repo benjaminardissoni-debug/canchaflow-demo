@@ -1459,7 +1459,8 @@ async function iniciar(id){
 }
 async function delRes(id){
   if(!confirm('¿Cancelar esta reserva?'))return;
-  const{error}=await sb.from('reservas').delete().eq('id',id);if(!error)audit('Eliminó reserva','reserva',`ID ${id}`);
+  const _r=D.reservas.find(x=>x.id===id);const _c=D.canchas.find(x=>x.id===_r?.canchaId);
+  const{error}=await sb.from('reservas').delete().eq('id',id);if(!error)audit('Eliminó reserva','reserva',`${_c?.nombre||'Cancha'} · ${_r?.horario||''} · ${_r?.fecha||''} · ${_r?.contacto||''}`);
   if(error){alert('No se pudo cancelar: '+error.message);return;}
   D.reservas=D.reservas.filter(r=>r.id!==id);rAll();cM('m-slot');
 }
