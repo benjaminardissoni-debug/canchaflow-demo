@@ -9,59 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js">
-// — SUSCRIPCIÓN —
-async function calcularEstadoSuscripcion(){
-  try{
-    const{data,error}=await sb.from('suscripciones_club').select('*').eq('club_id','sauce-padel').single();
-    if(error||!data)return 'activo';
-    const hoy=new Date();hoy.setHours(0,0,0,0);
-    const fin=data.fecha_fin_ciclo?new Date(data.fecha_fin_ciclo+'T00:00:00'):null;
-    const ini=data.fecha_inicio_ciclo?new Date(data.fecha_inicio_ciclo+'T00:00:00'):null;
-    if(data.estado==='marcha_blanca')return 'marcha_blanca';
-    if(!fin||!ini)return data.estado||'activo';
-    const diasRestantes=Math.ceil((fin-hoy)/(1000*60*60*24));
-    const diasAtraso=Math.ceil((hoy-fin)/(1000*60*60*24));
-    if(hoy<=fin){
-      if(diasRestantes<=5)return 'por_vencer';
-      return 'activo';
-    } else {
-      if(diasAtraso<=data.dias_gracia)return 'vencido_gracia';
-      if(diasAtraso<=data.dias_para_suspendido)return 'limitado';
-      return 'suspendido';
-    }
-  }catch(e){return 'activo';}
-}
-
-async function mostrarBannerSuscripcion(){
-  const estado=await calcularEstadoSuscripcion();
-  const banner=document.getElementById('sub-banner');
-  const txt=document.getElementById('sub-banner-txt');
-  const btnClose=document.getElementById('sub-banner-close');
-  if(!banner)return;
-  const hoyStr=new Date().toISOString().slice(0,10);
-  const cerradoHoy=localStorage.getItem('sub-banner-cerrado')===hoyStr;
-  const configs={
-    marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 CanchaFlow en período de marcha blanca. El primer ciclo de pago comienza el 1 de julio.',closeable:true},
-    por_vencer:{bg:'#dbeafe',color:'#1e40af',txt:'⏰ Tu suscripción vence pronto. Recuerda regularizar el pago para mantener activo el servicio.',closeable:true},
-    vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Suscripción pendiente de pago. Puedes regularizar en los próximos días para mantener el servicio activo.',closeable:true},
-    limitado:{bg:'#fee2e2',color:'#991b1b',txt:'🔒 Servicio temporalmente limitado por pago pendiente. Regulariza la mensualidad para continuar usando CanchaFlow.',closeable:false},
-    suspendido:{bg:'#fca5a5',color:'#7f1d1d',txt:'❌ Servicio suspendido por pago pendiente. Tu información está resguardada. Regulariza para reactivar el acceso.',closeable:false},
-  };
-  const cfg=configs[estado];
-  if(!cfg||estado==='activo'){banner.style.display='none';return;}
-  if(cerradoHoy&&cfg.closeable){banner.style.display='none';return;}
-  banner.style.display='flex';
-  banner.style.background=cfg.bg;
-  banner.style.color=cfg.color;
-  txt.textContent=cfg.txt;
-  btnClose.style.display=cfg.closeable?'block':'none';
-}
-
-function cerrarBanner(){
-  const hoyStr=new Date().toISOString().slice(0,10);
-  localStorage.setItem('sub-banner-cerrado',hoyStr);
-  document.getElementById('sub-banner').style.display='none';
-}
 
 </script>
 <style>
@@ -2367,6 +2314,61 @@ function loadDemoData(){
   }
   ld();g('login-screen').style.display='flex';g('main-app').classList.add('hidden');
 })();
+
+// — SUSCRIPCIÓN —
+async function calcularEstadoSuscripcion(){
+  try{
+    const{data,error}=await sb.from('suscripciones_club').select('*').eq('club_id','sauce-padel').single();
+    if(error||!data)return 'activo';
+    const hoy=new Date();hoy.setHours(0,0,0,0);
+    const fin=data.fecha_fin_ciclo?new Date(data.fecha_fin_ciclo+'T00:00:00'):null;
+    const ini=data.fecha_inicio_ciclo?new Date(data.fecha_inicio_ciclo+'T00:00:00'):null;
+    if(data.estado==='marcha_blanca')return 'marcha_blanca';
+    if(!fin||!ini)return data.estado||'activo';
+    const diasRestantes=Math.ceil((fin-hoy)/(1000*60*60*24));
+    const diasAtraso=Math.ceil((hoy-fin)/(1000*60*60*24));
+    if(hoy<=fin){
+      if(diasRestantes<=5)return 'por_vencer';
+      return 'activo';
+    } else {
+      if(diasAtraso<=data.dias_gracia)return 'vencido_gracia';
+      if(diasAtraso<=data.dias_para_suspendido)return 'limitado';
+      return 'suspendido';
+    }
+  }catch(e){return 'activo';}
+}
+
+async function mostrarBannerSuscripcion(){
+  const estado=await calcularEstadoSuscripcion();
+  const banner=document.getElementById('sub-banner');
+  const txt=document.getElementById('sub-banner-txt');
+  const btnClose=document.getElementById('sub-banner-close');
+  if(!banner)return;
+  const hoyStr=new Date().toISOString().slice(0,10);
+  const cerradoHoy=localStorage.getItem('sub-banner-cerrado')===hoyStr;
+  const configs={
+    marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 CanchaFlow en período de marcha blanca. El primer ciclo de pago comienza el 1 de julio.',closeable:true},
+    por_vencer:{bg:'#dbeafe',color:'#1e40af',txt:'⏰ Tu suscripción vence pronto. Recuerda regularizar el pago para mantener activo el servicio.',closeable:true},
+    vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Suscripción pendiente de pago. Puedes regularizar en los próximos días para mantener el servicio activo.',closeable:true},
+    limitado:{bg:'#fee2e2',color:'#991b1b',txt:'🔒 Servicio temporalmente limitado por pago pendiente. Regulariza la mensualidad para continuar usando CanchaFlow.',closeable:false},
+    suspendido:{bg:'#fca5a5',color:'#7f1d1d',txt:'❌ Servicio suspendido por pago pendiente. Tu información está resguardada. Regulariza para reactivar el acceso.',closeable:false},
+  };
+  const cfg=configs[estado];
+  if(!cfg||estado==='activo'){banner.style.display='none';return;}
+  if(cerradoHoy&&cfg.closeable){banner.style.display='none';return;}
+  banner.style.display='flex';
+  banner.style.background=cfg.bg;
+  banner.style.color=cfg.color;
+  txt.textContent=cfg.txt;
+  btnClose.style.display=cfg.closeable?'block':'none';
+}
+
+function cerrarBanner(){
+  const hoyStr=new Date().toISOString().slice(0,10);
+  localStorage.setItem('sub-banner-cerrado',hoyStr);
+  document.getElementById('sub-banner').style.display='none';
+}
+
 </script>
 </body>
 </html>
