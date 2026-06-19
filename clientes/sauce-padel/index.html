@@ -1675,7 +1675,7 @@ function chQ(pid,d){
   if(cQty[pid]===0)delete cAsig[pid];
   else if(d>0){if(esPelota&&!cSJ)cAsig[pid]=[];else if(cSJ){if(!cAsig[pid])cAsig[pid]=[];if(!cAsig[pid].includes(cSJ))cAsig[pid]=[...cAsig[pid],cSJ];}}
   const el=g('qty-'+pid);if(el)el.textContent=cQty[pid];refreshProdRow(pid);updCS();
-  const r=D.reservas.find(x=>x.id===cRid);if(r){volcarProductosARserva(r);scheduleAutosave(cRid);}
+  const r=D.reservas.find(x=>x.id===cRid);if(r){if(d>0){const _p=D.productos.find(x=>x.id===pid);const _cn=D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha';audit("Agregó producto","comanda",`${_p?.nombre||pid} · ${_cn} · ${r.horario}`);}volcarProductosARserva(r);scheduleAutosave(cRid);}
 }
 function refreshProdRow(pid){
   const p=D.productos.find(x=>x.id===pid);if(!p)return;const q=cQty[pid]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[pid]||[];let asigLabel='';
