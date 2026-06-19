@@ -2230,8 +2230,23 @@ function loadDemoData(){
   ];
 }
 
-ld();
-g('main-app').classList.add('hidden');
+// auto-login
+(async()=>{
+  const{data:{session}}=await sb.auth.getSession();
+  if(session&&session.user){
+    const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
+    if(perfil){
+      role=perfil.rol;D.perfil=perfil;
+      try{D=JSON.parse(localStorage.getItem('cf-data-v1'))||D;}catch(e){}
+      await cargarDatosDesdeSupabase();
+      rAll();
+      g('login-screen').style.display='none';
+      g('main-app').classList.remove('hidden');
+      return;
+    }
+  }
+  ld();g('main-app').classList.add('hidden');
+})();
 </script>
 </body>
 </html>
