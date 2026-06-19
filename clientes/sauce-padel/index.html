@@ -1517,6 +1517,7 @@ async function saveRes(){
     if(error){alert('No se pudo crear la reserva: '+error.message);return;}
     const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:'reservada',creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
     D.reservas.push(nuevaR);
+    const _cn=D.canchas.find(x=>x.id===cid)?.nombre||cid;audit("Creó reserva","reservas",`${_cn} · ${hor} · ${fec}`);
     await syncReservaCompleta(data.id);
   }
   rAll();cM('m-res');
