@@ -2294,7 +2294,7 @@ function loadDemoData(){
   if(session&&session.user){
     const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
     if(perfil){
-      role=perfil.rol;D.perfil=perfil;
+      role=perfil.rol;D.perfil=perfil;D.perfil.email=session.user.email;
       try{D=JSON.parse(localStorage.getItem('cf-data-v1'))||D;}catch(e){}
       await cargarDatosDesdeSupabase();
       rAll();
