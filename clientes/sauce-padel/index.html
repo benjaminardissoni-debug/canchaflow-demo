@@ -307,6 +307,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <button class="nb" onclick="S('jugadores')" id="nav-jugadores"><i class="ti ti-users"></i>Jugadores</button>
     <div class="sb-section" style="margin-top:.5rem">Gestión</div>
     <button class="nb" onclick="S('inventario')" id="nav-inventario"><i class="ti ti-package"></i>Inventario</button>
+    <button class="nb" onclick="S('ventas')" id="nav-ventas"><i class="ti ti-shopping-bag"></i>Ventas directas</button>
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb ao" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
@@ -391,6 +392,19 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
 </div>
+<!-- VENTAS DIRECTAS -->
+<div class="sec" id="sec-ventas">
+  <div class="rb">
+    <div style="font-size:13px;color:var(--text2)">Ventas sin turno abierto — kiosco, eventos, cumpleaños, etc.</div>
+    <button class="btn p" onclick="openVD()"><i class="ti ti-plus"></i> Nueva venta</button>
+  </div>
+  <div id="vd-stats" class="g4" style="margin-bottom:1.25rem"></div>
+  <div class="card" style="padding:0;overflow:auto">
+    <div style="padding:1rem 1.25rem;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)">Ventas de hoy</div>
+    <table><thead><tr><th>Hora</th><th>Productos</th><th>Cliente</th><th>Total</th><th>Método</th><th>Estado</th><th></th></tr></thead>
+    <tbody id="vd-tbody"></tbody></table>
+  </div>
+</div>
 <!-- CLASES -->
 <div class="sec" id="sec-clases">
   <div class="alert info" style="margin-bottom:1rem"><i class="ti ti-info-circle"></i><div><strong>Trazabilidad de clases.</strong> Los registros se crean desde la agenda (Bloqueo / Evento → tipo Clase). Esta vista es solo de seguimiento y filtrado.</div></div>
@@ -430,7 +444,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="card" id="cblq-card" style="margin-bottom:1.25rem"><div class="card-title">Otros ingresos (clases, eventos, arriendos especiales)</div><div id="cblq"></div></div>
   <div class="card" style="padding:0;overflow:auto">
     <div style="padding:1rem 1.25rem;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)">Historial de turnos</div>
-    <table><thead><tr><th>Cancha</th><th>Horario</th><th>Fecha</th><th>Jug.</th><th>Cancha $</th><th>Prods $</th><th>Total</th><th>Cobrado</th><th>Pend.</th><th>Método</th></tr></thead>
+    <table><thead><tr><th>Cancha</th><th>Horario</th><th>Fecha</th><th>Jug.</th><th>Cancha $</th><th>Prods $</th><th>Total</th><th>Cobrado</th><th>Pend.</th><th>Método</th><th></th></tr></thead>
     <tbody id="chist"></tbody></table></div>
 </div>
 <!-- DEUDAS -->
@@ -591,6 +605,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 <div class="mob-mas-panel hidden" id="mob-mas-panel">
   <div style="padding:16px 12px 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Gestión</div>
   <button class="mob-mas-item" onclick="S('inventario');closeMobMas()"><i class="ti ti-box"></i> Inventario</button>
+  <button class="mob-mas-item" onclick="S('ventas');closeMobMas()"><i class="ti ti-shopping-bag"></i> Ventas directas</button>
   <button class="mob-mas-item ao" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
   <button class="mob-mas-item ao" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
   <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
@@ -849,9 +864,93 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
   </div>
 </div>
+<!-- MODAL VENTA DIRECTA -->
+<div class="mbg hidden" id="m-venta">
+  <div class="modal wide">
+    <div class="modal-header">
+      <div class="modal-title"><i class="ti ti-shopping-bag" style="margin-right:8px;color:var(--cyan-dark)"></i>Nueva venta directa</div>
+      <button class="btn icon-only sm" onclick="cM('m-venta')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="fr">
+      <lbl>Cliente (opcional)</lbl>
+      <div style="position:relative">
+        <i class="ti ti-user" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
+        <input id="vd-cliente" placeholder="Nombre o jugador (opcional)" style="padding-left:32px" oninput="sugVDCliente()" autocomplete="off">
+        <div id="vd-cliente-drop" class="jdrop hidden"></div>
+      </div>
+    </div>
+    <div class="fr">
+      <lbl>Buscar producto o código de barras</lbl>
+      <div style="position:relative">
+        <i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
+        <input id="vd-search" placeholder="Buscar producto o código de barras..." style="padding-left:32px" oninput="rVDProds()">
+      </div>
+    </div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="vd-cats"></div>
+    <div id="vd-prods" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px"></div>
+    <!-- Resumen -->
+    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:12px">
+      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:8px">Productos seleccionados</div>
+      <div id="vd-added" style="font-size:13px;color:var(--text3)">Ninguno aún.</div>
+      <div class="sl tot" style="margin-top:8px"><span>Total</span><span id="vd-total" style="font-family:Poppins,sans-serif">$0</span></div>
+    </div>
+    <!-- Pago -->
+    <div class="fr c3" style="margin-bottom:8px">
+      <div><lbl>Monto</lbl><input type="number" id="vd-monto" placeholder="0"></div>
+      <div><lbl>Método</lbl><select id="vd-metodo"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></div>
+      <div><lbl>Estado</lbl><select id="vd-estado-pago"><option value="cobrado">Cobrado</option><option value="pendiente">Pendiente (deuda)</option></select></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
+      <button class="btn" onclick="cM('m-venta')">Cancelar</button>
+      <button class="btn p" onclick="saveVD()"><i class="ti ti-check"></i> Registrar venta</button>
+    </div>
+  </div>
+</div>
+
+<!-- MODAL EDITAR COMANDA CERRADA (admin) -->
+<div class="mbg hidden" id="m-edit-cerrada">
+  <div class="modal wide">
+    <div class="modal-header">
+      <div class="modal-title" id="edit-cerrada-title"><i class="ti ti-edit" style="margin-right:8px;color:var(--amber)"></i>Editar comanda cerrada</div>
+      <button class="btn icon-only sm" onclick="cM('m-edit-cerrada')"><i class="ti ti-x"></i></button>
+    </div>
+    <div class="alert warning" style="margin-bottom:1rem"><i class="ti ti-alert-triangle"></i><div>Solo administradores pueden editar comandas cerradas. Los cambios quedan registrados en el historial.</div></div>
+    <!-- Productos -->
+    <div style="font-family:Poppins,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px">Productos</div>
+    <div class="fr">
+      <div style="position:relative">
+        <i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
+        <input id="ec-search" placeholder="Buscar y agregar producto..." style="padding-left:32px" oninput="rECProds()">
+      </div>
+    </div>
+    <div id="ec-prods-add" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px"></div>
+    <div id="ec-prods-cur" style="margin-bottom:14px"></div>
+    <!-- Pagos -->
+    <div style="font-family:Poppins,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px">Pagos</div>
+    <div id="ec-pagos-list" style="margin-bottom:10px"></div>
+    <div class="fr c3" style="margin-bottom:10px">
+      <div><lbl>Monto</lbl><input type="number" id="ec-pago-m" placeholder="0"></div>
+      <div><lbl>Método</lbl><select id="ec-pago-met"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></div>
+      <div><lbl>Quién paga</lbl><select id="ec-pago-q"></select></div>
+    </div>
+    <button class="btn sm p" onclick="addECPago()" style="margin-bottom:14px"><i class="ti ti-plus"></i> Agregar pago</button>
+    <!-- Totales -->
+    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:14px">
+      <div class="sl"><span style="color:var(--text2)">Total cancha</span><span id="ec-tot-c" style="font-weight:700"></span></div>
+      <div class="sl"><span style="color:var(--text2)">Total productos</span><span id="ec-tot-p" style="font-weight:700"></span></div>
+      <div class="sl tot"><span>Total</span><span id="ec-tot-t" style="font-family:Poppins,sans-serif"></span></div>
+      <div class="sl"><span style="color:#3d6b0a">Cobrado</span><span id="ec-tot-cob" style="color:#3d6b0a;font-weight:700"></span></div>
+      <div class="sl"><span style="color:#92400E">Pendiente</span><span id="ec-tot-pend" style="color:#92400E;font-weight:700"></span></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="cM('m-edit-cerrada')">Cancelar</button>
+      <button class="btn p" onclick="saveEditCerrada()"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
+    </div>
+  </div>
+</div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -992,6 +1091,9 @@ async function cargarDatosDesdeSupabase(){
   };
   D.feriadosPropios=(feriadosPropios||[]).map(f=>({fecha:f.fecha,nombre:f.nombre}));
   D.feriadosOficialesEliminados=(feriadosElim||[]).map(f=>f.fecha);
+
+  // Ventas directas (hoy y últimos 30 días para Caja)
+  await cargarVentasDirectas();
 
   // Estos módulos todavía no están migrados (próximos pasos) — quedan vacíos por ahora
   // Jugadores: mapeo membresia_id->memb, precio_override->precioOv
@@ -1184,13 +1286,14 @@ async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
   if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
+  if(s==='ventas'){setTimeout(rVD,50);}
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
   if(window.innerWidth<=768){const tabs=['agenda','turnos','jugadores'];if(tabs.includes(s))setMobTab(s);}
 }
 function cM(id){g(id).classList.add('hidden');}
-function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();}
+function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();rVD();}
 
 // ── AGENDA ──────────────────────────────────────────────
 function genSlots(){
@@ -1798,6 +1901,7 @@ async function confCierre(){
   }
   rAll();cM('m-cierreT');cM('m-com');
 }
+// cargarVentasDirectas se llama desde cargarDatosDesdeSupabase y desde rAll
 
 // ── CIERRE DEL DÍA ───────────────────────────────────────
 function openCD(){
@@ -2089,6 +2193,256 @@ function addPromo(){
 }
 function delPromo(i){D.promos.splice(i,1);sv();rPromos();}
 
+// ── VENTAS DIRECTAS ───────────────────────────────────────
+let vdQty={},vdCatSel=null;
+
+function openVD(){
+  vdQty={};vdCatSel=null;
+  g('vd-cliente').value='';g('vd-search').value='';g('vd-monto').value='';
+  g('vd-metodo').value='Efectivo';g('vd-estado-pago').value='cobrado';
+  g('vd-cliente-drop').classList.add('hidden');
+  rVDCats();rVDProds();updVDTotal();
+  g('m-venta').classList.remove('hidden');
+}
+function rVDCats(){
+  const cats=[...new Set(D.productos.map(p=>p.cat))];
+  g('vd-cats').innerHTML=`<span class="badge${!vdCatSel?' bblue':' bg'}" style="cursor:pointer" onclick="vdSelCat(null)">Todos</span>`+
+    cats.map(c=>`<span class="badge${vdCatSel===c?' bblue':' bg'}" style="cursor:pointer" onclick="vdSelCat('${c}')">${c}</span>`).join('');
+}
+function vdSelCat(c){vdCatSel=c;rVDCats();rVDProds();}
+function rVDProds(){
+  const s=(g('vd-search').value||'').toLowerCase().trim();
+  // código de barras exacto
+  const ex=D.productos.find(p=>p.cod&&p.cod===s);
+  if(ex&&s){vdQty[ex.id]=(vdQty[ex.id]||0)+1;g('vd-search').value='';updVDTotal();rVDProds();return;}
+  let pr=D.productos;
+  if(vdCatSel)pr=pr.filter(p=>p.cat===vdCatSel);
+  if(s)pr=pr.filter(p=>p.nombre.toLowerCase().includes(s)||(p.cod&&p.cod.includes(s)));
+  const el=g('vd-prods');
+  if(!pr.length){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:12px">Sin resultados.</p>';return;}
+  const cats=vdCatSel?[vdCatSel]:[...new Set(pr.map(p=>p.cat))];
+  el.innerHTML=cats.map(cat=>{
+    const its=pr.filter(p=>p.cat===cat);if(!its.length)return'';
+    return`<div class="ps"><div class="psh" onclick="tgPS(this)">${cat} <span style="font-size:10px;color:var(--text3);font-weight:400">(${its.length})</span><i class="ti ti-chevron-down" style="font-size:13px;color:var(--text3);transition:transform .2s"></i></div>
+    <div class="psb open">${its.map(p=>{const q=vdQty[p.id]||0;
+      return`<div class="pr" style="display:flex;align-items:center;gap:8px;padding:8px 12px">
+        <div style="flex:1"><div style="font-size:13px;font-weight:${q>0?700:500}">${p.nombre}</div>
+        <div style="font-size:11px;color:var(--text3)">${fmt(p.precio)}${p.cod?` · <code style="font-size:10px">${p.cod}</code>`:''}${p.stock<=p.smin?` · <span style="color:#92400E;font-weight:600">stock:${p.stock}</span>`:''}</div></div>
+        <div style="display:flex;align-items:center;gap:6px">
+          <button class="qb" onclick="chVDQ('${p.id}',-1)">−</button>
+          <div class="qv" id="vdqty-${p.id}">${q}</div>
+          <button class="qb" onclick="chVDQ('${p.id}',1)">+</button>
+        </div></div>`;}).join('')}</div></div>`;
+  }).join('');
+}
+function chVDQ(pid,d){
+  vdQty[pid]=Math.max(0,(vdQty[pid]||0)+d);
+  const el=g('vdqty-'+pid);if(el)el.textContent=vdQty[pid];
+  updVDTotal();
+}
+function updVDTotal(){
+  let total=0;
+  const added=D.productos.filter(p=>(vdQty[p.id]||0)>0);
+  const html=added.length?added.map(p=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0"><span>${vdQty[p.id]}× ${p.nombre}</span><span style="font-weight:600">${fmt(vdQty[p.id]*p.precio)}</span></div>`).join(''):'Ninguno aún.';
+  added.forEach(p=>{total+=vdQty[p.id]*p.precio;});
+  g('vd-added').innerHTML=html;
+  g('vd-total').textContent=fmt(total);
+  // autocompletar monto si el campo está vacío
+  if(!g('vd-monto').value||g('vd-monto').value==='0')g('vd-monto').value=total||'';
+}
+function sugVDCliente(){
+  const val=g('vd-cliente').value.toLowerCase();const drop=g('vd-cliente-drop');
+  if(!val){drop.classList.add('hidden');return;}
+  const m=D.jugadores.filter(j=>j.nombre.toLowerCase().includes(val)).slice(0,6);
+  if(!m.length){drop.classList.add('hidden');return;}
+  drop.innerHTML=m.map(j=>`<div class="jdi" onclick="pickVDCliente('${j.nombre.replace(/'/g,"\\'")}')"><span>${j.nombre}</span></div>`).join('');
+  drop.classList.remove('hidden');
+}
+function pickVDCliente(nombre){g('vd-cliente').value=nombre;g('vd-cliente-drop').classList.add('hidden');}
+async function saveVD(){
+  const items=D.productos.filter(p=>(vdQty[p.id]||0)>0);
+  if(!items.length){alert('Agrega al menos un producto.');return;}
+  const total=items.reduce((s,p)=>s+vdQty[p.id]*p.precio,0);
+  const monto=parseInt(g('vd-monto').value)||0;
+  const metodo=g('vd-metodo').value;
+  const estadoPago=g('vd-estado-pago').value;
+  const cliente=g('vd-cliente').value.trim()||null;
+  const productos=items.map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:vdQty[p.id],cat:p.cat}));
+  const pago={monto:estadoPago==='cobrado'?monto:0,metodo,cliente};
+  const venta={
+    fecha:ds(new Date()),hora:new Date().toTimeString().slice(0,5),
+    cliente,productos,pago_monto:estadoPago==='cobrado'?monto:0,pago_metodo:metodo,
+    estado_pago:estadoPago,total,created_at:new Date().toISOString()
+  };
+  // Guardar en Supabase tabla ventas_directas
+  const{data:vd,error}=await sb.from('ventas_directas').insert({
+    fecha:venta.fecha,hora:venta.hora,cliente,
+    productos:JSON.stringify(productos),
+    total,pago_monto:venta.pago_monto,pago_metodo:metodo,
+    estado_pago:estadoPago
+  }).select().single();
+  if(error){alert('No se pudo registrar la venta: '+error.message);return;}
+  // Descontar stock
+  const stockUpdates=[];
+  for(const p of items){
+    const prod=D.productos.find(x=>x.id===p.id);
+    if(prod){prod.stock=Math.max(0,prod.stock-vdQty[p.id]);stockUpdates.push({id:prod.id,stock:prod.stock});}
+  }
+  for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
+  // Audit
+  const detalle=items.map(p=>`${vdQty[p.id]}× ${p.nombre}`).join(', ')+(cliente?' → '+cliente:'');
+  audit('Venta directa','venta_directa',`${fmt(total)} · ${detalle}`);
+  // Agregar a D local
+  if(!D.ventasDirectas)D.ventasDirectas=[];
+  D.ventasDirectas.push({...venta,id:vd.id});
+  cM('m-venta');rVD();rI();rCaja();
+}
+async function cargarVentasDirectas(){
+  const desde=new Date();desde.setDate(desde.getDate()-30);
+  const{data,error}=await sb.from('ventas_directas').select('*').gte('fecha',ds(desde)).order('created_at',{ascending:false});
+  if(!error&&data){
+    D.ventasDirectas=(data||[]).map(v=>({
+      id:v.id,fecha:v.fecha,hora:v.hora,cliente:v.cliente,
+      productos:typeof v.productos==='string'?JSON.parse(v.productos):(v.productos||[]),
+      total:v.total,pago_monto:v.pago_monto,pago_metodo:v.pago_metodo,estado_pago:v.estado_pago
+    }));
+  }
+}
+function rVD(){
+  const ventas=D.ventasDirectas||[];
+  const hoy=ds(new Date());const ventasHoy=ventas.filter(v=>v.fecha===hoy);
+  const totalHoy=ventasHoy.reduce((s,v)=>s+v.total,0);
+  const cobradoHoy=ventasHoy.filter(v=>v.estado_pago==='cobrado').reduce((s,v)=>s+v.pago_monto,0);
+  g('vd-stats').innerHTML=[
+    {l:'Ventas hoy',v:ventasHoy.length},{l:'Total',v:fmt(totalHoy)},{l:'Cobrado',v:fmt(cobradoHoy)},{l:'Pendiente',v:fmt(Math.max(0,totalHoy-cobradoHoy))}
+  ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
+  g('vd-tbody').innerHTML=ventasHoy.length?ventasHoy.map(v=>{
+    const prods=(v.productos||[]).map(p=>`${p.qty}× ${p.nombre}`).join(', ');
+    return`<tr>
+      <td style="color:var(--text3)">${v.hora||''}</td>
+      <td style="font-size:12px;max-width:220px">${prods}</td>
+      <td>${v.cliente||'<span style="color:var(--text3)">—</span>'}</td>
+      <td style="font-weight:700">${fmt(v.total)}</td>
+      <td>${v.pago_metodo||'—'}</td>
+      <td>${v.estado_pago==='cobrado'?'<span class="badge bgreen">Cobrado</span>':'<span class="badge bamber">Pendiente</span>'}</td>
+      <td><button class="btn icon-only sm d" onclick="delVD('${v.id}')"><i class="ti ti-trash" style="font-size:13px"></i></button></td>
+    </tr>`;
+  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:14px">Sin ventas hoy.</td></tr>';
+}
+async function delVD(id){
+  if(!confirm('¿Eliminar esta venta?'))return;
+  const{error}=await sb.from('ventas_directas').delete().eq('id',id);
+  if(error){alert('No se pudo eliminar: '+error.message);return;}
+  D.ventasDirectas=(D.ventasDirectas||[]).filter(v=>v.id!==id);rVD();rCaja();
+}
+
+// ── EDITAR COMANDA CERRADA (admin) ────────────────────────
+let ecRid=null,ecQty={};
+
+function openEditCerrada(rid){
+  if(role!=='admin')return;
+  const r=D.reservas.find(x=>x.id===rid);if(!r||r.estado!=='cerrado')return;
+  ecRid=rid;
+  // Inicializar cantidades con lo que ya tiene la comanda
+  ecQty={};
+  (r.productos||[]).forEach(p=>{ecQty[p.id]=p.qty;});
+  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
+  g('edit-cerrada-title').innerHTML=`<i class="ti ti-edit" style="margin-right:8px;color:var(--amber)"></i>Editar comanda · ${c.nombre} · ${r.horario} · ${fmtD(new Date(r.fecha+'T12:00:00'))}`;
+  // selector quién paga
+  const jugs=(r.jugadores||[]).filter(j=>j);
+  g('ec-pago-q').innerHTML='<option value="">-- Jugador --</option>'+jugs.map(j=>`<option value="${j}">${j}</option>`).join('');
+  g('ec-search').value='';
+  rECProds();rECPagosList();updECTotales();
+  g('m-edit-cerrada').classList.remove('hidden');
+}
+function rECProds(){
+  const s=(g('ec-search').value||'').toLowerCase().trim();
+  let pr=D.productos;
+  if(s)pr=pr.filter(p=>p.nombre.toLowerCase().includes(s)||(p.cod&&p.cod.includes(s)));
+  const el=g('ec-prods-add');
+  if(!s&&!pr.length){el.innerHTML='';return;}
+  if(!s){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:8px">Escribe para buscar productos.</p>';return;}
+  el.innerHTML=pr.slice(0,8).map(p=>{const q=ecQty[p.id]||0;
+    return`<div class="pr" style="display:flex;align-items:center;gap:8px;padding:7px 12px">
+      <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.nombre}</div>
+      <div style="font-size:11px;color:var(--text3)">${fmt(p.precio)}</div></div>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="qb" onclick="chECQ('${p.id}',-1)">−</button>
+        <div class="qv" id="ecqty-${p.id}">${q}</div>
+        <button class="qb" onclick="chECQ('${p.id}',1)">+</button>
+      </div></div>`;
+  }).join('');
+  // También renderizar productos actuales en comanda
+  rECProdsActuales();
+}
+function rECProdsActuales(){
+  const added=D.productos.filter(p=>(ecQty[p.id]||0)>0);
+  g('ec-prods-cur').innerHTML=added.length?
+    `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Productos en comanda</div>`+
+    added.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${p.nombre}</span>
+      <div style="display:flex;align-items:center;gap:6px">
+        <button class="qb" onclick="chECQ('${p.id}',-1)">−</button>
+        <div class="qv" id="ecqty2-${p.id}">${ecQty[p.id]||0}</div>
+        <button class="qb" onclick="chECQ('${p.id}',1)">+</button>
+      </div>
+      <span style="font-size:12px;font-weight:600;min-width:70px;text-align:right">${fmt((ecQty[p.id]||0)*p.precio)}</span>
+    </div>`).join('')
+  :'<p style="font-size:12px;color:var(--text3)">Sin productos.</p>';
+}
+function chECQ(pid,d){
+  ecQty[pid]=Math.max(0,(ecQty[pid]||0)+d);
+  ['ecqty-','ecqty2-'].forEach(pref=>{const el=g(pref+pid);if(el)el.textContent=ecQty[pid];});
+  rECProdsActuales();updECTotales();
+}
+function rECPagosList(){
+  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
+  g('ec-pagos-list').innerHTML=(r.pagos||[]).length?
+    (r.pagos||[]).map((p,i)=>`<div class="pagorow"><i class="ti ti-check-circle" style="color:#3d6b0a;font-size:16px"></i>
+      <span style="font-weight:700;font-family:Poppins,sans-serif">${fmt(p.monto)}</span>
+      <span class="badge bg">${p.metodo}</span>
+      ${p.quien?`<span style="color:var(--text2);font-size:12px">${p.quien}</span>`:''}
+      <button class="btn sm d icon-only" onclick="delECPago(${i})" style="margin-left:auto"><i class="ti ti-x"></i></button>
+    </div>`).join('')
+  :'<p style="font-size:12px;color:var(--text3)">Sin pagos.</p>';
+  updECTotales();
+}
+function addECPago(){
+  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
+  const m=parseInt(g('ec-pago-m').value)||0;if(m<=0)return;
+  if(!r.pagos)r.pagos=[];
+  r.pagos.push({monto:m,metodo:g('ec-pago-met').value,quien:g('ec-pago-q').value||'',fecha:new Date().toISOString()});
+  g('ec-pago-m').value='';rECPagosList();
+}
+function delECPago(i){
+  const r=D.reservas.find(x=>x.id===ecRid);if(!r||!r.pagos)return;
+  r.pagos.splice(i,1);rECPagosList();
+}
+function updECTotales(){
+  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
+  const{precioCancha}=calcTotalesPorJugador(r,{},{});
+  let tp=0;D.productos.forEach(p=>{tp+=(ecQty[p.id]||0)*p.precio;});
+  const tot=precioCancha+tp;
+  const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);
+  const pend=Math.max(0,tot-cob);
+  g('ec-tot-c').textContent=fmt(precioCancha);
+  g('ec-tot-p').textContent=fmt(tp);
+  g('ec-tot-t').textContent=fmt(tot);
+  g('ec-tot-cob').textContent=fmt(cob);
+  g('ec-tot-pend').textContent=fmt(pend);
+}
+async function saveEditCerrada(){
+  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
+  // Actualizar productos de la reserva
+  r.productos=D.productos.filter(p=>(ecQty[p.id]||0)>0).map(p=>({
+    id:p.id,nombre:p.nombre,precio:p.precio,qty:ecQty[p.id],cat:p.cat,asignados:[],jugador:null
+  }));
+  const ok=await syncReservaCompleta(ecRid);
+  if(!ok){alert('No se pudo guardar. Revisa tu conexión.');return;}
+  audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  cM('m-edit-cerrada');rCaja();rAll();
+}
+
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','semana','mes'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));rCaja();}
 function getCajaRange(){
@@ -2107,16 +2461,25 @@ function rCaja(){
     const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);tCob+=cob;tPend+=Math.max(0,(precioCancha+tp)-cob);
     (r.pagos||[]).forEach(p=>{if(!mets[p.metodo])mets[p.metodo]=0;mets[p.metodo]+=p.monto;});});
   const blq=(D.bloqueos||[]).filter(b=>b.fecha>=from&&b.fecha<=to&&b.genIngreso&&b.valor>0);const tBlq=blq.reduce((s,b)=>s+b.valor,0);
-  const tot=tC+tP+tBlq;
-  g('cmet').innerHTML=[{l:'Ingresos totales',v:fmt(tot)},{l:'Cobrado',v:fmt(tCob)},{l:'Pendiente',v:fmt(tPend)},{l:'Turnos cerrados',v:res.length}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
+  // Ventas directas
+  const vds=(D.ventasDirectas||[]).filter(v=>v.fecha>=from&&v.fecha<=to);
+  const tVD=vds.reduce((s,v)=>s+v.total,0);
+  const cobVD=vds.filter(v=>v.estado_pago==='cobrado').reduce((s,v)=>s+v.pago_monto,0);
+  vds.forEach(v=>{(v.productos||[]).forEach(p=>{if(!pV[p.nombre])pV[p.nombre]=0;pV[p.nombre]+=p.qty;});
+    if(v.estado_pago==='cobrado'&&v.pago_metodo){if(!mets[v.pago_metodo])mets[v.pago_metodo]=0;mets[v.pago_metodo]+=v.pago_monto;}});
+  const tot=tC+tP+tBlq+tVD;
+  const totCob=tCob+cobVD;
+  const totPend=tPend+Math.max(0,tVD-cobVD);
+  g('cmet').innerHTML=[{l:'Ingresos totales',v:fmt(tot)},{l:'Cobrado',v:fmt(totCob)},{l:'Pendiente',v:fmt(totPend)},{l:'Turnos cerrados',v:res.length}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
   g('cmetodos').innerHTML=Object.entries(mets).length?Object.entries(mets).map(([m,v])=>`<div class="sl"><span style="color:var(--text2)">${m}</span><span style="font-weight:700">${fmt(v)}</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin pagos en este período.</p>';
   g('cprods').innerHTML=Object.entries(pV).length?Object.entries(pV).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,q])=>`<div class="sl"><span style="color:var(--text2)">${n}</span><span style="font-weight:700">${q} uds</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin ventas en este período.</p>';
   const cblqCard=g('cblq-card');
   if(blq.length){cblqCard.classList.remove('hidden');g('cblq').innerHTML=blq.map(b=>{const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;return`<div class="sl"><span style="color:var(--text2)">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${bt.label}${b.titulo?' · '+b.titulo:''}</span><span style="font-weight:700">${fmt(b.valor)}</span></div>`;}).join('');}
   else{cblqCard.classList.add('hidden');}
   g('chist').innerHTML=res.length?res.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const{precioCancha}=calcTotalesPorJugador(r,{},{});const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const t=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,t-cob);const mets2=[...new Set((r.pagos||[]).map(p=>p.metodo))].join(', ')||'—';
-    return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td></tr>`;
-  }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
+    const editBtn=role==='admin'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
+    return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td>${editBtn}</tr>`;
+  }).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
 }
 
 // ── DEUDAS ────────────────────────────────────────────────
