@@ -1735,7 +1735,7 @@ function openCom(rid){
 function rCPtags(){
   const r=D.reservas.find(x=>x.id===cRid);const jugs=(r&&r.jugadores||[]).filter(j=>j);
   g('com-ptags').innerHTML=`<div class="ptag${!cSJ?' sel':''}" onclick="sSJ(null)"><i class="ti ti-users" style="font-size:12px"></i> Todos <span style="font-size:10px;opacity:.6">(pelotas)</span></div>`+
-    jugs.map(j=>`<div class="ptag${cSJ===j?' sel':''}" onclick="sSJ('${j.replace(/'/g,"\\'")}')"><span style="width:22px;height:22px;border-radius:50%;background:${cSJ===j?'var(--cyan-light)':'var(--gray-light)'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cSJ===j?'var(--cyan-dark)':'var(--text2)'}">${j.charAt(0)}</span>${j}</div>`).join('');
+    jugs.map(j=>`<div class="ptag${cSJ===j?' sel':''}" style="white-space:nowrap" onclick="sSJ('${j.replace(/'/g,"\\'")}')"><span style="width:22px;height:22px;border-radius:50%;background:${cSJ===j?'var(--cyan-light)':'var(--gray-light)'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cSJ===j?'var(--cyan-dark)':'var(--text2)'}">${j.charAt(0)}</span>${j}</div>`).join('');
   const sel=g('pago-q');if(sel)sel.innerHTML='<option value="">-- Jugador --</option>'+jugs.map(j=>`<option value="${j}">${j}</option>`).join('');
 }
 function sSJ(j){cSJ=j||null;rCPtags();}
@@ -1855,7 +1855,7 @@ function rCierreJugs(totales,jugs,r,cobPorJugador){
     const rowCls=est==='pagado'?'ok':est==='cubierto'?'cubierto':est==='cortesia'?'ok':'deuda';
     const descTag=t.descLabel?`<span class="bcyan" style="font-size:10px;padding:1px 5px">${t.descLabel}</span>`:'';
     const estIcon=est==='pagado'?'<i class="ti ti-circle-check" style="color:#3d6b0a;font-size:18px"></i>':est==='cubierto'?'<i class="ti ti-arrow-merge" style="color:var(--cyan-dark);font-size:18px"></i>':est==='cortesia'?'<i class="ti ti-gift" style="color:#3d6b0a;font-size:18px"></i>':'<i class="ti ti-clock" style="color:#92400E;font-size:18px"></i>';
-    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro').split(' ')[0]}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
+    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro'}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
     let optsHtml='';
     if(est!=='pagado'){
       const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2.split(' ')[0]} lo cubre</button>`;}).join('');
