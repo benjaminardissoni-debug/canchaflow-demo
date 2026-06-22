@@ -586,11 +586,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </div>
 </div>
 </div>
-<!-- BOTÓN SOPORTE WHATSAPP -->
-<a href="https://wa.me/56987494697" target="_blank" id="btn-soporte" style="position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.4);z-index:150;transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-  <i class="ti ti-brand-whatsapp" style="font-size:28px;color:#fff"></i>
-</a>
-
 <!-- BARRA INFERIOR MÓVIL -->
 <div class="mob-tabbar" id="mob-tabbar">
   <button class="mob-tab" onclick="S('agenda');setMobTab('agenda')" id="mtab-agenda">
@@ -693,7 +688,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div id="com-cortesias" style="margin-bottom:10px"></div>
     <div style="margin-bottom:10px">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Asignando a</div>
-      <select id="com-ptags-sel" onchange="sSJ(this.value||null)" style="width:100%;height:38px;font-size:13px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 12px;background:var(--card);color:var(--text)"></select>
+      <select id="com-ptags-sel" onchange="sSJ(this.value||null)" style="width:100%;height:38px;font-size:13px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 12px;background:var(--card);color:var(--text);margin-bottom:4px"></select>
       <div id="com-ptags" style="display:none"></div>
     </div>
     <div style="position:relative;margin-bottom:8px"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
@@ -976,8 +971,8 @@ const FERIADOS_CHILE_2026=[
   {fecha:'2026-12-25',nombre:'Navidad'}
 ];
 // ── CONEXIÓN SUPABASE ──────────────────────────────────────
-const SUPABASE_URL='https://mfufcecghjwellqolpsg.supabase.co';
-const SUPABASE_KEY='sb_publishable_-Vyn5Qasp-OOo2ozA024wA_XD-o1o3v';
+const SUPABASE_URL='https://djufzbswezexwxptuujg.supabase.co';
+const SUPABASE_KEY='sb_publishable_VfbdWm2rDFk5pB9__pT1iA_7zXW9VQt';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let D={canchas:[],productos:[],reservas:[],jugadores:[],deudas:[],promos:[],bloqueos:[],feriadosPropios:[],feriadosOficialesEliminados:[],cfg:{ini:'07:00',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel Las Torres',precioFeriado:24000,precioFinSemana:24000}};
@@ -1730,13 +1725,11 @@ function openCom(rid){
   (r.productos||[]).forEach(p=>{cQty[p.id]=p.qty;if(p.asignados)cAsig[p.id]=p.asignados;else if(p.jugador)cAsig[p.id]=[p.jugador];});
   const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};g('com-title').textContent=`Comanda · ${c.nombre} · ${r.horario}`;
   const jugs=(r.jugadores||[]).filter(j=>j);const pcBruto=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario,r.fecha);const cuotaBase=Math.ceil(pcBruto/Math.max(jugs.length,1));
-  g('com-jugs').innerHTML=jugs.length?`<div style="display:flex;gap:6px;flex-wrap:wrap">${jugs.map(j=>{const jd=D.jugadores.find(x=>x.nombre===j);const mc=calcPrecioJugador(cuotaBase,jd);const mb=mc.hasDescuento?`<span class="bcyan" style="font-size:9px;padding:1px 5px">${mc.label}</span>`:'';return`<span style="background:var(--cyan-light);color:var(--cyan-dark);font-size:12px;padding:4px 12px;border-radius:20px;font-weight:600">${j}${mb}</span>`;}).join('')}</div>`:'';
   rCPtags();rCCats();rCP();rPagos();rCortesias();g('com-search').value='';g('pago-m').value='';g('pago-q').value='';g('m-com').classList.remove('hidden');
 }
 function rCPtags(){
   const r=D.reservas.find(x=>x.id===cRid);const jugs=(r&&r.jugadores||[]).filter(j=>j);
-  g('com-ptags').innerHTML=`<div class="ptag${!cSJ?' sel':''}" onclick="sSJ(null)"><i class="ti ti-users" style="font-size:12px"></i> Todos <span style="font-size:10px;opacity:.6">(pelotas)</span></div>`+
-    jugs.map(j=>`<div class="ptag${cSJ===j?' sel':''}" style="white-space:nowrap" onclick="sSJ('${j.replace(/'/g,"\\'")}')"><span style="width:22px;height:22px;border-radius:50%;background:${cSJ===j?'var(--cyan-light)':'var(--gray-light)'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cSJ===j?'var(--cyan-dark)':'var(--text2)'}">${j.charAt(0)}</span>${j}</div>`).join('');
+  const selAsig=g('com-ptags-sel');if(selAsig){selAsig.innerHTML=jugs.map(j=>`<option value="${j}"${cSJ===j?' selected':''}>${j}</option>`).join('')+'<option value=""'+(cSJ?'':' selected')+'>👥 Todos (pelotas)</option>';selAsig.value=cSJ||'';}
   const sel=g('pago-q');if(sel)sel.innerHTML='<option value="">-- Jugador --</option>'+jugs.map(j=>`<option value="${j}">${j}</option>`).join('');
 }
 function sSJ(j){cSJ=j||null;rCPtags();}
@@ -1754,7 +1747,7 @@ function rCP(){
       let asigLabel='';
       if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${p.id}')">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
         else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj}</span>`).join('');}
+        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
       const pelPH=esPelota?`<div class="pelota-panel" id="pelota-panel-${p.id}"><div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:7px">¿Quién paga las pelotas?</div><div style="display:flex;gap:5px;flex-wrap:wrap" id="pelota-jugs-${p.id}"></div><div id="pelota-calc-${p.id}" style="font-size:11px;color:var(--cyan-dark);margin-top:6px;background:var(--cyan-light);padding:4px 8px;border-radius:6px;display:none"></div></div>`:'';
       return`<div class="pr" id="prod-row-${p.id}" style="flex-direction:column;align-items:stretch;padding:8px 12px">
         <div style="display:flex;align-items:center;gap:8px">
@@ -1771,7 +1764,7 @@ function renderPelotaJugs(pid){
   const q=cQty[pid]||1;const sel=cAsig[pid]||[];const todos=sel.length===0;
   const container=document.getElementById('pelota-jugs-'+pid);const calc=document.getElementById('pelota-calc-'+pid);if(!container)return;container.innerHTML='';
   const btnTodos=document.createElement('button');btnTodos.className='jbtn-p'+(todos?' todos-sel':'');btnTodos.textContent='÷ Todos';btnTodos.onclick=function(){setPelotaAsig(pid,[]);};container.appendChild(btnTodos);
-  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j;btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
+  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j.split(' ')[0];btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
   const quienes=todos?jugs:sel;
   if(calc){if(quienes.length>0){const costoPU=Math.ceil((p.precio*q)/quienes.length);calc.style.display='block';calc.textContent=(todos?'Todos':quienes.map(j=>j.split(' ')[0]).join(' + '))+' → '+fmt(costoPU)+' c/u';}else calc.style.display='none';}
 }
@@ -1856,7 +1849,7 @@ function rCierreJugs(totales,jugs,r,cobPorJugador){
     const rowCls=est==='pagado'?'ok':est==='cubierto'?'cubierto':est==='cortesia'?'ok':'deuda';
     const descTag=t.descLabel?`<span class="bcyan" style="font-size:10px;padding:1px 5px">${t.descLabel}</span>`:'';
     const estIcon=est==='pagado'?'<i class="ti ti-circle-check" style="color:#3d6b0a;font-size:18px"></i>':est==='cubierto'?'<i class="ti ti-arrow-merge" style="color:var(--cyan-dark);font-size:18px"></i>':est==='cortesia'?'<i class="ti ti-gift" style="color:#3d6b0a;font-size:18px"></i>':'<i class="ti ti-clock" style="color:#92400E;font-size:18px"></i>';
-    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro'}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
+    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro').split(' ')[0]}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
     let optsHtml='';
     if(est!=='pagado'){
       const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2.split(' ')[0]} lo cubre</button>`;}).join('');
