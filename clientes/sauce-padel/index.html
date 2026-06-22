@@ -1770,7 +1770,7 @@ function renderPelotaJugs(pid){
   const q=cQty[pid]||1;const sel=cAsig[pid]||[];const todos=sel.length===0;
   const container=document.getElementById('pelota-jugs-'+pid);const calc=document.getElementById('pelota-calc-'+pid);if(!container)return;container.innerHTML='';
   const btnTodos=document.createElement('button');btnTodos.className='jbtn-p'+(todos?' todos-sel':'');btnTodos.textContent='÷ Todos';btnTodos.onclick=function(){setPelotaAsig(pid,[]);};container.appendChild(btnTodos);
-  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j.split(' ')[0];btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
+  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j;btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
   const quienes=todos?jugs:sel;
   if(calc){if(quienes.length>0){const costoPU=Math.ceil((p.precio*q)/quienes.length);calc.style.display='block';calc.textContent=(todos?'Todos':quienes.map(j=>j.split(' ')[0]).join(' + '))+' → '+fmt(costoPU)+' c/u';}else calc.style.display='none';}
 }
