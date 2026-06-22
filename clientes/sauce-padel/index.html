@@ -8,17 +8,8 @@
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.0.0/dist/tabler-icons.min.css">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js">
-
-</script>
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
-/* feedback táctil visual */
-.btn:active,.btn:active *{transform:scale(0.96);opacity:0.85;transition:transform 0.08s,opacity 0.08s}
-.ag-free:active,.ag-res:active,.ag-blq:active,.ag-clase:active{transform:scale(0.97);opacity:0.8;transition:transform 0.08s,opacity 0.08s}
-.nb:active,.sb-nav-item:active{transform:scale(0.94);transition:transform 0.08s}
-.btn{transition:transform 0.08s,opacity 0.08s,background 0.15s}
-.ag-free,.ag-res,.ag-blq,.ag-clase{transition:transform 0.08s,opacity 0.08s}
 :root{
   --navy:#0D1B2A;--blue:#1F4FA3;--green:#A3E635;--green-dark:#7ab81f;
   --cyan:#0EA5E9;--cyan-dark:#0284C7;--cyan-light:#E0F2FE;
@@ -153,7 +144,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-block-time{font-size:10px;font-weight:700;opacity:.75;margin-bottom:2px}
 .ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-block-meta{font-size:10px;opacity:.82;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ag-block-meta2{font-size:10px;opacity:.82;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .ag-conflict{outline:2px solid rgba(229,62,62,.35);outline-offset:1px}
 .agenda-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:8px}
 .agenda-date{display:flex;align-items:center;gap:8px;min-width:260px;position:relative}
@@ -216,89 +206,38 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .cjug-opt.sel-deuda{background:#FEF3C7;border-color:var(--amber);color:#92400E}
 .cjug-opt.sel-cubierto{background:var(--cyan-light);border-color:var(--cyan);color:var(--cyan-dark)}
 .cjug-opt.sel-cortesia{background:rgba(163,230,53,.2);border-color:var(--green);color:#3d6b0a}
-
-/* Barra inferior móvil */
-.mob-tabbar{display:none;position:fixed;bottom:0;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:200;padding-bottom:env(safe-area-inset-bottom);box-shadow:0 -2px 12px rgba(0,0,0,.08)}
-.mob-tab{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:none;border:none;cursor:pointer;color:var(--text3);font-size:11px;font-family:Inter,sans-serif;font-weight:600}
-.mob-tab i{font-size:24px}
-.mob-tab.active{color:var(--cyan-dark)}
-.mob-mas-panel{display:none;position:fixed;bottom:56px;left:0;right:0;background:var(--card);border-top:1px solid var(--border);z-index:199;padding:8px 0 12px;box-shadow:0 -4px 20px rgba(0,0,0,.1)}
-.mob-mas-panel.visible{display:block}
-.mob-mas-item{display:flex;align-items:center;gap:12px;width:100%;padding:14px 20px;background:none;border:none;cursor:pointer;font-size:15px;color:var(--text);text-align:left;font-family:Inter,sans-serif}
-.mob-mas-item i{font-size:20px;color:var(--text2);width:24px}
 @media print{.sidebar,.btn,.mbg{display:none!important}body{background:#fff}.main{margin-left:0}.content{padding:0;max-width:100%}}
-@media(max-width:768px){
-  .sidebar{display:none}
-  .main{margin-left:0}
-  .g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}
-  .topbar{padding:.6rem .75rem}
-  .ag-mob-nav{display:flex!important;flex-direction:column;gap:8px;padding:10px 12px;background:var(--card);border-bottom:1px solid var(--border)}
-  .topbar-right .btn span{display:none}
-  .mob-tabbar{display:flex!important}
-  .content{padding-bottom:70px}
-
-  /* Barra de navegación de canchas (fila superior) */
-  .ag-mob-nav-row{display:flex;align-items:center;justify-content:space-between}
-  .ag-mob-arrow{background:none;border:none;cursor:pointer;font-size:20px;color:var(--text);padding:4px 8px}
-  .ag-mob-lbl{font-weight:700;font-size:13px;font-family:Poppins,sans-serif}
-
-  /* Selector segmentado 2 canchas / 1 cancha / Lista */
-  .ag-mob-modes{display:flex;background:#fff;border:1px solid var(--border);border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.06);padding:3px;gap:2px}
-  .ag-mob-mode-btn{flex:1;display:flex;align-items:center;justify-content:center;gap:4px;padding:7px 4px;background:none;border:none;border-radius:9px;cursor:pointer;font-size:11px;font-weight:600;color:var(--text3);font-family:Inter,sans-serif}
-  .ag-mob-mode-btn i{font-size:14px}
-  .ag-mob-mode-btn.active{background:var(--cyan-light);color:var(--cyan-dark)}
-
-  /* Agenda compacta */
-  .ag-wrap{overflow-x:hidden;border-radius:18px}
-  .ag-cal{min-width:100%}
-  .agenda-toolbar{grid-template-columns:1fr;gap:8px}
-  .agenda-actions{display:none}
-  .ag-legend{justify-content:flex-start;overflow-x:auto;flex-wrap:nowrap;padding-bottom:4px}
-  .ag-head-time{padding:8px 6px;font-size:10px}
-  .ag-head-court{padding:8px 6px}
-  .ag-head-court .cn{font-size:12px}
-  .ag-head-court .cp span{font-size:10px}
-  .ag-time span{right:6px;font-size:11px}
-  .ag-block{padding:6px 7px}
-  .ag-block-time{font-size:10px}
-  .ag-block-title{font-size:12px}
-  .ag-block-meta{font-size:10px}
-}
-@media(min-width:769px){
-  .ag-mob-nav{display:none!important}
-  .mob-tabbar{display:none!important}
-  .mob-mas-panel{display:none!important}
-}
+@media(max-width:768px){.sidebar{transform:translateX(-100%)}.main{margin-left:0}.g4{grid-template-columns:1fr 1fr}.g2{grid-template-columns:1fr}.fr.c2,.fr.c3{grid-template-columns:1fr}}
 </style>
 </head>
 <body>
 <!-- LOGIN -->
-<div id="login-screen" class="login-wrap" style="display:none">
+<div id="login-screen" class="login-wrap">
   <div class="login-box">
     <div class="login-logo"><div class="login-icon"><i class="ti ti-ball-tennis"></i></div><div class="login-brand"><span class="c">Cancha</span><span class="f">Flow</span></div></div>
     <div class="login-tagline">CONTROL TOTAL DE TU CLUB</div>
     <div style="margin-bottom:1rem;text-align:left"><lbl>Correo electrónico</lbl>
       <div style="position:relative;margin-top:4px"><i class="ti ti-mail" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3)"></i>
-      <input id="login-email" type="email" value="admin@saucepadel.cl" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
+      <input id="login-email" type="email" value="demo@canchaflow.cl" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
     <div style="margin-bottom:1.25rem;text-align:left"><lbl>Contraseña</lbl>
       <div style="position:relative;margin-top:4px"><i class="ti ti-lock" style="position:absolute;left:12px;top:50%;transform:translateY(-50%);font-size:16px;color:var(--text3)"></i>
-      <input id="login-pass" type="password" value="" placeholder="Contraseña" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
+      <input id="login-pass" type="password" value="demo123" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
     <div id="lerr" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:10px;text-align:center">⚠ Correo o contraseña incorrectos.</div>
-    <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
-
+    <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar a la demo</button>
+    <div style="background:var(--gray-light);border-radius:var(--r);padding:10px 12px;font-size:11px;color:var(--text2);margin-top:1.25rem;text-align:left;line-height:1.8">
+      <strong>Acceso demo:</strong><br>Admin → <code>demo@canchaflow.cl</code> / <code>demo123</code><br>Recepción → <code>recepcion@canchaflow.cl</code> / <code>demo123</code></div>
   </div>
 </div>
 <!-- APP -->
 <div id="main-app" class="hidden">
-
-<div id="sub-banner" style="display:none;padding:10px 16px;font-size:13px;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;position:sticky;top:0;z-index:999">
-  <span id="sub-banner-txt"></span>
-  <button id="sub-banner-close" onclick="cerrarBanner()" style="background:none;border:none;cursor:pointer;font-size:18px;line-height:1;opacity:0.6">✕</button>
-</div>
+<div id="demo-fab" style="position:fixed;bottom:18px;right:18px;z-index:150">
+  <button onclick="if(confirm('¿Restaurar todos los datos de demo?')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"
+    style="display:flex;align-items:center;gap:6px;background:#0D1B2A;color:#A3E635;border:none;border-radius:24px;padding:9px 14px;font-size:12px;font-weight:600;cursor:pointer;box-shadow:0 2px 10px rgba(13,27,42,.25);font-family:Inter,sans-serif">
+    <i class="ti ti-refresh" style="font-size:14px"></i> Restaurar demo</button></div>
 <div class="layout">
 <div class="sidebar">
   <div class="sb-logo"><div class="sb-logo-text"><div class="sb-logo-icon"><i class="ti ti-ball-tennis"></i></div><div>
-    <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span></div>
+    <div class="sb-brand"><span class="c">Cancha</span><span class="f">Flow</span> <span style="background:#A3E635;color:#0D1B2A;font-size:9px;font-weight:700;padding:2px 6px;border-radius:6px;letter-spacing:.05em;vertical-align:middle">DEMO</span></div>
     <div class="sb-sub">CONTROL TOTAL DE TU CLUB</div></div></div></div>
   <nav class="sb-nav">
     <div class="sb-section">Operación</div>
@@ -307,12 +246,10 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <button class="nb" onclick="S('jugadores')" id="nav-jugadores"><i class="ti ti-users"></i>Jugadores</button>
     <div class="sb-section" style="margin-top:.5rem">Gestión</div>
     <button class="nb" onclick="S('inventario')" id="nav-inventario"><i class="ti ti-package"></i>Inventario</button>
-    <button class="nb" onclick="S('ventas')" id="nav-ventas"><i class="ti ti-shopping-bag"></i>Ventas directas</button>
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb ao" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
-    <button class="nb ao" onclick="S('historial')" id="nav-historial"><i class="ti ti-history"></i>Historial</button>
-      <button class="nb ao" onclick="S('config')" id="nav-config"><i class="ti ti-settings"></i>Configuración</button>
+    <button class="nb ao" onclick="S('config')" id="nav-config"><i class="ti ti-settings"></i>Configuración</button>
   </nav>
   <div class="sb-footer"><div class="sb-user">
     <div class="sb-avatar"><i class="ti ti-user"></i></div>
@@ -321,10 +258,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div></div>
 </div>
 <div class="main">
-  <div class="topbar">
-    <div class="topbar-title" id="topbar-title">Agenda</div>
-    <div class="topbar-right"><span id="rbadge" class="rbadge"></span></div>
-  </div>
+  <div class="topbar"><div class="topbar-title" id="topbar-title">Agenda</div><div class="topbar-right"><span id="rbadge" class="rbadge"></span></div></div>
   <div class="content">
 <!-- AGENDA -->
 <div class="sec active" id="sec-agenda">
@@ -352,18 +286,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
   </div>
   <div id="ag-stats" class="hidden"></div>
-  <div class="ag-mob-nav">
-    <div class="ag-mob-nav-row">
-      <button onclick="mobCanchaNav(-1)" class="ag-mob-arrow"><i class="ti ti-chevron-left"></i></button>
-      <span id="mob-cancha-lbl" class="ag-mob-lbl"></span>
-      <button onclick="mobCanchaNav(1)" class="ag-mob-arrow"><i class="ti ti-chevron-right"></i></button>
-    </div>
-    <div class="ag-mob-modes">
-      <button class="ag-mob-mode-btn" id="agmode-two" onclick="setMobAgendaMode('two')"><i class="ti ti-layout-columns"></i> 2 canchas</button>
-      <button class="ag-mob-mode-btn" id="agmode-one" onclick="setMobAgendaMode('one')"><i class="ti ti-square"></i> 1 cancha</button>
-      <button class="ag-mob-mode-btn" id="agmode-list" onclick="setMobAgendaMode('list')"><i class="ti ti-list"></i> Lista</button>
-    </div>
-  </div>
   <div class="ag-wrap"><div class="ag-cal" id="ag-tbl"></div></div>
 </div>
 <!-- TURNOS -->
@@ -391,19 +313,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="card" style="padding:0;overflow:auto">
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
-</div>
-<!-- VENTAS DIRECTAS -->
-<div class="sec" id="sec-ventas">
-  <div class="rb">
-    <div style="font-size:13px;color:var(--text2)">Ventas sin turno abierto — kiosco, eventos, cumpleaños, etc.</div>
-    <button class="btn p" onclick="openVD()"><i class="ti ti-plus"></i> Nueva venta</button>
-  </div>
-  <div id="vd-stats" class="g4" style="margin-bottom:1.25rem"></div>
-  <div class="card" style="padding:0;overflow:auto">
-    <div style="padding:1rem 1.25rem;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)">Ventas de hoy</div>
-    <table><thead><tr><th>Hora</th><th>Productos</th><th>Cliente</th><th>Total</th><th>Método</th><th>Estado</th><th></th></tr></thead>
-    <tbody id="vd-tbody"></tbody></table>
-  </div>
 </div>
 <!-- CLASES -->
 <div class="sec" id="sec-clases">
@@ -444,7 +353,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="card" id="cblq-card" style="margin-bottom:1.25rem"><div class="card-title">Otros ingresos (clases, eventos, arriendos especiales)</div><div id="cblq"></div></div>
   <div class="card" style="padding:0;overflow:auto">
     <div style="padding:1rem 1.25rem;font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;border-bottom:1px solid var(--border)">Historial de turnos</div>
-    <table><thead><tr><th>Cancha</th><th>Horario</th><th>Fecha</th><th>Jug.</th><th>Cancha $</th><th>Prods $</th><th>Total</th><th>Cobrado</th><th>Pend.</th><th>Método</th><th></th></tr></thead>
+    <table><thead><tr><th>Cancha</th><th>Horario</th><th>Fecha</th><th>Jug.</th><th>Cancha $</th><th>Prods $</th><th>Total</th><th>Cobrado</th><th>Pend.</th><th>Método</th></tr></thead>
     <tbody id="chist"></tbody></table></div>
 </div>
 <!-- DEUDAS -->
@@ -470,29 +379,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
   </div>
 </div>
 <!-- CONFIG -->
-<div class="sec" id="sec-historial">
-  <div style="padding:16px">
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:16px">
-      <h2 style="font-size:18px;font-weight:700;color:var(--navy)">Historial de actividad</h2>
-      <select id="hist-filtro" onchange="rHistorial()" style="padding:6px 10px;border:1px solid var(--border);border-radius:8px;font-size:13px">
-        <option value="7">Últimos 7 días</option>
-        <option value="30">Últimos 30 días</option>
-        <option value="90">Últimos 90 días</option>
-      </select>
-    </div>
-    <div id="hist-tabla" style="overflow-x:auto">
-      <table style="width:100%;border-collapse:collapse;font-size:13px">
-        <thead><tr style="background:var(--bg);border-bottom:2px solid var(--border)">
-          <th style="padding:10px;text-align:left;color:var(--text3)">Fecha/Hora</th>
-          <th style="padding:10px;text-align:left;color:var(--text3)">Usuario</th>
-          <th style="padding:10px;text-align:left;color:var(--text3)">Acción</th>
-          <th style="padding:10px;text-align:left;color:var(--text3)">Detalle</th>
-        </tr></thead>
-        <tbody id="hist-body"><tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Cargando...</td></tr></tbody>
-      </table>
-    </div>
-  </div>
-</div>
 <div class="sec" id="sec-config">
   <div class="g2" style="margin-bottom:1.25rem">
     <div class="card">
@@ -580,42 +466,21 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn p" onclick="addPromo()"><i class="ti ti-plus"></i></button>
     </div>
   </div>
-
+  <div class="card">
+    <div class="card-title">Acceso demo</div>
+    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px 14px;font-size:13px;line-height:2">
+      <div><strong>Administrador:</strong> <code>demo@canchaflow.cl</code> / <code>demo123</code></div>
+      <div><strong>Recepcionista:</strong> <code>recepcion@canchaflow.cl</code> / <code>demo123</code></div>
+    </div>
+    <div style="display:flex;gap:8px;margin-top:12px">
+      <button class="btn secondary sm" onclick="g('m-tour').classList.remove('hidden')"><i class="ti ti-route"></i> Ver tour</button>
+      <button class="btn d sm" onclick="if(confirm('¿Restaurar datos de demo?')){localStorage.removeItem('cf-demo-v1');localStorage.removeItem('cf-tour-seen');location.reload();}"><i class="ti ti-refresh"></i> Restaurar demo</button>
+    </div>
+  </div>
 </div>
   </div>
 </div>
 </div>
-</div>
-<!-- BOTÓN SOPORTE WHATSAPP -->
-<a href="https://wa.me/56987494697" target="_blank" id="btn-soporte" style="position:fixed;bottom:24px;right:24px;width:52px;height:52px;border-radius:50%;background:#25D366;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 16px rgba(37,211,102,.4);z-index:150;transition:transform .2s" onmouseover="this.style.transform='scale(1.1)'" onmouseout="this.style.transform='scale(1)'">
-  <i class="ti ti-brand-whatsapp" style="font-size:28px;color:#fff"></i>
-</a>
-
-<!-- BARRA INFERIOR MÓVIL -->
-<div class="mob-tabbar" id="mob-tabbar">
-  <button class="mob-tab" onclick="S('agenda');setMobTab('agenda')" id="mtab-agenda">
-    <i class="ti ti-calendar-month"></i><span>Agenda</span>
-  </button>
-  <button class="mob-tab" onclick="S('turnos');setMobTab('turnos')" id="mtab-turnos">
-    <i class="ti ti-clock"></i><span>Turnos</span>
-  </button>
-  <button class="mob-tab" onclick="S('jugadores');setMobTab('jugadores')" id="mtab-jugadores">
-    <i class="ti ti-users"></i><span>Jugadores</span>
-  </button>
-  <button class="mob-tab" onclick="toggleMobMas()" id="mtab-mas">
-    <i class="ti ti-dots"></i><span>Más</span>
-  </button>
-</div>
-<!-- PANEL MÁS (móvil) -->
-<div class="mob-mas-panel hidden" id="mob-mas-panel">
-  <div style="padding:16px 12px 8px;font-size:11px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em">Gestión</div>
-  <button class="mob-mas-item" onclick="S('inventario');closeMobMas()"><i class="ti ti-box"></i> Inventario</button>
-  <button class="mob-mas-item" onclick="S('ventas');closeMobMas()"><i class="ti ti-shopping-bag"></i> Ventas directas</button>
-  <button class="mob-mas-item ao" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
-  <button class="mob-mas-item ao" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
-  <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
-  <button class="mob-mas-item ao" onclick="S('historial');closeMobMas()"><i class="ti ti-history"></i> Historial</button>
-      <button class="mob-mas-item ao" onclick="S('config');closeMobMas()"><i class="ti ti-settings"></i> Configuración</button>
 </div>
 <!-- MODALES -->
 <div class="mbg hidden" id="m-pin">
@@ -690,11 +555,11 @@ tr:hover td{background:rgba(242,244,247,.7)}
         <button class="btn icon-only" onclick="cM('m-com')"><i class="ti ti-x"></i></button>
       </div>
     </div>
+    <div id="com-jugs" style="margin-bottom:8px"></div>
     <div id="com-cortesias" style="margin-bottom:10px"></div>
     <div style="margin-bottom:10px">
       <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Asignando a</div>
-      <select id="com-ptags-sel" onchange="sSJ(this.value||null)" style="width:100%;height:38px;font-size:13px;border:1.5px solid var(--border);border-radius:var(--r);padding:0 12px;background:var(--card);color:var(--text)"></select>
-      <div id="com-ptags" style="display:none"></div>
+      <div id="com-ptags" style="display:flex;gap:6px;flex-wrap:wrap"></div>
     </div>
     <div style="position:relative;margin-bottom:8px"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
       <input id="com-search" placeholder="Buscar producto o código de barras..." style="padding-left:36px" oninput="rCP()"></div>
@@ -823,7 +688,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div class="fr">
         <lbl>Alumno(s)</lbl>
         <div id="bl-alumnos-list" style="display:flex;flex-direction:column;gap:6px;margin-bottom:6px"></div>
-        <div style="position:relative"><div style="display:flex;gap:6px"><input id="bl-alumno-input" placeholder="Buscar jugador o escribir nombre libre" oninput="sugBlAlumno()" onkeydown="if(event.key==='Enter'){event.preventDefault();addBlAlumno();}" autocomplete="off"><button class="btn sm" onclick="addBlAlumno()" type="button"><i class="ti ti-plus"></i></button></div><div id="bl-alumno-drop" class="jdrop hidden"></div></div>
+        <div style="display:flex;gap:6px"><input id="bl-alumno-input" placeholder="Nombre del alumno (clic + para agregar)" onkeydown="if(event.key==='Enter'){event.preventDefault();addBlAlumno();}"><button class="btn sm" onclick="addBlAlumno()" type="button"><i class="ti ti-plus"></i></button></div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Agrega uno o varios alumnos — útil para clases grupales.</div>
       </div>
     </div>
@@ -856,7 +721,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:1rem">
       <div style="width:40px;height:40px;border-radius:50%;background:rgba(163,230,53,.2);display:flex;align-items:center;justify-content:center;flex-shrink:0">
         <i class="ti ti-ball-tennis" style="font-size:20px;color:#3d6b0a"></i></div>
-      <div><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:16px">Bienvenido a CanchaFlow</div><div style="font-size:12px;color:var(--text3)">Sistema de gestión</div></div>
+      <div><div style="font-family:Poppins,sans-serif;font-weight:700;font-size:16px">Bienvenido a CanchaFlow</div><div style="font-size:12px;color:var(--text3)">Demo interactiva</div></div>
     </div>
     <p style="font-size:14px;line-height:1.6;margin:0 0 1.25rem">Sistema de gestión para clubes de pádel. 3 pasos para ver el flujo principal:</p>
     <div style="display:flex;flex-direction:column;gap:8px;margin-bottom:1.25rem">
@@ -869,93 +734,9 @@ tr:hover td{background:rgba(242,244,247,.7)}
     </div>
   </div>
 </div>
-<!-- MODAL VENTA DIRECTA -->
-<div class="mbg hidden" id="m-venta">
-  <div class="modal wide">
-    <div class="modal-header">
-      <div class="modal-title"><i class="ti ti-shopping-bag" style="margin-right:8px;color:var(--cyan-dark)"></i>Nueva venta directa</div>
-      <button class="btn icon-only sm" onclick="cM('m-venta')"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="fr">
-      <lbl>Cliente (opcional)</lbl>
-      <div style="position:relative">
-        <i class="ti ti-user" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
-        <input id="vd-cliente" placeholder="Nombre o jugador (opcional)" style="padding-left:32px" oninput="sugVDCliente()" autocomplete="off">
-        <div id="vd-cliente-drop" class="jdrop hidden"></div>
-      </div>
-    </div>
-    <div class="fr">
-      <lbl>Buscar producto o código de barras</lbl>
-      <div style="position:relative">
-        <i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
-        <input id="vd-search" placeholder="Buscar producto o código de barras..." style="padding-left:32px" oninput="rVDProds()">
-      </div>
-    </div>
-    <div style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:10px" id="vd-cats"></div>
-    <div id="vd-prods" style="max-height:260px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);margin-bottom:12px"></div>
-    <!-- Resumen -->
-    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:12px">
-      <div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:8px">Productos seleccionados</div>
-      <div id="vd-added" style="font-size:13px;color:var(--text3)">Ninguno aún.</div>
-      <div class="sl tot" style="margin-top:8px"><span>Total</span><span id="vd-total" style="font-family:Poppins,sans-serif">$0</span></div>
-    </div>
-    <!-- Pago -->
-    <div class="fr c3" style="margin-bottom:8px">
-      <div><lbl>Monto</lbl><input type="number" id="vd-monto" placeholder="0"></div>
-      <div><lbl>Método</lbl><select id="vd-metodo"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></div>
-      <div><lbl>Estado</lbl><select id="vd-estado-pago"><option value="cobrado">Cobrado</option><option value="pendiente">Pendiente (deuda)</option></select></div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
-      <button class="btn" onclick="cM('m-venta')">Cancelar</button>
-      <button class="btn p" onclick="saveVD()"><i class="ti ti-check"></i> Registrar venta</button>
-    </div>
-  </div>
-</div>
-
-<!-- MODAL EDITAR COMANDA CERRADA (admin) -->
-<div class="mbg hidden" id="m-edit-cerrada">
-  <div class="modal wide">
-    <div class="modal-header">
-      <div class="modal-title" id="edit-cerrada-title"><i class="ti ti-edit" style="margin-right:8px;color:var(--amber)"></i>Editar comanda cerrada</div>
-      <button class="btn icon-only sm" onclick="cM('m-edit-cerrada')"><i class="ti ti-x"></i></button>
-    </div>
-    <div class="alert warning" style="margin-bottom:1rem"><i class="ti ti-alert-triangle"></i><div>Solo administradores pueden editar comandas cerradas. Los cambios quedan registrados en el historial.</div></div>
-    <!-- Productos -->
-    <div style="font-family:Poppins,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px">Productos</div>
-    <div class="fr">
-      <div style="position:relative">
-        <i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
-        <input id="ec-search" placeholder="Buscar y agregar producto..." style="padding-left:32px" oninput="rECProds()">
-      </div>
-    </div>
-    <div id="ec-prods-add" style="max-height:180px;overflow-y:auto;border:1px solid var(--border);border-radius:var(--r);margin-bottom:10px"></div>
-    <div id="ec-prods-cur" style="margin-bottom:14px"></div>
-    <!-- Pagos -->
-    <div style="font-family:Poppins,sans-serif;font-size:13px;font-weight:700;margin-bottom:8px">Pagos</div>
-    <div id="ec-pagos-list" style="margin-bottom:10px"></div>
-    <div class="fr c3" style="margin-bottom:10px">
-      <div><lbl>Monto</lbl><input type="number" id="ec-pago-m" placeholder="0"></div>
-      <div><lbl>Método</lbl><select id="ec-pago-met"><option>Efectivo</option><option>Tarjeta</option><option>Transferencia</option></select></div>
-      <div><lbl>Quién paga</lbl><select id="ec-pago-q"></select></div>
-    </div>
-    <button class="btn sm p" onclick="addECPago()" style="margin-bottom:14px"><i class="ti ti-plus"></i> Agregar pago</button>
-    <!-- Totales -->
-    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:14px">
-      <div class="sl"><span style="color:var(--text2)">Total cancha</span><span id="ec-tot-c" style="font-weight:700"></span></div>
-      <div class="sl"><span style="color:var(--text2)">Total productos</span><span id="ec-tot-p" style="font-weight:700"></span></div>
-      <div class="sl tot"><span>Total</span><span id="ec-tot-t" style="font-family:Poppins,sans-serif"></span></div>
-      <div class="sl"><span style="color:#3d6b0a">Cobrado</span><span id="ec-tot-cob" style="color:#3d6b0a;font-weight:700"></span></div>
-      <div class="sl"><span style="color:#92400E">Pendiente</span><span id="ec-tot-pend" style="color:#92400E;font-weight:700"></span></div>
-    </div>
-    <div style="display:flex;gap:8px;justify-content:flex-end">
-      <button class="btn" onclick="cM('m-edit-cerrada')">Cancelar</button>
-      <button class="btn p" onclick="saveEditCerrada()"><i class="ti ti-device-floppy"></i> Guardar cambios</button>
-    </div>
-  </div>
-</div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',clases:'Clases',caja:'Caja',deudas:'Deudas',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -975,11 +756,6 @@ const FERIADOS_CHILE_2026=[
   {fecha:'2026-12-08',nombre:'Inmaculada Concepción'},
   {fecha:'2026-12-25',nombre:'Navidad'}
 ];
-// ── CONEXIÓN SUPABASE ──────────────────────────────────────
-const SUPABASE_URL='https://mfufcecghjwellqolpsg.supabase.co';
-const SUPABASE_KEY='sb_publishable_-Vyn5Qasp-OOo2ozA024wA_XD-o1o3v';
-const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
-
 let D={canchas:[],productos:[],reservas:[],jugadores:[],deudas:[],promos:[],bloqueos:[],feriadosPropios:[],feriadosOficialesEliminados:[],cfg:{ini:'07:00',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel Las Torres',precioFeriado:24000,precioFinSemana:24000}};
 let cRid=null,cQty={},cAsig={},cSJ=null,cSC=null,agOff=0,cajaT='hoy',sRid=null,eRid=null,agCtx='',role=null,dSel=null;
 let cierreEstados={};
@@ -1046,196 +822,24 @@ function calcPrecioJugador(precioBase,jugador){
 }
 
 function ld(){
-  // Versión mínima: solo prepara D con estructura vacía antes del login.
-  // La carga real de datos ahora ocurre en cargarDatosDesdeSupabase(), después de autenticarse,
-  // porque las políticas RLS requieren una sesión activa (auth.uid()) para devolver filas.
-  if(!D.canchas)D.canchas=[];if(!D.productos)D.productos=[];
+  try{const r=localStorage.getItem('cf-demo-v1');if(r){const x=JSON.parse(r);D={...D,...x};}}catch(e){}
+  if(!D.canchas||!D.canchas.length)D.canchas=[{id:1,nombre:'Cancha 1',pN:20000,pA:24000},{id:2,nombre:'Cancha 2',pN:20000,pA:24000}];
+  D.canchas=D.canchas.map(c=>{if(!c.pA)c.pA=c.pN*2||24000;return c;});
+  if(!D.productos||!D.productos.length)D.productos=[{id:1,nombre:'Agua mineral',cat:'Bebidas',cod:'7801001',precio:1500,costo:700,stock:30,smin:8,und:'unidad'},{id:5,nombre:'Pelotas pádel x3',cat:'Pelotas',cod:'7802001',precio:8500,costo:5000,stock:12,smin:3,und:'pack'}];
   if(!D.jugadores)D.jugadores=[];if(!D.reservas)D.reservas=[];if(!D.deudas)D.deudas=[];if(!D.promos)D.promos=[];if(!D.bloqueos)D.bloqueos=[];if(!D.feriadosPropios)D.feriadosPropios=[];if(!D.feriadosOficialesEliminados)D.feriadosOficialesEliminados=[];
-  if(!D.cfg)D.cfg={ini:'07:00',fin:'23:30',dur:90,tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel',precioFeriado:24000,precioFinSemana:24000};
-}
-
-async function cargarDatosDesdeSupabase(){
-  // Canchas: mapeo precio_normal->pN, precio_alto->pA (nombres cortos que ya usa el resto del código)
-  const{data:canchas,error:errCanchas}=await sb.from('canchas').select('*').order('orden');
-  if(errCanchas){console.error('Error cargando canchas:',errCanchas);D.canchas=[];}
-  else D.canchas=(canchas||[]).map(c=>({id:c.id,nombre:c.nombre,pN:c.precio_normal,pA:c.precio_alto}));
-
-  // Productos: mapeo categoria->cat, codigo->cod, stock_minimo->smin, unidad->und
-  const{data:productos,error:errProductos}=await sb.from('productos').select('*');
-  if(errProductos){console.error('Error cargando productos:',errProductos);D.productos=[];}
-  else D.productos=(productos||[]).map(p=>({id:p.id,nombre:p.nombre,cat:p.categoria,cod:p.codigo,precio:p.precio,costo:p.costo,stock:p.stock,smin:p.stock_minimo,und:p.unidad}));
-
-  // Membresías -> D.cfg.membs
-  const{data:membs,error:errMembs}=await sb.from('membresias').select('*');
-  if(errMembs){console.error('Error cargando membresías:',errMembs);}
-
-  // Tramos de precio -> D.cfg.tramos
-  const{data:tramos,error:errTramos}=await sb.from('tramos_precio').select('*');
-  if(errTramos)console.error('Error cargando tramos:',errTramos);
-
-  // Feriados propios y oficiales eliminados
-  const{data:feriadosPropios,error:errFP}=await sb.from('feriados_propios').select('*');
-  if(errFP)console.error('Error cargando feriados propios:',errFP);
-  const{data:feriadosElim,error:errFE}=await sb.from('feriados_oficiales_eliminados').select('*');
-  if(errFE)console.error('Error cargando feriados eliminados:',errFE);
-
-  // Configuración (fila única id=1)
-  const{data:cfgRow,error:errCfg}=await sb.from('configuracion').select('*').eq('id',1).single();
-  if(errCfg)console.error('Error cargando configuración:',errCfg);
-
-  D.cfg={
-    ini:cfgRow?.hora_inicio?.slice(0,5)||'07:00',
-    fin:cfgRow?.hora_fin?.slice(0,5)||'23:30',
-    dur:cfgRow?.duracion_default||90,
-    clubNombre:cfgRow?.club_nombre||'Club Pádel',
-    precioFeriado:cfgRow?.precio_feriado||24000,
-    precioFinSemana:cfgRow?.precio_fin_semana||24000,
-    tramos:(tramos||[]).map(t=>({id:t.id,nombre:t.nombre,ini:t.hora_inicio?.slice(0,5),fin:t.hora_fin?.slice(0,5),precio:t.precio})),
-    membs:(membs||[]).map(m=>({id:m.id,nombre:m.nombre,tipo:m.tipo==='porcentaje'?'pct':m.tipo==='preciofijo'?'precio':m.tipo,valor:m.valor})),
-    niveles:[]
-  };
-  D.feriadosPropios=(feriadosPropios||[]).map(f=>({fecha:f.fecha,nombre:f.nombre}));
-  D.feriadosOficialesEliminados=(feriadosElim||[]).map(f=>f.fecha);
-
-  // Ventas directas (hoy y últimos 30 días para Caja)
-  await cargarVentasDirectas();
-
-  // Estos módulos todavía no están migrados (próximos pasos) — quedan vacíos por ahora
-  // Jugadores: mapeo membresia_id->memb, precio_override->precioOv
-  const{data:jugadores,error:errJugadores}=await sb.from('jugadores').select('*');
-  if(errJugadores){console.error('Error cargando jugadores:',errJugadores);D.jugadores=[];}
-  else D.jugadores=(jugadores||[]).map(j=>({id:j.id,nombre:j.nombre,telefono:j.telefono,nivel:j.nivel,disponibilidad:j.disponibilidad,lado:j.lado,memb:j.membresia_id,precioOv:j.precio_override!==null?j.precio_override:undefined,notas:j.notas}));
-
-  // Reservas + tablas relacionadas (jugadores, productos, pagos, cortesías)
-  const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
-  if(errRes){console.error('Error cargando reservas:',errRes);D.reservas=[];}
-  else{
-    const resIds=(reservasRaw||[]).map(r=>r.id);
-    let rJugRows=[],rProdRows=[],rPagoRows=[],rCortRows=[];
-    if(resIds.length){
-      const[rj,rp,rpg,rc]=await Promise.all([
-        sb.from('reserva_jugadores').select('*').in('reserva_id',resIds),
-        sb.from('reserva_productos').select('*').in('reserva_id',resIds),
-        sb.from('reserva_pagos').select('*').in('reserva_id',resIds),
-        sb.from('reserva_cortesias').select('*').in('reserva_id',resIds)
-      ]);
-      rJugRows=rj.data||[];rProdRows=rp.data||[];rPagoRows=rpg.data||[];rCortRows=rc.data||[];
-    }
-    D.reservas=(reservasRaw||[]).map(r=>{
-      const jugRows=rJugRows.filter(x=>x.reserva_id===r.id).sort((a,b)=>a.posicion-b.posicion);
-      const jugadores=[0,1,2,3].map(pos=>{const jr=jugRows.find(x=>x.posicion===pos);if(!jr)return'';const j=jr.jugador_id?D.jugadores.find(jj=>jj.id===jr.jugador_id):null;return j?j.nombre:(jr.nombre_libre||'');});
-      const productos=rProdRows.filter(x=>x.reserva_id===r.id).map(rp=>{const p=D.productos.find(pp=>pp.id===rp.producto_id)||{};return{id:rp.producto_id,nombre:p.nombre||'?',precio:rp.precio_unitario,qty:rp.cantidad,cat:p.cat||'',asignados:rp.asignados||[],jugador:null,_rpId:rp.id};});
-      const pagos=rPagoRows.filter(x=>x.reserva_id===r.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien,fecha:p.fecha,_id:p.id}));
-      const cortesias=rCortRows.filter(x=>x.reserva_id===r.id).map(c=>({jugador:c.jugador,tipo:c.motivo?JSON.parse(c.motivo).tipo:'pct',valor:c.motivo?JSON.parse(c.motivo).valor:0,promoId:c.motivo?JSON.parse(c.motivo).promoId:undefined,_id:c.id}));
-      return{id:r.id,canchaId:r.cancha_id,horario:r.horario?.slice(0,5),fecha:r.fecha,contacto:r.contacto,jugadores,notas:r.notas,pOv:r.precio_override!==null?r.precio_override:undefined,productos,pagos,cortesias,estado:r.estado,creadoAt:r.creado_at,aperturaAt:r.apertura_at,cierreAt:r.cierre_at};
-    });
-  }
-
-  // Deudas
-  const{data:deudas,error:errDeudas}=await sb.from('deudas').select('*');
-  if(errDeudas){console.error('Error cargando deudas:',errDeudas);D.deudas=[];}
-  else D.deudas=(deudas||[]).map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado}));
-
-  D.promos=[];
-
-  // Bloqueos (clase/mantenimiento/evento/cumpleaños) + alumnos de clase
-  const{data:bloqueosRaw,error:errBloq}=await sb.from('bloqueos').select('*');
-  if(errBloq){console.error('Error cargando bloqueos:',errBloq);D.bloqueos=[];}
-  else{
-    const bloqIds=(bloqueosRaw||[]).map(b=>b.id);
-    let alumnoRows=[];
-    if(bloqIds.length){const{data}=await sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds);alumnoRows=data||[];}
-    D.bloqueos=(bloqueosRaw||[]).map(b=>{
-      const alumnos=alumnoRows.filter(a=>a.bloqueo_id===b.id).map(a=>{const j=a.jugador_id?D.jugadores.find(jj=>jj.id===a.jugador_id):null;return j?j.nombre:(a.nombre_libre||'');}).filter(Boolean);
-      return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined};
-    });
-  }
+  if(!D.cfg)D.cfg={ini:'07:00',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel Las Torres',precioFeriado:24000,precioFinSemana:24000};
+  if(!D.cfg.ini||D.cfg.ini==='08:30')D.cfg.ini='07:00';
+  D.cfg.dur=90;
+  if(!D.cfg.tramos)D.cfg.tramos=[];if(!D.cfg.membs)D.cfg.membs=[];if(!D.cfg.niveles)D.cfg.niveles=[];
+  if(!D.cfg.pAdmin)D.cfg.pAdmin='1234';if(!D.cfg.pRecep)D.cfg.pRecep='5678';
+  if(!D.cfg.clubNombre)D.cfg.clubNombre='Club Pádel Las Torres';
+  if(!D.cfg.precioFeriado)D.cfg.precioFeriado=24000;
+  if(!D.cfg.precioFinSemana)D.cfg.precioFinSemana=24000;
+  const needsDemo=!D.jugadores.length||!D._demoLoaded;
+  if(needsDemo){loadDemoData();D._demoLoaded=true;}
   updSelNiveles();
 }
 
-// ── SINCRONIZACIÓN DE RESERVAS CON SUPABASE ──────────────
-// Estrategia: D.reservas vive en memoria para que la comanda sea instantánea.
-// syncReservaCompleta() persiste el estado completo de UNA reserva a las 4 tablas
-// relacionadas. Se llama: al crear/editar la reserva, al iniciar turno, en el
-// autosave periódico mientras la comanda está abierta, y siempre al cerrar el turno.
-let autosaveTimer=null;
-function scheduleAutosave(rid){
-  if(autosaveTimer)clearTimeout(autosaveTimer);
-  autosaveTimer=setTimeout(()=>{syncReservaCompleta(rid).catch(e=>console.error('Autosave falló:',e));},2500);
-}
-async function syncReservaCompleta(rid){
-  const r=D.reservas.find(x=>x.id===rid);if(!r)return;
-  const payload={cancha_id:r.canchaId,fecha:r.fecha,horario:r.horario,contacto:r.contacto||null,estado:r.estado,precio_override:r.pOv!==undefined?r.pOv:null,notas:r.notas||null,apertura_at:r.aperturaAt||null,cierre_at:r.cierreAt||null};
-  const{error:errUpd}=await sb.from('reservas').update(payload).eq('id',rid);
-  if(errUpd){console.error('Error sincronizando reserva:',errUpd);return false;}
-
-  // Jugadores: borrar y reinsertar (simple y seguro para un array chico de máx 4)
-  await sb.from('reserva_jugadores').delete().eq('reserva_id',rid);
-  const jugRows=(r.jugadores||[]).map((nombre,pos)=>{if(!nombre)return null;const j=D.jugadores.find(jj=>jj.nombre===nombre);return{reserva_id:rid,jugador_id:j?j.id:null,nombre_libre:j?null:nombre,posicion:pos};}).filter(Boolean);
-  if(jugRows.length)await sb.from('reserva_jugadores').insert(jugRows);
-
-  // Productos: borrar y reinsertar
-  await sb.from('reserva_productos').delete().eq('reserva_id',rid);
-  const prodRows=(r.productos||[]).map(p=>({reserva_id:rid,producto_id:p.id,cantidad:p.qty,precio_unitario:p.precio,asignados:p.asignados||[]}));
-  if(prodRows.length)await sb.from('reserva_productos').insert(prodRows);
-
-  // Pagos: borrar y reinsertar
-  await sb.from('reserva_pagos').delete().eq('reserva_id',rid);
-  const pagoRows=(r.pagos||[]).map(p=>({reserva_id:rid,monto:p.monto,metodo:p.metodo,quien:p.quien||null,fecha:p.fecha}));
-  if(pagoRows.length)await sb.from('reserva_pagos').insert(pagoRows);
-
-  // Cortesías: borrar y reinsertar (tipo/valor/promoId se serializan en motivo como JSON)
-  await sb.from('reserva_cortesias').delete().eq('reserva_id',rid);
-  const cortRows=(r.cortesias||[]).map(c=>({reserva_id:rid,jugador:c.jugador,motivo:JSON.stringify({tipo:c.tipo,valor:c.valor,promoId:c.promoId})}));
-  if(cortRows.length)await sb.from('reserva_cortesias').insert(cortRows);
-
-  return true;
-}
-
-function openSidebar(){document.querySelector('.sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
-function closeSidebar(){document.querySelector('.sidebar').classList.remove('open');document.getElementById('sb-overlay').classList.remove('open');}
-function setMobTab(s){document.querySelectorAll('.mob-tab').forEach(t=>t.classList.remove('active'));const el=document.getElementById('mtab-'+s);if(el)el.classList.add('active');closeMobMas();}
-function toggleMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.toggle('visible');const t=document.getElementById('mtab-mas');t.classList.toggle('active');}
-function closeMobMas(){const p=document.getElementById('mob-mas-panel');p.classList.remove('visible');document.getElementById('mtab-mas').classList.remove('active');}
-// Navegación de canchas en móvil: grupo visible (2 canchas / 1 cancha / lista)
-let mobCanchaIdx=0;
-let mobAgendaMode='two'; // 'two' | 'one' | 'list'
-function groupSize(){return mobAgendaMode==='one'?1:2;} // 'list' usa tamaño 1 por ahora (placeholder)
-function getMobileVisibleCanchas(){
-  const n=groupSize();
-  if(!D.canchas.length)return[];
-  return D.canchas.slice(mobCanchaIdx,mobCanchaIdx+n);
-}
-function mobCanchaNav(dir){
-  if(!D.canchas.length)return;
-  const n=groupSize();
-  const maxStart=Math.max(0,D.canchas.length-n);
-  mobCanchaIdx=Math.max(0,Math.min(maxStart,mobCanchaIdx+dir*n));
-  rAg();
-}
-function setMobAgendaMode(mode){
-  mobAgendaMode=mode;
-  // Reencuadrar el índice actual al nuevo tamaño de grupo para no dejarlo "a medias"
-  const n=groupSize();
-  const maxStart=Math.max(0,D.canchas.length-n);
-  mobCanchaIdx=Math.max(0,Math.min(maxStart,Math.floor(mobCanchaIdx/n)*n));
-  document.querySelectorAll('.ag-mob-mode-btn').forEach(b=>b.classList.remove('active'));
-  const btn=document.getElementById('agmode-'+mode);if(btn)btn.classList.add('active');
-  rAg();
-}
-function updateMobAgendaLabel(){
-  const lbl=document.getElementById('mob-cancha-lbl');if(!lbl)return;
-  const vis=getMobileVisibleCanchas();
-  lbl.textContent=vis.map(c=>c.nombre).join(' – ')||'';
-}
-function initMobCancha(){
-  if(window.innerWidth<=768){
-    const btn=document.getElementById('agmode-'+mobAgendaMode);
-    document.querySelectorAll('.ag-mob-mode-btn').forEach(b=>b.classList.remove('active'));
-    if(btn)btn.classList.add('active');
-    updateMobAgendaLabel();
-  }
-}
 function updSelNiveles(){
   const nivs=getNiveles();
   ['j-nivel','jfnivel'].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=(id==='jfnivel'?'<option value="">Todos los niveles</option>':'')+nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});
@@ -1243,62 +847,27 @@ function updSelNiveles(){
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
 
-async function doLogin(){
+function doLogin(){
   ld();
   const email=(g('login-email').value||'').trim().toLowerCase();const pass=(g('login-pass').value||'').trim();
-  g('lerr').classList.add('hidden');
-  const{data,error}=await sb.auth.signInWithPassword({email,password:pass});
-  if(error||!data.user){g('lerr').textContent='Email o contraseña incorrectos.';g('lerr').classList.remove('hidden');g('login-pass').value='';g('login-pass').focus();return;}
-  const{data:perfil,error:errPerfil}=await sb.from('perfiles').select('rol,nombre').eq('id',data.user.id).single();
-  if(errPerfil||!perfil){g('lerr').textContent='Tu cuenta no tiene un perfil asignado. Contacta al administrador.';g('lerr').classList.remove('hidden');await sb.auth.signOut();return;}
-  const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
-  const u=rolMap[perfil.rol]||rolMap.recepcion;
+  const dU={'demo@canchaflow.cl':{pass:'demo123',rol:'admin',nombre:'Demo Administrador',roleName:'Administrador',desc:'Acceso completo'},'recepcion@canchaflow.cl':{pass:'demo123',rol:'recep',nombre:'Recepcionista Demo',roleName:'Recepcionista',desc:'Acceso operacional'}};
+  const u=dU[email];if(!u||u.pass!==pass){g('lerr').classList.remove('hidden');g('login-pass').value='';g('login-pass').focus();return;}
   role=u.rol;g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
   g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
-  _auditEmail=data.user.email;_auditNombre=perfil.nombre||email;if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
+  if(g('sb-uname'))g('sb-uname').textContent=u.nombre;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
   document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
-  await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
-  rAll();
+  rAll();if(!localStorage.getItem('cf-tour-seen')){g('m-tour').classList.remove('hidden');localStorage.setItem('cf-tour-seen','1');}
 }
-async function rHistorial(){
-  const dias=parseInt(g('hist-filtro')?.value||'7');
-  const desde=new Date();desde.setDate(desde.getDate()-dias);
-  const{data,error}=await sb.from('audit_log').select('*').gte('created_at',desde.toISOString()).order('created_at',{ascending:false}).limit(200);
-  const body=g('hist-body');
-  if(error||!data?.length){body.innerHTML='<tr><td colspan="4" style="padding:20px;text-align:center;color:var(--text3)">Sin actividad en este período</td></tr>';return;}
-  body.innerHTML=data.map(r=>{
-    const f=new Date(r.created_at);
-    const fecha=f.toLocaleDateString('es-CL',{day:'2-digit',month:'2-digit'})+' '+f.toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'});
-    return `<tr style="border-bottom:1px solid var(--border)">
-      <td style="padding:10px;color:var(--text3);white-space:nowrap">${fecha}</td>
-      <td style="padding:10px;font-weight:500">${r.usuario_nombre||r.usuario_email||'-'}</td>
-      <td style="padding:10px">${r.accion||'-'}</td>
-      <td style="padding:10px;color:var(--text3)">${r.detalle||'-'}</td>
-    </tr>`;
-  }).join('');
-}
-let _auditEmail='';let _auditNombre='';
-async function audit(accion, entidad, detalle){
-  try{
-    await sb.from('audit_log').insert({
-      usuario_email: _auditEmail||D.perfil?.email||'',
-      usuario_nombre: _auditNombre||D.perfil?.nombre||'',
-      accion, entidad, detalle
-    });
-  }catch(e){}
-}
-async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+function doLogout(){role=null;g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
-  if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
-  if(s==='ventas'){setTimeout(rVD,50);}
+  if(s==='clases')setTimeout(rClases,50);
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
-  if(window.innerWidth<=768){const tabs=['agenda','turnos','jugadores'];if(tabs.includes(s))setMobTab(s);}
 }
 function cM(id){g(id).classList.add('hidden');}
-function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();rVD();}
+function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();}
 
 // ── AGENDA ──────────────────────────────────────────────
 function genSlots(){
@@ -1379,55 +948,46 @@ function describeConflict(conflict){
 function rAg(){
   const f=getAF();const dstr=ds(f);const fer=isFeriado(dstr);const finde=!fer&&isFinde(dstr);
   g('ag-lbl').innerHTML=fmtD(f)+(agOff===0?' · hoy':'')+(fer?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> ${fer.nombre}</span>`:'')+(finde?` <span class="badge" style="background:#FCE4EC;color:#D6336C;margin-left:4px"><i class="ti ti-flag-3" style="font-size:11px"></i> Fin de semana</span>`:'');
-  const isMobile=window.innerWidth<=768;
-  const mobVis=isMobile?getMobileVisibleCanchas():[];
-  const canchas=isMobile?(mobVis.length?mobVis:[...D.canchas]):[...D.canchas];
+  const canchas=[...D.canchas].sort((a,b)=>a.id-b.id);
   const tramos=D.cfg.tramos||[];
   const slotDur=D.cfg.dur||90;
   const startDay=timeToMin(D.cfg.ini||'07:00'),endDay=timeToMin(D.cfg.fin||'23:30'),pxPerMin=.8,topPad=12,bodyH=Math.max(620,(endDay-startDay)*pxPerMin+topPad+12);
-  const mobTimeCol=mobAgendaMode==='two'?'64px':'70px';
-  const mobCourtCol=mobAgendaMode==='two'?'minmax(0,1fr)':'1fr';
-  let h=`<div class="ag-head" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'})"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
+  let h=`<div class="ag-head" style="grid-template-columns:110px repeat(${canchas.length},minmax(190px,1fr))"><div class="ag-head-time">Horario</div>${canchas.map(c=>{
     let pInfo;
     if(fer){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Feriado: ${fmt(D.cfg.precioFeriado||24000)} todo el día</span>`;}
     else if(finde){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Fin de semana: ${fmt(D.cfg.precioFinSemana||24000)} todo el día</span>`;}
     else pInfo=tramos.length?tramos.map(t=>`<span class="pm" style="font-size:11px">${t.nombre}: ${fmt(t.precio)}</span>`).join(' '):`<span class="pn">${fmt(c.pN||0)}</span> <span style="color:rgba(255,255,255,.4);font-size:11px">·</span> <span class="pa">${fmt(c.pA||0)} >${D.cfg.alto||'17:30'}</span>`;
     return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
   }).join('')}</div>`;
-  h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
+  h+=`<div class="ag-body" style="grid-template-columns:110px repeat(${canchas.length},minmax(190px,1fr));height:${bodyH}px"><div class="ag-timecol">`;
   for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}–${minToTime(Math.min(m+slotDur,endDay))}</span></div>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
     h+=`<div class="ag-daycol">`;
     for(let m=startDay;m<=endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-gridline" style="top:${top}px"></div>`;}
-    for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad,freeH=Math.max(58,slotDur*pxPerMin-5);h+=`<div class="ag-free" title="Crear reserva ${minToTime(m)}" style="top:${top}px;height:${freeH}px" onclick="clkLibre('${dstr}','${minToTime(m)}','${c.id}')" ondblclick="event.stopPropagation();openBloqueo(null,'${dstr}','${minToTime(m)}','${c.id}')"></div>`;}
+    for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad,freeH=Math.max(58,slotDur*pxPerMin-5);h+=`<div class="ag-free" title="Crear reserva ${minToTime(m)}" style="top:${top}px;height:${freeH}px" onclick="clkLibre('${dstr}','${minToTime(m)}',${c.id})" ondblclick="event.stopPropagation();openBloqueo(null,'${dstr}','${minToTime(m)}',${c.id})"></div>`;}
     const evs=[];
     D.reservas.filter(r=>r.fecha===dstr&&r.canchaId===c.id).forEach(r=>{
-      const jugsArr=r.jugadores||[];const jugs=jugsArr.filter(j=>j),fa=4-jugs.length;
+      const jugs=(r.jugadores||[]).filter(j=>j),fa=4-jugs.length;
       let cls='reservada';if(r.estado==='abierto')cls='abierto';else if(r.estado==='cerrado')cls='cerrado';else if(fa>0)cls='incompleta';
-      const p1=[jugsArr[0],jugsArr[1]].filter(Boolean).join(' / ');const p2=[jugsArr[2],jugsArr[3]].filter(Boolean).join(' / ');
-      const metaTxt=p1&&p2?`${p1} vs ${p2}`:(p1||p2||'Sin jugadores');
-      evs.push({kind:'reserva',id:r.id,start:timeToMin(r.horario),end:getReservaEnd(r),cls,title:r.estado==='abierto'?'En juego':r.estado==='cerrado'?'Cerrada':fa>0?`Faltan ${fa}`:'Reservada',meta:metaTxt});
+      evs.push({kind:'reserva',id:r.id,start:timeToMin(r.horario),end:getReservaEnd(r),cls,title:r.estado==='abierto'?'En juego':r.estado==='cerrado'?'Cerrada':fa>0?`Faltan ${fa}`:'Reservada',meta:jugs.length?jugs[0]+(jugs.length>1?` +${jugs.length-1}`:''):'Sin jugadores'});
     });
     (D.bloqueos||[]).filter(b=>b.fecha===dstr&&(b.canchaId==='todas'||b.canchaId===c.id)).forEach(b=>{
       const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;
-      let metaTxt,meta2Txt='';
-      if(b.tipo==='clase'){metaTxt=b.profesor?('Prof. '+b.profesor.replace(/^Prof\.\s*/i,'')):'Sin profesor';const als=(b.alumnos||[]).filter(Boolean);meta2Txt=als.length?als.join(', '):'';}
-      else metaTxt=b.titulo||'';
-      evs.push({kind:'bloqueo',id:b.id,start:timeToMin(b.horaInicio),end:timeToMin(b.horaFin),cls:b.tipo||'evento',icon:bt.icon,title:bt.label,meta:metaTxt,meta2:meta2Txt});
+      const metaTxt=b.tipo==='clase'?[b.profesor,b.titulo].filter(Boolean).join(' · ')||'Sin profesor':(b.titulo||'');
+      evs.push({kind:'bloqueo',id:b.id,start:timeToMin(b.horaInicio),end:timeToMin(b.horaFin),cls:b.tipo||'evento',icon:bt.icon,title:bt.label,meta:metaTxt});
     });
     layoutAgendaEvents(evs).forEach(ev=>{
       const dur=Math.max(0,ev.end-ev.start),isShort=ev.kind==='bloqueo'&&dur<(slotDur-5);
       const vGap=isShort?7:5,hInset=isShort?18:7;
       const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+(vGap/2));
-      const minH=(isShort?38:56)+(ev.meta2?14:0);
-      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
+      const height=Math.max(isShort?38:56,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
       const width=(100/ev.lanes),left=ev.lane*width;
       const click=ev.kind==='reserva'?`clkSlot('${ev.id}')`:`openBloqueo('${ev.id}')`;
       h+=`<div class="ag-block ${ev.cls}${isShort?' short':''}${ev.conflict?' ag-conflict':''}" style="top:${top}px;height:${height}px;left:calc(${left}% + ${hInset}px);width:calc(${width}% - ${hInset*2}px)" onclick="${click}">
         <div class="ag-block-time">${minToTime(ev.start)}–${minToTime(ev.end)}</div>
         <div class="ag-block-title">${ev.icon?`<i class="ti ${ev.icon}" style="margin-right:4px"></i>`:''}${ev.title}</div>
-        <div class="ag-block-meta">${ev.meta}</div>${ev.meta2?`<div class="ag-block-meta2">${ev.meta2}</div>`:''}
+        <div class="ag-block-meta">${ev.meta}</div>
       </div>`;
     });
     h+=`</div>`;
@@ -1436,7 +996,6 @@ function rAg(){
   g('ag-tbl').innerHTML=h;
   const rh=D.reservas.filter(r=>r.fecha===dstr),blh=(D.bloqueos||[]).filter(b=>b.fecha===dstr);const inc=rh.filter(r=>r.estado!=='cerrado'&&(r.jugadores||[]).filter(j=>j).length<4).length;
   g('ag-stats').innerHTML=[{l:'Reservas',v:rh.length,s:'en el día'},{l:'Clases / eventos',v:blh.length,s:'bloques editables'},{l:'En juego',v:rh.filter(r=>r.estado==='abierto').length,s:'activas ahora'},{l:'Incompletas',v:inc,s:'buscan partner',w:inc>0}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv" style="${m.w?'color:#F59E0B':''}">${m.v}</div><div class="ms">${m.s}</div></div>`).join('');
-  initMobCancha();
 }
 function clkLibre(fecha,horario,cid){openRes(fecha,horario,cid);}
 
@@ -1447,19 +1006,9 @@ function renderBlAlumnos(){
   const el=g('bl-alumnos-list');
   el.innerHTML=blAlumnos.length?blAlumnos.map((a,i)=>`<div style="display:flex;align-items:center;gap:8px;background:var(--gray-light);border-radius:8px;padding:6px 10px"><span style="flex:1;font-size:13px;font-weight:600">${a}</span><button class="btn icon-only sm d" onclick="delBlAlumno(${i})" type="button"><i class="ti ti-x" style="font-size:13px"></i></button></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin alumnos agregados aún.</p>';
 }
-function sugBlAlumno(){
-  const val=g('bl-alumno-input').value.toLowerCase();const drop=g('bl-alumno-drop');if(!val){drop.classList.add('hidden');return;}
-  const yaAgregados=new Set(blAlumnos);
-  const m=D.jugadores.filter(j=>j.nombre.toLowerCase().includes(val)&&!yaAgregados.has(j.nombre)).slice(0,6);
-  if(!m.length){drop.classList.add('hidden');return;}
-  drop.innerHTML=m.map(j=>{const nc=getNColor(j.nivel);return`<div class="jdi" onclick="pickBlAlumno('${j.nombre.replace(/'/g,"\\'")}')"><span style="background:${nc.b};color:${nc.t};font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600">${j.nivel||'—'}</span><span>${j.nombre}</span></div>`;}).join('');
-  drop.classList.remove('hidden');
-}
-function pickBlAlumno(nombre){g('bl-alumno-input').value=nombre;g('bl-alumno-drop').classList.add('hidden');addBlAlumno();}
 function addBlAlumno(){
   const inp=g('bl-alumno-input');const n=inp.value.trim();if(!n)return;
-  if(blAlumnos.includes(n)){inp.value='';return;}
-  blAlumnos.push(n);inp.value='';g('bl-alumno-drop').classList.add('hidden');renderBlAlumnos();
+  blAlumnos.push(n);inp.value='';renderBlAlumnos();
 }
 function delBlAlumno(i){blAlumnos.splice(i,1);renderBlAlumnos();}
 function openBloqueo(id,fecha,horario,cid){
@@ -1489,41 +1038,20 @@ function selBloqTipo(tipo){
   const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
 }
-async function saveBloqueo(){
+function saveBloqueo(){
   const tipo=g('bl-tipos').dataset.sel||'mantenimiento';const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
   if(!fecha||!hi||!hf){alert('Completa fecha, hora inicio y hora fin.');return;}if(timeToMin(hf)<=timeToMin(hi)){alert('Hora fin debe ser posterior al inicio.');return;}
   const canchaVal=g('bl-cancha').value;const genIngreso=g('bl-genIngreso').checked;const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
   const eid=g('bl-id').value;
-  const conflict=hasCalendarConflict({fecha,canchaId:canchaVal,start:timeToMin(hi),end:timeToMin(hf),ignoreBloqueoId:eid||null});
+  const conflict=hasCalendarConflict({fecha,canchaId:parseInt(canchaVal),start:timeToMin(hi),end:timeToMin(hf),ignoreBloqueoId:eid||null});
   if(conflict){alert(`No se puede guardar: se cruza con ${describeConflict(conflict)}.`);return;}
-  const titulo=g('bl-desc').value.trim();const profesor=tipo==='clase'?g('bl-profesor').value.trim():null;
-  const datosDb={tipo,titulo,cancha_id:canchaVal==='todas'?null:canchaVal,fecha,hora_inicio:hi,hora_fin:hf,gen_ingreso:genIngreso,valor,profesor};
-  let bloqueoId=eid;
-  if(eid){
-    const{error}=await sb.from('bloqueos').update(datosDb).eq('id',eid);
-    if(error){alert('No se pudo guardar: '+error.message);return;}
-  }else{
-    const{data,error}=await sb.from('bloqueos').insert(datosDb).select().single();
-    if(error){alert('No se pudo crear: '+error.message);return;}
-    bloqueoId=data.id;
-  }
-  // Alumnos de clase: borrar y reinsertar (igual patrón que reserva_jugadores)
-  await sb.from('bloqueo_alumnos').delete().eq('bloqueo_id',bloqueoId);
-  if(tipo==='clase'&&blAlumnos.length){
-    const alumnoRows=blAlumnos.map(nombre=>{const j=D.jugadores.find(jj=>jj.nombre===nombre);return{bloqueo_id:bloqueoId,jugador_id:j?j.id:null,nombre_libre:j?null:nombre};});
-    await sb.from('bloqueo_alumnos').insert(alumnoRows);
-  }
-  const datos={tipo,titulo,fecha,canchaId:canchaVal,horaInicio:hi,horaFin:hf,genIngreso,valor,profesor:profesor||undefined,alumnos:tipo==='clase'?[...blAlumnos]:undefined};
+  const datos={tipo,titulo:g('bl-desc').value.trim(),fecha,canchaId:parseInt(canchaVal),horaInicio:hi,horaFin:hf,genIngreso,valor};
+  if(tipo==='clase'){datos.profesor=g('bl-profesor').value.trim();datos.alumnos=[...blAlumnos];}
   if(eid){const idx=D.bloqueos.findIndex(b=>b.id===eid);if(idx>=0)D.bloqueos[idx]={...D.bloqueos[idx],...datos};}
-  else D.bloqueos.push({id:bloqueoId,...datos});
-  rAg();rCaja();cM('m-bloqueo');
+  else{datos.id='bl'+Date.now();D.bloqueos.push(datos);}
+  sv();rAg();rCaja();cM('m-bloqueo');
 }
-async function delBloqueo(){
-  const eid=g('bl-id').value;if(!eid)return;if(!confirm('¿Eliminar este bloqueo/evento?'))return;
-  const{error}=await sb.from('bloqueos').delete().eq('id',eid);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.bloqueos=D.bloqueos.filter(b=>b.id!==eid);rAg();rCaja();cM('m-bloqueo');
-}
+function delBloqueo(){const eid=g('bl-id').value;if(!eid)return;if(!confirm('¿Eliminar este bloqueo/evento?'))return;D.bloqueos=D.bloqueos.filter(b=>b.id!==eid);sv();rAg();rCaja();cM('m-bloqueo');}
 
 // ── SLOT / RESERVA ──────────────────────────────────────
 function clkSlot(rid){
@@ -1562,31 +1090,19 @@ function rPart(){
       <button class="btn p sm" onclick="addPartner('${j.id}')"><i class="ti ti-user-plus"></i></button></div>`;
   }).join('');
 }
-function addPartner(jid){const r=D.reservas.find(x=>x.id===sRid);const j=D.jugadores.find(x=>x.id===jid);if(!r||!j)return;if(!r.jugadores)r.jugadores=['','','',''];const sl=r.jugadores.indexOf('');if(sl>=0)r.jugadores[sl]=j.nombre;else if(r.jugadores.length<4)r.jugadores.push(j.nombre);syncReservaCompleta(sRid);rAll();clkSlot(sRid);}
-async function iniciar(id){
+function addPartner(jid){const r=D.reservas.find(x=>x.id===sRid);const j=D.jugadores.find(x=>x.id===jid);if(!r||!j)return;if(!r.jugadores)r.jugadores=['','','',''];const sl=r.jugadores.indexOf('');if(sl>=0)r.jugadores[sl]=j.nombre;else if(r.jugadores.length<4)r.jugadores.push(j.nombre);sv();rAll();clkSlot(sRid);}
+function iniciar(id){
   const r=D.reservas.find(x=>x.id===id);if(!r)return;
   const pendiente=getTurnoAnteriorPendiente(r);
   if(pendiente){const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'esta cancha'};alert(`No puedes iniciar este turno: el turno de las ${pendiente.horario} en ${c.nombre} ya debería haber terminado y no se ha cerrado. Cierra esa comanda primero.`);return;}
-  r.estado='abierto';r.aperturaAt=new Date().toISOString();
-  const ok=await syncReservaCompleta(id);
-  if(!ok){alert('No se pudo iniciar el turno. Intenta de nuevo.');return;}
-  rAll();cM('m-slot');
+  r.estado='abierto';r.aperturaAt=new Date().toISOString();sv();rAll();cM('m-slot');
 }
-async function delRes(id){
-  if(!confirm('¿Cancelar esta reserva?'))return;
-  const _r=D.reservas.find(x=>x.id===id);const _c=D.canchas.find(x=>x.id===_r?.canchaId);
-  const{error}=await sb.from('reservas').delete().eq('id',id);if(!error)audit('Eliminó reserva','reserva',`${_c?.nombre||'Cancha'} · ${_r?.horario||''} · ${_r?.fecha||''} · ${_r?.contacto||''}`);
-  if(error){alert('No se pudo cancelar: '+error.message);return;}
-  D.reservas=D.reservas.filter(r=>r.id!==id);rAll();cM('m-slot');
-}
+function delRes(id){if(!confirm('¿Cancelar esta reserva?'))return;D.reservas=D.reservas.filter(r=>r.id!==id);sv();rAll();cM('m-slot');}
 function editRes(id){const r=D.reservas.find(x=>x.id===id);if(!r)return;cM('m-slot');openRes(r.fecha,r.horario,r.canchaId,r);}
 
 function bJI(vals=[]){
   const w=g('res-jugs');w.innerHTML='';
-  for(let i=0;i<4;i++){
-    if(i===0||i===2){const lbl=document.createElement('div');lbl.style.gridColumn='1 / -1';lbl.style.fontSize='11px';lbl.style.fontWeight='600';lbl.style.color='#7C8AA0';lbl.style.marginTop=i===2?'4px':'0';lbl.textContent=i===0?'Pareja 1':'Pareja 2';w.appendChild(lbl);}
-    const d=document.createElement('div');d.style.position='relative';d.innerHTML=`<input placeholder="Jugador ${i+1}" value="${vals[i]||''}" id="rj${i}" oninput="sugJ(${i})" autocomplete="off"><div id="rjd${i}" class="jdrop hidden"></div>`;w.appendChild(d);
-  }
+  for(let i=0;i<4;i++){const d=document.createElement('div');d.style.position='relative';d.innerHTML=`<input placeholder="Jugador ${i+1}" value="${vals[i]||''}" id="rj${i}" oninput="sugJ(${i})" autocomplete="off"><div id="rjd${i}" class="jdrop hidden"></div>`;w.appendChild(d);}
 }
 function sugJ(i){
   const val=g('rj'+i).value.toLowerCase();const drop=g('rjd'+i);if(!val){drop.classList.add('hidden');return;}
@@ -1596,7 +1112,7 @@ function sugJ(i){
 }
 function pickJ(i,n){g('rj'+i).value=n;g('rjd'+i).classList.add('hidden');}
 function updRP(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;if(!cid||!hor)return;
+  const cid=parseInt(g('res-cancha').value);const hor=g('res-horario').value;if(!cid||!hor)return;
   const p=pcP(cid,hor,agCtx);const pl=getPrecioLabel(hor,agCtx);g('res-pbase').textContent=fmt(p);g('res-ptipo').textContent=pl.label;g('res-ptipo').className=pl.cls;
   const tramos=D.cfg.tramos||[];const ref=g('res-tramos-ref');
   if(tramos.length&&!pl.isFeriado&&!pl.isFinde){
@@ -1610,41 +1126,31 @@ function openRes(fecha,horario,cid,editR){
   eRid=editR?editR.id:null;g('m-res-title').textContent=editR?'Editar reserva':'Nueva reserva';
   const fc=fecha||(editR?editR.fecha:ds(getAF()));agCtx=fc;
   const fer=isFeriado(fc);const finde=!fer&&isFinde(fc);g('res-flbl').textContent=fmtDL(new Date(fc+'T12:00:00'))+(fer?` · 🚩 ${fer.nombre}`:'')+(finde?' · 🚩 Fin de semana':'');
-  const cs=g('res-cancha');cs.innerHTML=[...D.canchas].map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');if(cid)cs.value=cid;
+  const cs=g('res-cancha');cs.innerHTML=[...D.canchas].sort((a,b)=>a.id-b.id).map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');if(cid)cs.value=cid;
   const hs=g('res-horario');hs.innerHTML=genSlots().map(s=>`<option value="${s.start}">${s.label}</option>`).join('');if(horario){for(const o of hs.options)if(o.value===horario){o.selected=true;break;}}
   bJI(editR?editR.jugadores:[]);g('res-contacto').value=editR?editR.contacto||'':'';g('res-notas').value=editR?editR.notas||'':'';
   const ov=g('res-pov');ov.dataset.m='';if(editR&&editR.pOv!==undefined){ov.value=editR.pOv;ov.dataset.m='1';}else ov.value='';
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
 }
-async function saveRes(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;const fec=agCtx||ds(getAF());
+function saveRes(){
+  const cid=parseInt(g('res-cancha').value);const hor=g('res-horario').value;const fec=agCtx||ds(getAF());
   const jugs=[0,1,2,3].map(i=>g('rj'+i).value.trim());const contacto=g('res-contacto').value.trim();const notas=g('res-notas').value.trim();
   const ovr=g('res-pov').value;const pOv=ovr!==''?parseInt(ovr):undefined;
   const conflict=hasCalendarConflict({fecha:fec,canchaId:cid,start:timeToMin(hor),end:timeToMin(hor)+(D.cfg.dur||90),ignoreReservaId:eRid});
   if(conflict){const a=g('res-adv');a.classList.remove('hidden');a.innerHTML=`<i class="ti ti-alert-triangle"></i> Ese horario se cruza con ${describeConflict(conflict)}.`;return;}
-  if(eRid){
-    const r=D.reservas.find(x=>x.id===eRid);if(r)Object.assign(r,{canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv});
-    const ok=await syncReservaCompleta(eRid);
-    if(!ok){alert('No se pudo guardar la reserva. Intenta de nuevo.');return;}
-  }else{
-    const{data,error}=await sb.from('reservas').insert({cancha_id:cid,fecha:fec,horario:hor,contacto:contacto||null,notas:notas||null,precio_override:pOv!==undefined?pOv:null,estado:'reservada'}).select().single();
-    if(error){alert('No se pudo crear la reserva: '+error.message);return;}
-    const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:'reservada',creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
-    D.reservas.push(nuevaR);
-    const _cn=D.canchas.find(x=>x.id===cid)?.nombre||cid;audit("Creó reserva","reservas",`${_cn} · ${hor} · ${fec}`);
-    await syncReservaCompleta(data.id);
-  }
-  rAll();cM('m-res');
+  if(eRid){const r=D.reservas.find(x=>x.id===eRid);if(r)Object.assign(r,{canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv});}
+  else D.reservas.push({id:'r'+Date.now(),canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],estado:'reservada',creadoAt:new Date().toISOString(),aperturaAt:null,cierreAt:null});
+  sv();rAll();cM('m-res');
 }
 
 // ── PIN → CIERRE ─────────────────────────────────────────
-function openMPin(){
-  // El PIN quedó reemplazado por una confirmación simple: como el rol ya viene
-  // del login real (Supabase Auth + tabla perfiles), no se necesita una clave
-  // extra aparte para cerrar turnos.
-  const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
-  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'esta cancha'};
-  if(confirm(`¿Seguro que deseas cerrar el turno de ${c.nombre} a las ${r.horario}?`))openMCT();
+function openMPin(){['pd0','pd1','pd2','pd3'].forEach(id=>g(id).value='');g('perr').classList.add('hidden');g('m-pin').classList.remove('hidden');setTimeout(()=>g('pd0').focus(),80);}
+function pN(i){const v=g('pd'+i).value;if(v&&i<3)g('pd'+(i+1)).focus();if(i===3)chkPin();}
+function pB(e,i){if(e.key==='Backspace'&&!g('pd'+i).value&&i>0)g('pd'+(i-1)).focus();}
+function chkPin(){
+  const p=['pd0','pd1','pd2','pd3'].map(id=>g(id).value).join('');
+  if(p===D.cfg.pAdmin){g('perr').classList.add('hidden');cM('m-pin');openMCT();}
+  else{g('perr').classList.remove('hidden');['pd0','pd1','pd2','pd3'].forEach(id=>g(id).value='');g('pd0').focus();}
 }
 
 // ── CÁLCULO TOTALES POR JUGADOR (FIX: suma cuotas reales con descuento) ──
@@ -1708,21 +1214,18 @@ function openCortesia(jugador){
   const applyBtn=document.createElement('button');applyBtn.style.cssText='padding:7px 16px;border-radius:8px;background:var(--cyan);color:#fff;font-weight:700;border:none;cursor:pointer;font-size:12px;font-family:inherit';applyBtn.textContent='Aplicar';applyBtn.onclick=function(){guardarCortesia(jugador);};btnRow.appendChild(applyBtn);
   box.appendChild(btnRow);overlay.appendChild(box);overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};document.body.appendChild(overlay);
 }
-function volcarProductosARserva(r){
-  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:(p.cat!=='Pelotas'&&cSJ)?[cSJ]:cAsig[p.id]||[],jugador:null}));
-}
 function aplicarPromo(jugador,promoId){
   const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const promo=D.promos.find(p=>p.id===promoId);if(!promo)return;
   if(!r.cortesias)r.cortesias=[];r.cortesias=r.cortesias.filter(c=>c.jugador!==jugador);
   r.cortesias.push(promo.tipo==='fijo'&&promo.valor===0?{jugador,tipo:'gratis',valor:0,promoId}:{jugador,tipo:promo.tipo,valor:promo.valor,promoId});
-  const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();scheduleAutosave(cRid);
+  const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();
 }
 function guardarCortesia(jugador){
   const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const tipo=document.getElementById('cort-tipo').value;const valor=parseFloat(document.getElementById('cort-valor').value)||0;
   if(!r.cortesias)r.cortesias=[];r.cortesias=r.cortesias.filter(c=>c.jugador!==jugador);r.cortesias.push({jugador,tipo,valor});
-  const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();scheduleAutosave(cRid);
+  const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();
 }
-function quitarCortesia(jugador){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;r.cortesias=(r.cortesias||[]).filter(c=>c.jugador!==jugador);const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();scheduleAutosave(cRid);}
+function quitarCortesia(jugador){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;r.cortesias=(r.cortesias||[]).filter(c=>c.jugador!==jugador);const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();}
 
 // ── COMANDA ──────────────────────────────────────────────
 function openCom(rid){
@@ -1736,7 +1239,7 @@ function openCom(rid){
 function rCPtags(){
   const r=D.reservas.find(x=>x.id===cRid);const jugs=(r&&r.jugadores||[]).filter(j=>j);
   g('com-ptags').innerHTML=`<div class="ptag${!cSJ?' sel':''}" onclick="sSJ(null)"><i class="ti ti-users" style="font-size:12px"></i> Todos <span style="font-size:10px;opacity:.6">(pelotas)</span></div>`+
-    jugs.map(j=>`<div class="ptag${cSJ===j?' sel':''}" style="white-space:nowrap" onclick="sSJ('${j.replace(/'/g,"\\'")}')"><span style="width:22px;height:22px;border-radius:50%;background:${cSJ===j?'var(--cyan-light)':'var(--gray-light)'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cSJ===j?'var(--cyan-dark)':'var(--text2)'}">${j.charAt(0)}</span>${j}</div>`).join('');
+    jugs.map(j=>`<div class="ptag${cSJ===j?' sel':''}" onclick="sSJ('${j.replace(/'/g,"\\'")}')"><span style="width:22px;height:22px;border-radius:50%;background:${cSJ===j?'var(--cyan-light)':'var(--gray-light)'};display:inline-flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;color:${cSJ===j?'var(--cyan-dark)':'var(--text2)'}">${j.charAt(0)}</span>${j.split(' ')[0]}</div>`).join('');
   const sel=g('pago-q');if(sel)sel.innerHTML='<option value="">-- Jugador --</option>'+jugs.map(j=>`<option value="${j}">${j}</option>`).join('');
 }
 function sSJ(j){cSJ=j||null;rCPtags();}
@@ -1752,15 +1255,15 @@ function rCP(){
     return`<div class="ps"><div class="psh" onclick="tgPS(this)">${cat} <span style="font-size:10px;color:var(--text3);font-weight:400">(${its.length})</span><i class="ti ti-chevron-down" style="font-size:13px;color:var(--text3);transition:transform .2s"></i></div>
     <div class="psb open">${its.map(p=>{const q=cQty[p.id]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[p.id]||[];
       let asigLabel='';
-      if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${p.id}')">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
+      if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel(${p.id})">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
         else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj}</span>`).join('');}
+        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
       const pelPH=esPelota?`<div class="pelota-panel" id="pelota-panel-${p.id}"><div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:7px">¿Quién paga las pelotas?</div><div style="display:flex;gap:5px;flex-wrap:wrap" id="pelota-jugs-${p.id}"></div><div id="pelota-calc-${p.id}" style="font-size:11px;color:var(--cyan-dark);margin-top:6px;background:var(--cyan-light);padding:4px 8px;border-radius:6px;display:none"></div></div>`:'';
       return`<div class="pr" id="prod-row-${p.id}" style="flex-direction:column;align-items:stretch;padding:8px 12px">
         <div style="display:flex;align-items:center;gap:8px">
           <div style="flex:1"><div style="font-size:13px;font-weight:${q>0?700:500};display:flex;align-items:center;flex-wrap:wrap" data-name="1">${p.nombre}${asigLabel}</div>
           <div style="font-size:11px;color:var(--text3);margin-top:1px">${fmt(p.precio)}${p.cod?` · <code style="font-size:10px">${p.cod}</code>`:''}${p.stock<=p.smin?` · <span style="color:#92400E;font-weight:600">stock:${p.stock}</span>`:''}</div></div>
-          <div style="display:flex;align-items:center;gap:6px"><button class="qb" onclick="chQ('${p.id}',-1)">−</button><div class="qv" id="qty-${p.id}">${q}</div><button class="qb" onclick="chQ('${p.id}',1)">+</button></div>
+          <div style="display:flex;align-items:center;gap:6px"><button class="qb" onclick="chQ(${p.id},-1)">−</button><div class="qv" id="qty-${p.id}">${q}</div><button class="qb" onclick="chQ(${p.id},1)">+</button></div>
         </div>${pelPH}</div>`;
     }).join('')}</div></div>`;
   }).join('');updCS();
@@ -1771,7 +1274,7 @@ function renderPelotaJugs(pid){
   const q=cQty[pid]||1;const sel=cAsig[pid]||[];const todos=sel.length===0;
   const container=document.getElementById('pelota-jugs-'+pid);const calc=document.getElementById('pelota-calc-'+pid);if(!container)return;container.innerHTML='';
   const btnTodos=document.createElement('button');btnTodos.className='jbtn-p'+(todos?' todos-sel':'');btnTodos.textContent='÷ Todos';btnTodos.onclick=function(){setPelotaAsig(pid,[]);};container.appendChild(btnTodos);
-  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j;btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
+  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j.split(' ')[0];btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
   const quienes=todos?jugs:sel;
   if(calc){if(quienes.length>0){const costoPU=Math.ceil((p.precio*q)/quienes.length);calc.style.display='block';calc.textContent=(todos?'Todos':quienes.map(j=>j.split(' ')[0]).join(' + '))+' → '+fmt(costoPU)+' c/u';}else calc.style.display='none';}
 }
@@ -1789,11 +1292,10 @@ function chQ(pid,d){
   if(cQty[pid]===0)delete cAsig[pid];
   else if(d>0){if(esPelota&&!cSJ)cAsig[pid]=[];else if(cSJ){if(!cAsig[pid])cAsig[pid]=[];if(!cAsig[pid].includes(cSJ))cAsig[pid]=[...cAsig[pid],cSJ];}}
   const el=g('qty-'+pid);if(el)el.textContent=cQty[pid];refreshProdRow(pid);updCS();
-  const r=D.reservas.find(x=>x.id===cRid);if(r){if(d>0){const _p=D.productos.find(x=>x.id===pid);const _cn=D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha';audit("Agregó producto","comanda",`${_p?.nombre||pid} · ${_cn} · ${r.horario}`);}volcarProductosARserva(r);scheduleAutosave(cRid);}
 }
 function refreshProdRow(pid){
   const p=D.productos.find(x=>x.id===pid);if(!p)return;const q=cQty[pid]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[pid]||[];let asigLabel='';
-  if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const label=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${pid}')">${label} ✎ ${fmt(costoPU)}/c</span>`;}
+  if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const label=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel(${pid})">${label} ✎ ${fmt(costoPU)}/c</span>`;}
     else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
     else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
   const row=document.getElementById('prod-row-'+pid);if(!row)return;const nameDiv=row.querySelector('[data-name]');if(nameDiv)nameDiv.innerHTML=p.nombre+asigLabel;
@@ -1819,8 +1321,8 @@ function rPB(){
   let tp=0;D.productos.forEach(p=>{tp+=(cQty[p.id]||0)*p.precio;});const tot=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,tot-cob);
   g('pbal').innerHTML=`<div class="sl"><span style="color:var(--text2);font-weight:600">Total a cobrar:</span><span style="font-weight:700;font-family:Poppins,sans-serif">${fmt(tot)}</span></div><div class="sl"><span style="color:var(--text2);font-weight:600">Cobrado:</span><span style="color:#3d6b0a;font-weight:700;font-family:Poppins,sans-serif">${fmt(cob)}</span></div><div class="sl tot"><span>Pendiente:</span><span style="color:${pend>0?'#92400E':'#3d6b0a'};font-family:Poppins,sans-serif">${fmt(pend)}</span></div>`;
 }
-function addPago(){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const m=parseInt(g('pago-m').value)||0;if(m<=0)return;if(!r.pagos)r.pagos=[];r.pagos.push({monto:m,metodo:g('pago-met').value,quien:g('pago-q').value||'',fecha:new Date().toISOString()});g('pago-m').value='';rPagos();rPB();scheduleAutosave(cRid);}
-function delPago(i){const r=D.reservas.find(x=>x.id===cRid);if(r){r.pagos.splice(i,1);rPagos();scheduleAutosave(cRid);}}
+function addPago(){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const m=parseInt(g('pago-m').value)||0;if(m<=0)return;if(!r.pagos)r.pagos=[];r.pagos.push({monto:m,metodo:g('pago-met').value,quien:g('pago-q').value||'',fecha:new Date().toISOString()});g('pago-m').value='';rPagos();rPB();}
+function delPago(i){const r=D.reservas.find(x=>x.id===cRid);if(r){r.pagos.splice(i,1);rPagos();}}
 function saveCom(){
   document.querySelectorAll('.pelota-panel').forEach(p=>p.classList.remove('open'));const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
   r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));sv();rAll();cM('m-com');
@@ -1856,7 +1358,7 @@ function rCierreJugs(totales,jugs,r,cobPorJugador){
     const rowCls=est==='pagado'?'ok':est==='cubierto'?'cubierto':est==='cortesia'?'ok':'deuda';
     const descTag=t.descLabel?`<span class="bcyan" style="font-size:10px;padding:1px 5px">${t.descLabel}</span>`:'';
     const estIcon=est==='pagado'?'<i class="ti ti-circle-check" style="color:#3d6b0a;font-size:18px"></i>':est==='cubierto'?'<i class="ti ti-arrow-merge" style="color:var(--cyan-dark);font-size:18px"></i>':est==='cortesia'?'<i class="ti ti-gift" style="color:#3d6b0a;font-size:18px"></i>':'<i class="ti ti-clock" style="color:#92400E;font-size:18px"></i>';
-    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro'}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
+    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro').split(' ')[0]}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
     let optsHtml='';
     if(est!=='pagado'){
       const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2.split(' ')[0]} lo cubre</button>`;}).join('');
@@ -1879,34 +1381,23 @@ function setCierreEst(jugador,estado,cubridor){
   const cobPorJugador={};(r.pagos||[]).forEach(p=>{if(p.quien){if(!cobPorJugador[p.quien])cobPorJugador[p.quien]=0;cobPorJugador[p.quien]+=p.monto;}});
   rCierreJugs(totales,jugs,r,cobPorJugador);
 }
-async function confCierre(){
+function confCierre(){
   const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
   const{totales,jugs}=calcTotalesPorJugador(r,cQty,cAsig);
-  volcarProductosARserva(r);
-  const stockUpdates=[];
-  r.productos.forEach(rp=>{const p=D.productos.find(x=>x.id===rp.id);if(p){p.stock=Math.max(0,p.stock-rp.qty);stockUpdates.push({id:p.id,stock:p.stock});}});
+  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));
+  r.productos.forEach(rp=>{const p=D.productos.find(x=>x.id===rp.id);if(p)p.stock=Math.max(0,p.stock-rp.qty);});
   if(!r.pagos)r.pagos=[];if(!D.deudas)D.deudas=[];
   const cancha=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
-  const deudasNuevas=[];
   jugs.forEach(j=>{
     const t=totales[j];const est=cierreEstados[j]||'deuda';
     const jug=D.jugadores.find(x=>x.nombre===j);const tel=jug?jug.telefono||'':'';
     const cobJ=(r.pagos||[]).filter(p=>p.quien===j).reduce((s,p)=>s+p.monto,0);const pendJ=Math.max(0,t.total-cobJ);
     if(est==='pagado'||est==='cortesia'||est==='cubierto'){}
-    else{if(pendJ>0){deudasNuevas.push({jugador_id:jug?jug.id:null,jugador_nombre:j,telefono:tel,fecha:r.fecha,concepto:'Turno '+r.horario+' - '+cancha.nombre,monto:pendJ,pagado:0,estado:'Pendiente',bloqueado:false});}}
+    else{if(pendJ>0){D.deudas.push({id:'d'+Date.now()+Math.random().toString(36).slice(2),jugador:j,telefono:tel,fecha:r.fecha,concepto:'Turno '+r.horario+' - '+cancha.nombre,monto:pendJ,pagado:0,estado:'Pendiente',bloqueado:false});}}
+    if(jug){if(!jug.hist)jug.hist=[];jug.hist.push({fecha:r.fecha,canchaId:r.canchaId,horario:r.horario,cerradoAt:new Date().toISOString()});}
   });
-  r.estado='cerrado';r.cierreAt=new Date().toISOString();
-  const ok=await syncReservaCompleta(cRid);
-  if(!ok){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
-  audit('Cerró turno','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
-  for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
-  if(deudasNuevas.length){
-    const{data,error}=await sb.from('deudas').insert(deudasNuevas).select();
-    if(!error&&data)D.deudas.push(...data.map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado})));
-  }
-  rAll();cM('m-cierreT');cM('m-com');
+  r.estado='cerrado';r.cierreAt=new Date().toISOString();sv();rAll();cM('m-cierreT');cM('m-com');
 }
-// cargarVentasDirectas se llama desde cargarDatosDesdeSupabase y desde rAll
 
 // ── CIERRE DEL DÍA ───────────────────────────────────────
 function openCD(){
@@ -1978,38 +1469,17 @@ function openJ(id){
   if(id){const j=D.jugadores.find(x=>x.id===id);if(j){g('ej-id').value=j.id;g('m-jug-title').textContent='Editar jugador';g('j-nombre').value=j.nombre;g('j-tel').value=j.telefono||'';g('j-nivel').value=j.nivel||'';g('j-disp').value=j.disponibilidad||'Flexible';g('j-lado').value=j.lado||'';g('j-memb').value=j.memb||'';g('j-precio-ov').value=j.precioOv!==undefined?j.precioOv:'';g('j-notas').value=j.notas||'';}}
   g('m-jug').classList.remove('hidden');
 }
-async function saveJ(){
+function saveJ(){
   const nombre=g('j-nombre').value.trim();if(!nombre)return;
-  const datosUi={nombre,telefono:g('j-tel').value.trim(),nivel:g('j-nivel').value,disponibilidad:g('j-disp').value,lado:g('j-lado').value,memb:g('j-memb').value,notas:g('j-notas').value.trim()};
-  const ovVal=g('j-precio-ov').value;if(ovVal!=='')datosUi.precioOv=parseInt(ovVal);
-  const datosDb={nombre:datosUi.nombre,telefono:datosUi.telefono,nivel:datosUi.nivel,disponibilidad:datosUi.disponibilidad,lado:datosUi.lado,membresia_id:datosUi.memb||null,precio_override:ovVal!==''?parseInt(ovVal):null,notas:datosUi.notas};
+  const datos={nombre,telefono:g('j-tel').value.trim(),nivel:g('j-nivel').value,disponibilidad:g('j-disp').value,lado:g('j-lado').value,memb:g('j-memb').value,notas:g('j-notas').value.trim()};
+  const ovVal=g('j-precio-ov').value;if(ovVal!=='')datos.precioOv=parseInt(ovVal);
   const eid=g('ej-id').value;
-  if(eid){
-    const{error}=await sb.from('jugadores').update(datosDb).eq('id',eid);
-    if(error){alert('No se pudo guardar: '+error.message);return;}
-    const idx=D.jugadores.findIndex(j=>j.id===eid);
-    if(idx>=0){
-      const old=D.jugadores[idx].nombre;
-      D.jugadores[idx]={...D.jugadores[idx],...datosUi};if(!ovVal&&D.jugadores[idx].precioOv!==undefined)delete D.jugadores[idx].precioOv;
-      // Nota: no se requiere sincronizar las reservas afectadas a Supabase aquí,
-      // porque reserva_jugadores guarda jugador_id (no el nombre como texto);
-      // el nombre se resuelve dinámicamente al cargar. Esto solo actualiza la
-      // copia en memoria para que la UI se vea correcta sin tener que recargar.
-      if(old!==nombre){D.reservas.forEach(r=>{if(r.jugadores)r.jugadores=r.jugadores.map(j=>j===old?nombre:j);});}
-    }
-  }else{
-    const{data,error}=await sb.from('jugadores').insert(datosDb).select().single();if(!error)audit('Creó jugador','jugador',datosDb.nombre||'');
-    if(error){alert('No se pudo crear: '+error.message);return;}
-    D.jugadores.push({id:data.id,nombre:data.nombre,telefono:data.telefono,nivel:data.nivel,disponibilidad:data.disponibilidad,lado:data.lado,memb:data.membresia_id,precioOv:data.precio_override!==null?data.precio_override:undefined,notas:data.notas});
-  }
-  rJ();updSelNiveles();cM('m-jug');
+  if(eid){const idx=D.jugadores.findIndex(j=>j.id===eid);if(idx>=0){const old=D.jugadores[idx].nombre;D.jugadores[idx]={...D.jugadores[idx],...datos};if(!ovVal&&D.jugadores[idx].precioOv!==undefined)delete D.jugadores[idx].precioOv;
+    if(old!==nombre){D.reservas.forEach(r=>{if(r.jugadores)r.jugadores=r.jugadores.map(j=>j===old?nombre:j);});}}}
+  else D.jugadores.push({id:'j'+Date.now(),...datos});
+  sv();rJ();updSelNiveles();cM('m-jug');
 }
-async function delJ(id){
-  if(!confirm('¿Eliminar este jugador?'))return;
-  const{error}=await sb.from('jugadores').delete().eq('id',id);if(!error)audit('Eliminó jugador','jugador',`ID ${id}`);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.jugadores=D.jugadores.filter(j=>j.id!==id);rJ();
-}
+function delJ(id){if(!confirm('¿Eliminar este jugador?'))return;D.jugadores=D.jugadores.filter(j=>j.id!==id);sv();rJ();}
 
 // ── INVENTARIO ───────────────────────────────────────────
 function rI(){
@@ -2026,84 +1496,42 @@ function openP(id){
   if(id){const p=D.productos.find(x=>x.id===id);if(p){g('ep-id').value=p.id;g('m-prod-title').textContent='Editar producto';g('p-nombre').value=p.nombre;g('p-cat').value=p.cat;g('p-codigo').value=p.cod||'';g('p-unidad').value=p.und||'unidad';g('p-costo').value=p.costo;g('p-precio').value=p.precio;g('p-stock').value=p.stock;g('p-smin').value=p.smin;}}
   g('m-prod').classList.remove('hidden');
 }
-async function saveP(){
+function saveP(){
   const nombre=g('p-nombre').value.trim();if(!nombre)return;
-  const datos={nombre,categoria:g('p-cat').value,codigo:g('p-codigo').value.trim(),unidad:g('p-unidad').value,costo:parseInt(g('p-costo').value)||0,precio:parseInt(g('p-precio').value)||0,stock:parseInt(g('p-stock').value)||0,stock_minimo:parseInt(g('p-smin').value)||5};
+  const datos={nombre,cat:g('p-cat').value,cod:g('p-codigo').value.trim(),und:g('p-unidad').value,costo:parseInt(g('p-costo').value)||0,precio:parseInt(g('p-precio').value)||0,stock:parseInt(g('p-stock').value)||0,smin:parseInt(g('p-smin').value)||5};
   const eid=g('ep-id').value;
-  if(eid){
-    const{error}=await sb.from('productos').update(datos).eq('id',eid);
-    if(error){alert('No se pudo guardar: '+error.message);return;}
-    const idx=D.productos.findIndex(p=>p.id===eid);
-    if(idx>=0)D.productos[idx]={...D.productos[idx],nombre,cat:datos.categoria,cod:datos.codigo,und:datos.unidad,costo:datos.costo,precio:datos.precio,stock:datos.stock,smin:datos.stock_minimo};
-  }else{
-    const{data,error}=await sb.from('productos').insert(datos).select().single();
-    if(error){alert('No se pudo crear: '+error.message);return;}
-    D.productos.push({id:data.id,nombre:data.nombre,cat:data.categoria,cod:data.codigo,und:data.unidad,costo:data.costo,precio:data.precio,stock:data.stock,smin:data.stock_minimo});
-  }
-  rI();cM('m-prod');
+  if(eid){const idx=D.productos.findIndex(p=>p.id===eid);if(idx>=0)D.productos[idx]={...D.productos[idx],...datos};}
+  else D.productos.push({id:Date.now(),...datos});
+  sv();rI();cM('m-prod');
 }
-async function delP(id){
-  if(!confirm('¿Eliminar este producto?'))return;
-  const{error}=await sb.from('productos').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.productos=D.productos.filter(p=>p.id!==id);rI();
-}
+function delP(id){if(!confirm('¿Eliminar este producto?'))return;D.productos=D.productos.filter(p=>p.id!==id);sv();rI();}
 
 // ── CONFIG: CANCHAS ──────────────────────────────────────
 function rCanchas(){
-  g('clist').innerHTML=D.canchas.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;font-weight:600;font-size:13px">${c.nombre}</div><button class="btn icon-only sm" onclick="openEC('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button><button class="btn icon-only sm d" onclick="delCancha('${c.id}')"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Sin canchas.</p>';
+  g('clist').innerHTML=D.canchas.map(c=>`<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)"><div style="flex:1;font-weight:600;font-size:13px">${c.nombre}</div><button class="btn icon-only sm" onclick="openEC(${c.id})"><i class="ti ti-edit" style="font-size:13px"></i></button><button class="btn icon-only sm d" onclick="delCancha(${c.id})"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`).join('')||'<p style="font-size:12px;color:var(--text3)">Sin canchas.</p>';
 }
-async function addCancha(){
-  const n=g('nc-n').value.trim();if(!n)return;
-  const orden=D.canchas.length;
-  const{data,error}=await sb.from('canchas').insert({nombre:n,precio_normal:20000,precio_alto:24000,orden}).select().single();
-  if(error){alert('No se pudo crear la cancha: '+error.message);return;}
-  D.canchas.push({id:data.id,nombre:data.nombre,pN:data.precio_normal,pA:data.precio_alto});
-  g('nc-n').value='';rCanchas();rAg();
-}
-async function delCancha(id){
-  if(!confirm('¿Eliminar esta cancha?'))return;
-  const{error}=await sb.from('canchas').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.canchas=D.canchas.filter(c=>c.id!==id);rCanchas();rAg();
-}
+function addCancha(){const n=g('nc-n').value.trim();if(!n)return;const maxId=D.canchas.reduce((m,c)=>Math.max(m,c.id),0);D.canchas.push({id:maxId+1,nombre:n,pN:20000,pA:24000});g('nc-n').value='';sv();rCanchas();rAg();}
+function delCancha(id){if(!confirm('¿Eliminar esta cancha?'))return;D.canchas=D.canchas.filter(c=>c.id!==id);sv();rCanchas();rAg();}
 function openEC(id){const c=D.canchas.find(x=>x.id===id);if(!c)return;g('ec-id').value=c.id;g('ec-n').value=c.nombre;g('m-ecancha').classList.remove('hidden');}
-async function saveEC(){
-  const id=g('ec-id').value;const c=D.canchas.find(x=>x.id===id);if(!c){cM('m-ecancha');return;}
-  const nuevoNombre=g('ec-n').value.trim()||c.nombre;
-  const{error}=await sb.from('canchas').update({nombre:nuevoNombre}).eq('id',id);
-  if(error){alert('No se pudo guardar: '+error.message);return;}
-  c.nombre=nuevoNombre;rCanchas();rAg();cM('m-ecancha');
-}
+function saveEC(){const id=parseInt(g('ec-id').value);const c=D.canchas.find(x=>x.id===id);if(c){c.nombre=g('ec-n').value.trim()||c.nombre;sv();rCanchas();rAg();}cM('m-ecancha');}
 
 // ── CONFIG: HORARIOS / GENERAL ───────────────────────────
 function rCfg(){g('cfg-ini').value=D.cfg.ini;g('cfg-fin').value=D.cfg.fin;g('cfg-dur').value=D.cfg.dur;g('cfg-club').value=D.cfg.clubNombre||'';}
-async function saveConfig(){
-  const ini=g('cfg-ini').value,fin=g('cfg-fin').value,dur=parseInt(g('cfg-dur').value)||90,club=g('cfg-club').value;
-  const{error}=await sb.from('configuracion').update({hora_inicio:ini,hora_fin:fin,duracion_default:dur,club_nombre:club}).eq('id',1);
-  if(error){alert('No se pudo guardar: '+error.message);return;}
-  D.cfg.ini=ini;D.cfg.fin=fin;D.cfg.dur=dur;D.cfg.clubNombre=club;rAg();alert('Configuración guardada.');
-}
+function saveConfig(){D.cfg.ini=g('cfg-ini').value;D.cfg.fin=g('cfg-fin').value;D.cfg.dur=parseInt(g('cfg-dur').value)||90;sv();rAg();alert('Configuración guardada.');}
 
 // ── CONFIG: TRAMOS ────────────────────────────────────────
 function rTramos(){
   const tramos=D.cfg.tramos||[];
-  g('tramos-list').innerHTML=tramos.length?tramos.map((t)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="pm" style="min-width:90px">${t.nombre}</span><span style="font-size:12px;color:var(--text2)">${t.ini} – ${t.fin}</span><span style="font-weight:700;font-family:Poppins,sans-serif;margin-left:auto">${fmt(t.precio)}</span><button class="btn icon-only sm d" onclick="delTramo('${t.id}')"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin tramos configurados (usa precio normal/alto de cada cancha).</p>';
+  g('tramos-list').innerHTML=tramos.length?tramos.map((t,i)=>`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="pm" style="min-width:90px">${t.nombre}</span><span style="font-size:12px;color:var(--text2)">${t.ini} – ${t.fin}</span><span style="font-weight:700;font-family:Poppins,sans-serif;margin-left:auto">${fmt(t.precio)}</span><button class="btn icon-only sm d" onclick="delTramo(${i})"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin tramos configurados (usa precio normal/alto de cada cancha).</p>';
 }
-async function addTramo(){
+function addTramo(){
   const n=g('tr-n').value.trim(),ini=g('tr-ini').value,fin=g('tr-fin').value,precio=parseInt(g('tr-precio').value);
   if(!n||!ini||!fin||!precio){alert('Completa todos los campos del tramo.');return;}
-  const{data,error}=await sb.from('tramos_precio').insert({nombre:n,hora_inicio:ini,hora_fin:fin,precio}).select().single();
-  if(error){alert('No se pudo guardar el tramo: '+error.message);return;}
-  if(!D.cfg.tramos)D.cfg.tramos=[];D.cfg.tramos.push({id:data.id,nombre:data.nombre,ini:data.hora_inicio.slice(0,5),fin:data.hora_fin.slice(0,5),precio:data.precio});
+  if(!D.cfg.tramos)D.cfg.tramos=[];D.cfg.tramos.push({id:'tr'+Date.now(),nombre:n,ini,fin,precio});
   g('tr-n').value='';g('tr-ini').value='';g('tr-fin').value='';g('tr-precio').value='';
-  rTramos();rAg();
+  sv();rTramos();rAg();
 }
-async function delTramo(id){
-  const{error}=await sb.from('tramos_precio').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.cfg.tramos=D.cfg.tramos.filter(t=>t.id!==id);rTramos();rAg();
-}
+function delTramo(i){D.cfg.tramos.splice(i,1);sv();rTramos();rAg();}
 
 // ── CONFIG: FERIADOS ──────────────────────────────────────
 function rFeriados(){
@@ -2120,61 +1548,35 @@ function rFeriados(){
     </div>`;
   }).join(''):'<p style="font-size:12px;color:var(--text3)">Sin feriados cargados.</p>';
 }
-async function saveFeriadoPrecio(){
-  const v=parseInt(g('feriado-precio').value)||24000;
-  const{error}=await sb.from('configuracion').update({precio_feriado:v}).eq('id',1);
-  if(error){alert('No se pudo guardar: '+error.message);return;}
-  D.cfg.precioFeriado=v;rAg();
-}
-async function saveFinSemanaPrecio(){
-  const v=parseInt(g('finsemana-precio').value)||24000;
-  const{error}=await sb.from('configuracion').update({precio_fin_semana:v}).eq('id',1);
-  if(error){alert('No se pudo guardar: '+error.message);return;}
-  D.cfg.precioFinSemana=v;rAg();
-}
-async function addFeriado(){
+function saveFeriadoPrecio(){const v=parseInt(g('feriado-precio').value)||24000;D.cfg.precioFeriado=v;sv();rAg();}
+function saveFinSemanaPrecio(){const v=parseInt(g('finsemana-precio').value)||24000;D.cfg.precioFinSemana=v;sv();rAg();}
+function addFeriado(){
   const fecha=g('fer-fecha').value,nombre=g('fer-n').value.trim();
   if(!fecha||!nombre){alert('Completa fecha y nombre del feriado.');return;}
-  const{error}=await sb.from('feriados_propios').insert({fecha,nombre});
-  if(error){alert('No se pudo guardar: '+error.message);return;}
   if(!D.feriadosPropios)D.feriadosPropios=[];D.feriadosPropios.push({fecha,nombre});
-  g('fer-fecha').value='';g('fer-n').value='';rFeriados();rAg();
+  g('fer-fecha').value='';g('fer-n').value='';sv();rFeriados();rAg();
 }
-async function delFeriado(fecha,nombre,esPropio){
+function delFeriado(fecha,nombre,esPropio){
   if(!confirm('¿Eliminar este día feriado?'))return;
-  if(esPropio){
-    const{error}=await sb.from('feriados_propios').delete().eq('fecha',fecha).eq('nombre',nombre);
-    if(error){alert('No se pudo eliminar: '+error.message);return;}
-    D.feriadosPropios=(D.feriadosPropios||[]).filter(p=>!(p.fecha===fecha&&p.nombre===nombre));
-  }else{
-    const{error}=await sb.from('feriados_oficiales_eliminados').insert({fecha});
-    if(error){alert('No se pudo eliminar: '+error.message);return;}
-    if(!D.feriadosOficialesEliminados)D.feriadosOficialesEliminados=[];if(!D.feriadosOficialesEliminados.includes(fecha))D.feriadosOficialesEliminados.push(fecha);
-  }
-  rFeriados();rAg();
+  if(esPropio){D.feriadosPropios=(D.feriadosPropios||[]).filter(p=>!(p.fecha===fecha&&p.nombre===nombre));}
+  else{if(!D.feriadosOficialesEliminados)D.feriadosOficialesEliminados=[];if(!D.feriadosOficialesEliminados.includes(fecha))D.feriadosOficialesEliminados.push(fecha);}
+  sv();rFeriados();rAg();
 }
 
 // ── CONFIG: MEMBRESÍAS ────────────────────────────────────
 function rMembs(){
   const membs=D.cfg.membs||[];
-  g('memb-list').innerHTML=membs.length?membs.map((m)=>{const lbl=m.tipo==='fijo'?`-${fmt(m.valor)} fijo`:m.tipo==='pct'?`-${m.valor}%`:`Precio fijo ${fmt(m.valor)}`;
-    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="bcyan" style="min-width:90px">${m.nombre}</span><span style="font-size:12px;color:var(--text2);margin-left:auto">${lbl}</span><button class="btn icon-only sm d" onclick="delMemb('${m.id}')"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`;
+  g('memb-list').innerHTML=membs.length?membs.map((m,i)=>{const lbl=m.tipo==='fijo'?`-${fmt(m.valor)} fijo`:m.tipo==='pct'?`-${m.valor}%`:`Precio fijo ${fmt(m.valor)}`;
+    return`<div style="display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)"><span class="bcyan" style="min-width:90px">${m.nombre}</span><span style="font-size:12px;color:var(--text2);margin-left:auto">${lbl}</span><button class="btn icon-only sm d" onclick="delMemb(${i})"><i class="ti ti-trash" style="font-size:13px"></i></button></div>`;
   }).join(''):'<p style="font-size:12px;color:var(--text3)">Sin membresías configuradas.</p>';
 }
-async function addMemb(){
+function addMemb(){
   const n=g('memb-n').value.trim(),t=g('memb-t').value,v=parseInt(g('memb-v').value);
   if(!n||isNaN(v)){alert('Completa nombre y valor de la membresía.');return;}
-  const tipoDb=t==='pct'?'porcentaje':t==='precio'?'preciofijo':'fijo';
-  const{data,error}=await sb.from('membresias').insert({nombre:n,tipo:tipoDb,valor:v}).select().single();
-  if(error){alert('No se pudo guardar: '+error.message);return;}
-  if(!D.cfg.membs)D.cfg.membs=[];D.cfg.membs.push({id:data.id,nombre:data.nombre,tipo:t,valor:data.valor});
-  g('memb-n').value='';g('memb-v').value='';rMembs();updSelNiveles();
+  if(!D.cfg.membs)D.cfg.membs=[];D.cfg.membs.push({id:'mb'+Date.now(),nombre:n,tipo:t,valor:v});
+  g('memb-n').value='';g('memb-v').value='';sv();rMembs();updSelNiveles();
 }
-async function delMemb(id){
-  const{error}=await sb.from('membresias').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.cfg.membs=D.cfg.membs.filter(m=>m.id!==id);rMembs();updSelNiveles();
-}
+function delMemb(i){D.cfg.membs.splice(i,1);sv();rMembs();updSelNiveles();}
 
 // ── CONFIG: NIVELES ────────────────────────────────────────
 function rNivelesCfg(){
@@ -2198,256 +1600,6 @@ function addPromo(){
 }
 function delPromo(i){D.promos.splice(i,1);sv();rPromos();}
 
-// ── VENTAS DIRECTAS ───────────────────────────────────────
-let vdQty={},vdCatSel=null;
-
-function openVD(){
-  vdQty={};vdCatSel=null;
-  g('vd-cliente').value='';g('vd-search').value='';g('vd-monto').value='';
-  g('vd-metodo').value='Efectivo';g('vd-estado-pago').value='cobrado';
-  g('vd-cliente-drop').classList.add('hidden');
-  rVDCats();rVDProds();updVDTotal();
-  g('m-venta').classList.remove('hidden');
-}
-function rVDCats(){
-  const cats=[...new Set(D.productos.map(p=>p.cat))];
-  g('vd-cats').innerHTML=`<span class="badge${!vdCatSel?' bblue':' bg'}" style="cursor:pointer" onclick="vdSelCat(null)">Todos</span>`+
-    cats.map(c=>`<span class="badge${vdCatSel===c?' bblue':' bg'}" style="cursor:pointer" onclick="vdSelCat('${c}')">${c}</span>`).join('');
-}
-function vdSelCat(c){vdCatSel=c;rVDCats();rVDProds();}
-function rVDProds(){
-  const s=(g('vd-search').value||'').toLowerCase().trim();
-  // código de barras exacto
-  const ex=D.productos.find(p=>p.cod&&p.cod===s);
-  if(ex&&s){vdQty[ex.id]=(vdQty[ex.id]||0)+1;g('vd-search').value='';updVDTotal();rVDProds();return;}
-  let pr=D.productos;
-  if(vdCatSel)pr=pr.filter(p=>p.cat===vdCatSel);
-  if(s)pr=pr.filter(p=>p.nombre.toLowerCase().includes(s)||(p.cod&&p.cod.includes(s)));
-  const el=g('vd-prods');
-  if(!pr.length){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:12px">Sin resultados.</p>';return;}
-  const cats=vdCatSel?[vdCatSel]:[...new Set(pr.map(p=>p.cat))];
-  el.innerHTML=cats.map(cat=>{
-    const its=pr.filter(p=>p.cat===cat);if(!its.length)return'';
-    return`<div class="ps"><div class="psh" onclick="tgPS(this)">${cat} <span style="font-size:10px;color:var(--text3);font-weight:400">(${its.length})</span><i class="ti ti-chevron-down" style="font-size:13px;color:var(--text3);transition:transform .2s"></i></div>
-    <div class="psb open">${its.map(p=>{const q=vdQty[p.id]||0;
-      return`<div class="pr" style="display:flex;align-items:center;gap:8px;padding:8px 12px">
-        <div style="flex:1"><div style="font-size:13px;font-weight:${q>0?700:500}">${p.nombre}</div>
-        <div style="font-size:11px;color:var(--text3)">${fmt(p.precio)}${p.cod?` · <code style="font-size:10px">${p.cod}</code>`:''}${p.stock<=p.smin?` · <span style="color:#92400E;font-weight:600">stock:${p.stock}</span>`:''}</div></div>
-        <div style="display:flex;align-items:center;gap:6px">
-          <button class="qb" onclick="chVDQ('${p.id}',-1)">−</button>
-          <div class="qv" id="vdqty-${p.id}">${q}</div>
-          <button class="qb" onclick="chVDQ('${p.id}',1)">+</button>
-        </div></div>`;}).join('')}</div></div>`;
-  }).join('');
-}
-function chVDQ(pid,d){
-  vdQty[pid]=Math.max(0,(vdQty[pid]||0)+d);
-  const el=g('vdqty-'+pid);if(el)el.textContent=vdQty[pid];
-  updVDTotal();
-}
-function updVDTotal(){
-  let total=0;
-  const added=D.productos.filter(p=>(vdQty[p.id]||0)>0);
-  const html=added.length?added.map(p=>`<div style="display:flex;justify-content:space-between;font-size:12px;padding:2px 0"><span>${vdQty[p.id]}× ${p.nombre}</span><span style="font-weight:600">${fmt(vdQty[p.id]*p.precio)}</span></div>`).join(''):'Ninguno aún.';
-  added.forEach(p=>{total+=vdQty[p.id]*p.precio;});
-  g('vd-added').innerHTML=html;
-  g('vd-total').textContent=fmt(total);
-  // autocompletar monto si el campo está vacío
-  if(!g('vd-monto').value||g('vd-monto').value==='0')g('vd-monto').value=total||'';
-}
-function sugVDCliente(){
-  const val=g('vd-cliente').value.toLowerCase();const drop=g('vd-cliente-drop');
-  if(!val){drop.classList.add('hidden');return;}
-  const m=D.jugadores.filter(j=>j.nombre.toLowerCase().includes(val)).slice(0,6);
-  if(!m.length){drop.classList.add('hidden');return;}
-  drop.innerHTML=m.map(j=>`<div class="jdi" onclick="pickVDCliente('${j.nombre.replace(/'/g,"\\'")}')"><span>${j.nombre}</span></div>`).join('');
-  drop.classList.remove('hidden');
-}
-function pickVDCliente(nombre){g('vd-cliente').value=nombre;g('vd-cliente-drop').classList.add('hidden');}
-async function saveVD(){
-  const items=D.productos.filter(p=>(vdQty[p.id]||0)>0);
-  if(!items.length){alert('Agrega al menos un producto.');return;}
-  const total=items.reduce((s,p)=>s+vdQty[p.id]*p.precio,0);
-  const monto=parseInt(g('vd-monto').value)||0;
-  const metodo=g('vd-metodo').value;
-  const estadoPago=g('vd-estado-pago').value;
-  const cliente=g('vd-cliente').value.trim()||null;
-  const productos=items.map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:vdQty[p.id],cat:p.cat}));
-  const pago={monto:estadoPago==='cobrado'?monto:0,metodo,cliente};
-  const venta={
-    fecha:ds(new Date()),hora:new Date().toTimeString().slice(0,5),
-    cliente,productos,pago_monto:estadoPago==='cobrado'?monto:0,pago_metodo:metodo,
-    estado_pago:estadoPago,total,created_at:new Date().toISOString()
-  };
-  // Guardar en Supabase tabla ventas_directas
-  const{data:vd,error}=await sb.from('ventas_directas').insert({
-    fecha:venta.fecha,hora:venta.hora,cliente,
-    productos:JSON.stringify(productos),
-    total,pago_monto:venta.pago_monto,pago_metodo:metodo,
-    estado_pago:estadoPago
-  }).select().single();
-  if(error){alert('No se pudo registrar la venta: '+error.message);return;}
-  // Descontar stock
-  const stockUpdates=[];
-  for(const p of items){
-    const prod=D.productos.find(x=>x.id===p.id);
-    if(prod){prod.stock=Math.max(0,prod.stock-vdQty[p.id]);stockUpdates.push({id:prod.id,stock:prod.stock});}
-  }
-  for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
-  // Audit
-  const detalle=items.map(p=>`${vdQty[p.id]}× ${p.nombre}`).join(', ')+(cliente?' → '+cliente:'');
-  audit('Venta directa','venta_directa',`${fmt(total)} · ${detalle}`);
-  // Agregar a D local
-  if(!D.ventasDirectas)D.ventasDirectas=[];
-  D.ventasDirectas.push({...venta,id:vd.id});
-  cM('m-venta');rVD();rI();rCaja();
-}
-async function cargarVentasDirectas(){
-  const desde=new Date();desde.setDate(desde.getDate()-30);
-  const{data,error}=await sb.from('ventas_directas').select('*').gte('fecha',ds(desde)).order('created_at',{ascending:false});
-  if(!error&&data){
-    D.ventasDirectas=(data||[]).map(v=>({
-      id:v.id,fecha:v.fecha,hora:v.hora,cliente:v.cliente,
-      productos:typeof v.productos==='string'?JSON.parse(v.productos):(v.productos||[]),
-      total:v.total,pago_monto:v.pago_monto,pago_metodo:v.pago_metodo,estado_pago:v.estado_pago
-    }));
-  }
-}
-function rVD(){
-  const ventas=D.ventasDirectas||[];
-  const hoy=ds(new Date());const ventasHoy=ventas.filter(v=>v.fecha===hoy);
-  const totalHoy=ventasHoy.reduce((s,v)=>s+v.total,0);
-  const cobradoHoy=ventasHoy.filter(v=>v.estado_pago==='cobrado').reduce((s,v)=>s+v.pago_monto,0);
-  g('vd-stats').innerHTML=[
-    {l:'Ventas hoy',v:ventasHoy.length},{l:'Total',v:fmt(totalHoy)},{l:'Cobrado',v:fmt(cobradoHoy)},{l:'Pendiente',v:fmt(Math.max(0,totalHoy-cobradoHoy))}
-  ].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
-  g('vd-tbody').innerHTML=ventasHoy.length?ventasHoy.map(v=>{
-    const prods=(v.productos||[]).map(p=>`${p.qty}× ${p.nombre}`).join(', ');
-    return`<tr>
-      <td style="color:var(--text3)">${v.hora||''}</td>
-      <td style="font-size:12px;max-width:220px">${prods}</td>
-      <td>${v.cliente||'<span style="color:var(--text3)">—</span>'}</td>
-      <td style="font-weight:700">${fmt(v.total)}</td>
-      <td>${v.pago_metodo||'—'}</td>
-      <td>${v.estado_pago==='cobrado'?'<span class="badge bgreen">Cobrado</span>':'<span class="badge bamber">Pendiente</span>'}</td>
-      <td><button class="btn icon-only sm d" onclick="delVD('${v.id}')"><i class="ti ti-trash" style="font-size:13px"></i></button></td>
-    </tr>`;
-  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:14px">Sin ventas hoy.</td></tr>';
-}
-async function delVD(id){
-  if(!confirm('¿Eliminar esta venta?'))return;
-  const{error}=await sb.from('ventas_directas').delete().eq('id',id);
-  if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.ventasDirectas=(D.ventasDirectas||[]).filter(v=>v.id!==id);rVD();rCaja();
-}
-
-// ── EDITAR COMANDA CERRADA (admin) ────────────────────────
-let ecRid=null,ecQty={};
-
-function openEditCerrada(rid){
-  if(role!=='admin')return;
-  const r=D.reservas.find(x=>x.id===rid);if(!r||r.estado!=='cerrado')return;
-  ecRid=rid;
-  // Inicializar cantidades con lo que ya tiene la comanda
-  ecQty={};
-  (r.productos||[]).forEach(p=>{ecQty[p.id]=p.qty;});
-  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
-  g('edit-cerrada-title').innerHTML=`<i class="ti ti-edit" style="margin-right:8px;color:var(--amber)"></i>Editar comanda · ${c.nombre} · ${r.horario} · ${fmtD(new Date(r.fecha+'T12:00:00'))}`;
-  // selector quién paga
-  const jugs=(r.jugadores||[]).filter(j=>j);
-  g('ec-pago-q').innerHTML='<option value="">-- Jugador --</option>'+jugs.map(j=>`<option value="${j}">${j}</option>`).join('');
-  g('ec-search').value='';
-  rECProds();rECPagosList();updECTotales();
-  g('m-edit-cerrada').classList.remove('hidden');
-}
-function rECProds(){
-  const s=(g('ec-search').value||'').toLowerCase().trim();
-  let pr=D.productos;
-  if(s)pr=pr.filter(p=>p.nombre.toLowerCase().includes(s)||(p.cod&&p.cod.includes(s)));
-  const el=g('ec-prods-add');
-  if(!s&&!pr.length){el.innerHTML='';return;}
-  if(!s){el.innerHTML='<p style="font-size:12px;color:var(--text3);padding:8px">Escribe para buscar productos.</p>';return;}
-  el.innerHTML=pr.slice(0,8).map(p=>{const q=ecQty[p.id]||0;
-    return`<div class="pr" style="display:flex;align-items:center;gap:8px;padding:7px 12px">
-      <div style="flex:1"><div style="font-size:13px;font-weight:500">${p.nombre}</div>
-      <div style="font-size:11px;color:var(--text3)">${fmt(p.precio)}</div></div>
-      <div style="display:flex;align-items:center;gap:6px">
-        <button class="qb" onclick="chECQ('${p.id}',-1)">−</button>
-        <div class="qv" id="ecqty-${p.id}">${q}</div>
-        <button class="qb" onclick="chECQ('${p.id}',1)">+</button>
-      </div></div>`;
-  }).join('');
-  // También renderizar productos actuales en comanda
-  rECProdsActuales();
-}
-function rECProdsActuales(){
-  const added=D.productos.filter(p=>(ecQty[p.id]||0)>0);
-  g('ec-prods-cur').innerHTML=added.length?
-    `<div style="font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Productos en comanda</div>`+
-    added.map(p=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0;border-bottom:1px solid var(--border)">
-      <span style="flex:1;font-size:13px">${p.nombre}</span>
-      <div style="display:flex;align-items:center;gap:6px">
-        <button class="qb" onclick="chECQ('${p.id}',-1)">−</button>
-        <div class="qv" id="ecqty2-${p.id}">${ecQty[p.id]||0}</div>
-        <button class="qb" onclick="chECQ('${p.id}',1)">+</button>
-      </div>
-      <span style="font-size:12px;font-weight:600;min-width:70px;text-align:right">${fmt((ecQty[p.id]||0)*p.precio)}</span>
-    </div>`).join('')
-  :'<p style="font-size:12px;color:var(--text3)">Sin productos.</p>';
-}
-function chECQ(pid,d){
-  ecQty[pid]=Math.max(0,(ecQty[pid]||0)+d);
-  ['ecqty-','ecqty2-'].forEach(pref=>{const el=g(pref+pid);if(el)el.textContent=ecQty[pid];});
-  rECProdsActuales();updECTotales();
-}
-function rECPagosList(){
-  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
-  g('ec-pagos-list').innerHTML=(r.pagos||[]).length?
-    (r.pagos||[]).map((p,i)=>`<div class="pagorow"><i class="ti ti-check-circle" style="color:#3d6b0a;font-size:16px"></i>
-      <span style="font-weight:700;font-family:Poppins,sans-serif">${fmt(p.monto)}</span>
-      <span class="badge bg">${p.metodo}</span>
-      ${p.quien?`<span style="color:var(--text2);font-size:12px">${p.quien}</span>`:''}
-      <button class="btn sm d icon-only" onclick="delECPago(${i})" style="margin-left:auto"><i class="ti ti-x"></i></button>
-    </div>`).join('')
-  :'<p style="font-size:12px;color:var(--text3)">Sin pagos.</p>';
-  updECTotales();
-}
-function addECPago(){
-  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
-  const m=parseInt(g('ec-pago-m').value)||0;if(m<=0)return;
-  if(!r.pagos)r.pagos=[];
-  r.pagos.push({monto:m,metodo:g('ec-pago-met').value,quien:g('ec-pago-q').value||'',fecha:new Date().toISOString()});
-  g('ec-pago-m').value='';rECPagosList();
-}
-function delECPago(i){
-  const r=D.reservas.find(x=>x.id===ecRid);if(!r||!r.pagos)return;
-  r.pagos.splice(i,1);rECPagosList();
-}
-function updECTotales(){
-  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
-  const{precioCancha}=calcTotalesPorJugador(r,{},{});
-  let tp=0;D.productos.forEach(p=>{tp+=(ecQty[p.id]||0)*p.precio;});
-  const tot=precioCancha+tp;
-  const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);
-  const pend=Math.max(0,tot-cob);
-  g('ec-tot-c').textContent=fmt(precioCancha);
-  g('ec-tot-p').textContent=fmt(tp);
-  g('ec-tot-t').textContent=fmt(tot);
-  g('ec-tot-cob').textContent=fmt(cob);
-  g('ec-tot-pend').textContent=fmt(pend);
-}
-async function saveEditCerrada(){
-  const r=D.reservas.find(x=>x.id===ecRid);if(!r)return;
-  // Actualizar productos de la reserva
-  r.productos=D.productos.filter(p=>(ecQty[p.id]||0)>0).map(p=>({
-    id:p.id,nombre:p.nombre,precio:p.precio,qty:ecQty[p.id],cat:p.cat,asignados:[],jugador:null
-  }));
-  const ok=await syncReservaCompleta(ecRid);
-  if(!ok){alert('No se pudo guardar. Revisa tu conexión.');return;}
-  audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
-  cM('m-edit-cerrada');rCaja();rAll();
-}
-
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','semana','mes'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));rCaja();}
 function getCajaRange(){
@@ -2466,25 +1618,16 @@ function rCaja(){
     const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);tCob+=cob;tPend+=Math.max(0,(precioCancha+tp)-cob);
     (r.pagos||[]).forEach(p=>{if(!mets[p.metodo])mets[p.metodo]=0;mets[p.metodo]+=p.monto;});});
   const blq=(D.bloqueos||[]).filter(b=>b.fecha>=from&&b.fecha<=to&&b.genIngreso&&b.valor>0);const tBlq=blq.reduce((s,b)=>s+b.valor,0);
-  // Ventas directas
-  const vds=(D.ventasDirectas||[]).filter(v=>v.fecha>=from&&v.fecha<=to);
-  const tVD=vds.reduce((s,v)=>s+v.total,0);
-  const cobVD=vds.filter(v=>v.estado_pago==='cobrado').reduce((s,v)=>s+v.pago_monto,0);
-  vds.forEach(v=>{(v.productos||[]).forEach(p=>{if(!pV[p.nombre])pV[p.nombre]=0;pV[p.nombre]+=p.qty;});
-    if(v.estado_pago==='cobrado'&&v.pago_metodo){if(!mets[v.pago_metodo])mets[v.pago_metodo]=0;mets[v.pago_metodo]+=v.pago_monto;}});
-  const tot=tC+tP+tBlq+tVD;
-  const totCob=tCob+cobVD;
-  const totPend=tPend+Math.max(0,tVD-cobVD);
-  g('cmet').innerHTML=[{l:'Ingresos totales',v:fmt(tot)},{l:'Cobrado',v:fmt(totCob)},{l:'Pendiente',v:fmt(totPend)},{l:'Turnos cerrados',v:res.length}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
+  const tot=tC+tP+tBlq;
+  g('cmet').innerHTML=[{l:'Ingresos totales',v:fmt(tot)},{l:'Cobrado',v:fmt(tCob)},{l:'Pendiente',v:fmt(tPend)},{l:'Turnos cerrados',v:res.length}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
   g('cmetodos').innerHTML=Object.entries(mets).length?Object.entries(mets).map(([m,v])=>`<div class="sl"><span style="color:var(--text2)">${m}</span><span style="font-weight:700">${fmt(v)}</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin pagos en este período.</p>';
   g('cprods').innerHTML=Object.entries(pV).length?Object.entries(pV).sort((a,b)=>b[1]-a[1]).slice(0,6).map(([n,q])=>`<div class="sl"><span style="color:var(--text2)">${n}</span><span style="font-weight:700">${q} uds</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin ventas en este período.</p>';
   const cblqCard=g('cblq-card');
   if(blq.length){cblqCard.classList.remove('hidden');g('cblq').innerHTML=blq.map(b=>{const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;return`<div class="sl"><span style="color:var(--text2)">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${bt.label}${b.titulo?' · '+b.titulo:''}</span><span style="font-weight:700">${fmt(b.valor)}</span></div>`;}).join('');}
   else{cblqCard.classList.add('hidden');}
   g('chist').innerHTML=res.length?res.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const{precioCancha}=calcTotalesPorJugador(r,{},{});const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const t=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,t-cob);const mets2=[...new Set((r.pagos||[]).map(p=>p.metodo))].join(', ')||'—';
-    const editBtn=role==='admin'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
-    return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td>${editBtn}</tr>`;
-  }).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
+    return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td></tr>`;
+  }).join(''):'<tr><td colspan="10" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
 }
 
 // ── DEUDAS ────────────────────────────────────────────────
@@ -2525,18 +1668,14 @@ function rDeudor(nombre){
       ${pend>0?`<div style="display:flex;gap:6px;margin-top:8px"><input type="number" id="pay-${d.id}" placeholder="Monto a abonar" style="flex:1;height:32px;font-size:12px"><button class="btn p sm" onclick="payDebt('${d.id}')">Abonar</button></div>`:''}
     </div>`;}).join('')}`;
 }
-async function payDebt(did){
+function payDebt(did){
   const d=D.deudas.find(x=>x.id===did);if(!d)return;const inp=g('pay-'+did);const monto=parseInt(inp.value)||0;if(monto<=0)return;
-  const nuevoPagado=(d.pagado||0)+monto;const nuevoEstado=nuevoPagado>=d.monto?'Pagada':'Abono parcial';
-  const{error}=await sb.from('deudas').update({pagado:nuevoPagado,estado:nuevoEstado}).eq('id',did);
-  if(error){alert('No se pudo registrar el abono: '+error.message);return;}
-  d.pagado=nuevoPagado;d.estado=nuevoEstado;rDeudas();
+  d.pagado=(d.pagado||0)+monto;if(d.pagado>=d.monto){d.estado='Pagada';}else d.estado='Abono parcial';
+  sv();rDeudas();
 }
-async function toggleDebtBlock(nombre){
+function toggleDebtBlock(nombre){
   const items=(D.deudas||[]).filter(d=>d.jugador===nombre);const nowBlocked=!items.some(i=>i.bloqueado);
-  const{error}=await sb.from('deudas').update({bloqueado:nowBlocked}).in('id',items.map(i=>i.id));
-  if(error){alert('No se pudo actualizar: '+error.message);return;}
-  items.forEach(i=>i.bloqueado=nowBlocked);rDeudas();
+  items.forEach(i=>i.bloqueado=nowBlocked);sv();rDeudas();
 }
 
 // ── CLASES (trazabilidad) ─────────────────────────────────
@@ -2665,78 +1804,8 @@ function loadDemoData(){
   ];
 }
 
-// auto-login
-(async()=>{
-  const{data:{session}}=await sb.auth.getSession();
-  if(session&&session.user){
-    const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
-    if(perfil){
-      role=perfil.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
-      try{D=JSON.parse(localStorage.getItem('cf-data-v1'))||D;}catch(e){}
-      await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
-      rAll();
-      g('login-screen').style.display='none';
-      g('main-app').classList.remove('hidden');
-      return;
-    }
-  }
-  ld();g('login-screen').style.display='flex';g('main-app').classList.add('hidden');
-})();
-
-// — SUSCRIPCIÓN —
-async function calcularEstadoSuscripcion(){
-  try{
-    const{data,error}=await sb.from('suscripciones_club').select('*').eq('club_id','sauce-padel').single();
-    if(error||!data)return 'activo';
-    const hoy=new Date();hoy.setHours(0,0,0,0);
-    const fin=data.fecha_fin_ciclo?new Date(data.fecha_fin_ciclo+'T00:00:00'):null;
-    const ini=data.fecha_inicio_ciclo?new Date(data.fecha_inicio_ciclo+'T00:00:00'):null;
-    if(data.estado==='marcha_blanca')return 'marcha_blanca';
-    if(!fin||!ini)return data.estado||'activo';
-    const diasRestantes=Math.ceil((fin-hoy)/(1000*60*60*24));
-    const diasAtraso=Math.ceil((hoy-fin)/(1000*60*60*24));
-    if(hoy<=fin){
-      if(diasRestantes<=5)return 'por_vencer';
-      return 'activo';
-    } else {
-      if(diasAtraso<=data.dias_gracia)return 'vencido_gracia';
-      if(diasAtraso<=data.dias_para_suspendido)return 'limitado';
-      return 'suspendido';
-    }
-  }catch(e){return 'activo';}
-}
-
-async function mostrarBannerSuscripcion(){
-  const estado=await calcularEstadoSuscripcion();
-  const banner=document.getElementById('sub-banner');
-  const txt=document.getElementById('sub-banner-txt');
-  const btnClose=document.getElementById('sub-banner-close');
-  if(!banner)return;
-  const hoyStr=new Date().toISOString().slice(0,10);
-  const cerradoHoy=localStorage.getItem('sub-banner-cerrado')===hoyStr;
-  const configs={
-    marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 Bienvenido a CanchaFlow. Estás en período de prueba gratuita. Tu primera mensualidad comienza el 1 de julio.',closeable:true},
-    por_vencer:{bg:'#dbeafe',color:'#1e40af',txt:'⏰ Tu suscripción vence pronto. Recuerda regularizar el pago para mantener activo el servicio.',closeable:true},
-    vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Suscripción pendiente de pago. Puedes regularizar en los próximos días para mantener el servicio activo.',closeable:true},
-    limitado:{bg:'#fee2e2',color:'#991b1b',txt:'🔒 Servicio temporalmente limitado por pago pendiente. Regulariza la mensualidad para continuar usando CanchaFlow.',closeable:false},
-    suspendido:{bg:'#fca5a5',color:'#7f1d1d',txt:'❌ Servicio suspendido por pago pendiente. Tu información está resguardada. Regulariza para reactivar el acceso.',closeable:false},
-  };
-  const cfg=configs[estado];
-  if(!cfg||estado==='activo'){banner.style.display='none';return;}
-  if(cerradoHoy&&cfg.closeable){banner.style.display='none';return;}
-  banner.style.display='flex';
-  banner.style.background=cfg.bg;
-  banner.style.color=cfg.color;
-  txt.textContent=cfg.txt;
-  btnClose.style.display=cfg.closeable?'block':'none';
-}
-
-function cerrarBanner(){
-  const hoyStr=new Date().toISOString().slice(0,10);
-  localStorage.setItem('sub-banner-cerrado',hoyStr);
-  document.getElementById('sub-banner').style.display='none';
-}
-
+ld();
+g('main-app').classList.add('hidden');
 </script>
 </body>
 </html>
