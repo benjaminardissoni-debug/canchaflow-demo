@@ -1302,7 +1302,7 @@ function genSlots(){
   const hm=n=>String(Math.floor(n/60)).padStart(2,'0')+':'+String(n%60).padStart(2,'0');
   while(cur+dur<=end){slots.push({label:`${hm(cur)}–${hm(cur+dur)}`,start:hm(cur)});cur+=dur;}return slots;
 }
-function getAF(){const d=new Date();d.setDate(d.getDate()+agOff);return d;}
+function localDate(){const d=new Date();return new Date(d.getTime()-d.getTimezoneOffset()*60000);}function getAF(){const d=localDate();d.setDate(d.getDate()+agOff);return d;}
 function agD(n){agOff+=n;rAg();}
 function openAgDatePicker(){
   const inp=g('ag-datepick');inp.value=ds(getAF());
@@ -1311,7 +1311,7 @@ function openAgDatePicker(){
 }
 function jumpToAgDate(){
   const val=g('ag-datepick').value;if(!val)return;
-  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const hoy=localDate();hoy.setHours(0,0,0,0);
   const target=new Date(val+'T00:00:00');
   agOff=Math.round((target-hoy)/86400000);
   g('ag-datepick').style.pointerEvents='none';
@@ -2534,7 +2534,7 @@ async function toggleDebtBlock(nombre){
 
 // ── CLASES (trazabilidad) ─────────────────────────────────
 function getClasesPeriodRange(periodo){
-  const hoy=new Date();hoy.setHours(0,0,0,0);
+  const hoy=localDate();hoy.setHours(0,0,0,0);
   if(periodo==='semana'){const from=new Date(hoy);from.setDate(from.getDate()-7);return{from:ds(from),to:ds(hoy)};}
   if(periodo==='mes'){const from=new Date(hoy);from.setDate(from.getDate()-30);return{from:ds(from),to:ds(hoy)};}
   if(periodo==='anio'){const from=new Date(hoy);from.setDate(from.getDate()-365);return{from:ds(from),to:ds(hoy)};}
@@ -2681,7 +2681,7 @@ async function calcularEstadoSuscripcion(){
   try{
     const{data,error}=await sb.from('suscripciones_club').select('*').eq('club_id','sauce-padel').single();
     if(error||!data)return 'activo';
-    const hoy=new Date();hoy.setHours(0,0,0,0);
+    const hoy=localDate();hoy.setHours(0,0,0,0);
     const fin=data.fecha_fin_ciclo?new Date(data.fecha_fin_ciclo+'T00:00:00'):null;
     const ini=data.fecha_inicio_ciclo?new Date(data.fecha_inicio_ciclo+'T00:00:00'):null;
     if(data.estado==='marcha_blanca')return 'marcha_blanca';
