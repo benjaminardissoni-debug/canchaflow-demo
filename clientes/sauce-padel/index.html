@@ -1801,8 +1801,8 @@ function updCS(){
     return`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:2px 0"><span>${q}× ${p.nombre} ${al}</span><span style="font-weight:600">${fmt(q*p.precio)}</span></div>`;}).join('');}
   let jugHtml='';
   if(jugs.length){jugHtml='<div style="border-top:.5px solid var(--border);margin-top:8px;padding-top:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Total por jugador</div>'+
-    jugs.map(j=>{const t=totales[j];const descTag=t.descLabel?`<span style="font-size:9px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 5px;border-radius:8px;font-weight:600;margin-left:4px">${t.descLabel}</span>`:'';const prodDesc=t.productos.length?t.productos.map(p=>p.nombre.split(' ')[0]+' '+fmt(p.monto)).join(' + '):'';const desc='Cancha '+fmt(t.cancha)+(prodDesc?' + '+prodDesc:'');
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:var(--gray-light);margin-bottom:3px"><div><span style="font-size:12px;font-weight:700">${j.split(' ')[0]}</span>${descTag}<span style="font-size:10px;color:var(--text3);margin-left:6px">${desc}</span></div><span style="font-size:14px;font-weight:700;font-family:Poppins,sans-serif">${fmt(t.total)}</span></div>`;
+    jugs.map(j=>{const t=totales[j];const descTag=t.descLabel?`<span style="font-size:9px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 5px;border-radius:8px;font-weight:600;margin-left:4px">${t.descLabel}</span>`:'';const prodDesc=t.productos.length?t.productos.map(p=>p.nombre+' '+fmt(p.monto)).join(' + '):'';const desc='Cancha '+fmt(t.cancha)+(prodDesc?' + '+prodDesc:'');
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:var(--gray-light);margin-bottom:3px"><div><span style="font-size:12px;font-weight:700">${j}</span>${descTag}<span style="font-size:10px;color:var(--text3);margin-left:6px">${desc}</span></div><span style="font-size:14px;font-weight:700;font-family:Poppins,sans-serif">${fmt(t.total)}</span></div>`;
     }).join('')+'</div>';}
   g('com-added').innerHTML=itemsHtml+jugHtml;rPB();
 }
@@ -1852,10 +1852,10 @@ function rCierreJugs(totales,jugs,r,cobPorJugador){
     const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro').split(' ')[0]}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
     let optsHtml='';
     if(est!=='pagado'){
-      const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2.split(' ')[0]} lo cubre</button>`;}).join('');
+      const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2} lo cubre</button>`;}).join('');
       optsHtml=`<div class="cjug-opts"><button class="cjug-opt${est==='deuda'?' sel-deuda':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','deuda',null)"><i class="ti ti-clock" style="font-size:11px"></i> Registrar deuda</button>${cubOpts}<button class="cjug-opt${est==='cortesia'?' sel-cortesia':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cortesia',null)"><i class="ti ti-gift" style="font-size:11px"></i> Cortesía / condonar</button></div>`;
     }
-    const prodDesc=t.productos.length?' · '+t.productos.map(p=>p.nombre.split(' ')[0]+' '+fmt(p.monto)).join(' + '):'';
+    const prodDesc=t.productos.length?' · '+t.productos.map(p=>p.nombre+' '+fmt(p.monto)).join(' + '):'';
     return`<div class="cjug-row ${rowCls}">
       <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:${optsHtml?'8px':'0'}">
         <div style="display:flex;align-items:center;gap:10px">${estIcon}<div><div style="font-weight:700;font-family:Poppins,sans-serif">${j}${descTag}</div><div style="font-size:11px;color:var(--text3)">Cancha ${fmt(t.cancha)}${prodDesc}</div></div></div>
