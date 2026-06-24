@@ -1675,7 +1675,7 @@ function rCortesias(){
     const hasBenef=cort||membCalc.hasDescuento;
     const pill=document.createElement('div');
     pill.style.cssText=`display:flex;align-items:center;gap:4px;padding:4px 10px;border:1.5px solid ${hasBenef?'#C0DD97':'var(--border)'};border-radius:20px;font-size:12px;cursor:pointer;${hasBenef?'background:#EAF3DE;color:#3B6D11':''}`;
-    pill.innerHTML=`<span style="font-weight:700">${jugData?jugData.nombre:j}</span><span style="opacity:.7;margin-left:2px">${label}</span><span style="margin-left:3px;font-size:13px">✎</span>`;
+    pill.innerHTML=`<span style="font-weight:700">${(D.jugadores.find(x=>x.nombre===j||x.nombre.startsWith(j+' ')||j.startsWith(x.nombre+' '))||{nombre:j}).nombre}</span><span style="opacity:.7;margin-left:2px">${label}</span><span style="margin-left:3px;font-size:13px">✎</span>`;
     pill.onclick=function(){openCortesia(j);};row.appendChild(pill);
   });
   el.appendChild(row);
