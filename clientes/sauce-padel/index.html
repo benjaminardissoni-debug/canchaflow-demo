@@ -124,37 +124,37 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .login-tagline{font-size:12px;color:var(--text3);letter-spacing:.06em;margin-bottom:2rem;font-family:'Poppins',sans-serif}
 .ag-wrap{overflow-x:auto;border-radius:var(--r2);box-shadow:var(--shadow);background:var(--card);border:1px solid var(--border)}
 .ag-cal{min-width:860px;background:var(--card)}
-.ag-head{display:grid;position:relative;z-index:2;background:#fff;border-bottom:2px solid #E2E6ED;border-radius:12px 12px 0 0}
-.ag-head-time{background:#F7F9FC;color:#667085;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;display:flex;align-items:center;justify-content:center;padding:10px 6px;border-right:1px solid #E2E6ED;text-transform:uppercase;letter-spacing:.05em}
-.ag-head-court{padding:10px 14px;color:#0D1B2A;text-align:center;border-right:1px solid #E2E6ED;background:#fff}
+.ag-head{display:grid;position:relative;z-index:2;background:var(--cyan);border-bottom:1px solid var(--border)}
+.ag-head-time{background:var(--gray-light);color:var(--text2);border-right:1px solid var(--border);padding:8px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
+.ag-head-court{padding:8px 12px;color:#fff;text-align:center;border-right:1px solid rgba(255,255,255,.22)}
 .ag-head-court:last-child{border-right:none}
-.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;letter-spacing:.04em;color:#0D1B2A}
-.ag-head-court .cp{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:4px}
+.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em}
+.ag-head-court .cp{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:5px}
 .ag-body{display:grid;position:relative}
-.ag-timecol{position:relative;background:#F7F9FC;border-right:1px solid #E2E6ED}
-.ag-time{position:absolute;left:0;right:0;border-top:1px solid #E2E6ED}
-.ag-time span{position:absolute;top:-8px;right:10px;background:#F7F9FC;padding:0 4px;font-size:11px;font-family:'Inter',sans-serif;font-weight:600;color:#667085}
-.ag-daycol{position:relative;border-right:1px solid #E2E6ED;background:#fff}
+.ag-timecol{position:relative;background:var(--gray-light);border-right:1px solid var(--border)}
+.ag-time{position:absolute;left:0;right:0;border-top:1px solid var(--border)}
+.ag-time span{position:absolute;top:-8px;right:12px;background:var(--gray-light);padding-left:6px;font-size:11px;font-weight:600;color:var(--text2)}
+.ag-daycol{position:relative;border-right:1px solid var(--border);background:var(--card)}
 .ag-daycol:last-child{border-right:none}
-.ag-gridline{position:absolute;left:0;right:0;border-top:1px solid #F2F4F7;pointer-events:none}
-.ag-free{position:absolute;left:4px;right:4px;border:1.5px dashed #CBD5E1;border-radius:8px;cursor:pointer;transition:background .15s}
-.ag-free:hover{background:rgba(14,165,233,.06);border-color:#0EA5E9}
-.ag-block{position:absolute;border-radius:8px;padding:7px 9px;cursor:pointer;overflow:hidden;transition:filter .15s,transform .1s;border-left:3px solid transparent}
-.ag-block:hover{filter:brightness(.95);transform:translateY(-1px)}
-.ag-block-time{font-size:10px;font-family:'Inter',sans-serif;font-weight:600;opacity:.7;margin-bottom:2px}
-.ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;line-height:1.2}
-.ag-block-meta{font-size:11px;font-family:'Inter',sans-serif;opacity:.8;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ag-block-meta2{font-size:10px;font-family:'Inter',sans-serif;opacity:.65;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.ag-block.reservada{background:#EFF6FF;border-left-color:#3B82F6;color:#1E3A5F}
-.ag-block.incompleta{background:#FFFBEB;border-left-color:#F59E0B;color:#78350F}
-.ag-block.abierto{background:#F0FDF4;border-left-color:#22C55E;color:#14532D}
-.ag-block.cerrado{background:#F8FAFC;border-left-color:#94A3B8;color:#475569}
-.ag-block.clase{background:#F5F3FF;border-left-color:#8B5CF6;color:#4C1D95}
-.ag-block.evento{background:#FFF7ED;border-left-color:#F97316;color:#7C2D12}
-.ag-block.mantencion{background:#F1F5F9;border-left-color:#64748B;color:#334155}
-.ag-block.feriado{background:#FFF1F2;border-left-color:#F43F5E;color:#881337}
-.ag-block.short{padding:4px 8px}
-.ag-conflict{outline:2px solid #EF4444}
+.ag-gridline{position:absolute;left:0;right:0;border-top:1px solid var(--border);pointer-events:none}
+.ag-free{position:absolute;left:8px;right:8px;border:1px dashed transparent;border-radius:8px;cursor:pointer;transition:all .12s}
+.ag-free:hover{background:rgba(14,165,233,.08);border-color:rgba(14,165,233,.35)}
+.ag-block{position:absolute;border-radius:9px;padding:6px 9px;box-shadow:0 3px 12px rgba(13,27,42,.12);overflow:hidden;cursor:pointer;border:1px solid transparent;border-left-width:4px;transition:transform .12s,box-shadow .12s}
+.ag-block.short{box-shadow:0 2px 9px rgba(13,27,42,.1);border-radius:8px;padding:5px 9px}
+.ag-block:hover{transform:translateY(-1px);box-shadow:0 7px 22px rgba(13,27,42,.18)}
+.ag-block.reservada{background:#EAF2FF;border-color:var(--blue);color:#153D81}
+.ag-block.incompleta{background:var(--amber-light);border-color:var(--amber);color:#854F0B}
+.ag-block.abierto{background:rgba(163,230,53,.22);border-color:var(--green);color:#365F0B}
+.ag-block.cerrado{background:#EEF2F7;border-color:#94A3B8;color:#64748B}
+.ag-block.mantenimiento{background:#F1F5F9;border-color:#64748B;color:#475569}
+.ag-block.clase{background:#EEEDFE;border-color:#7C6FE8;color:#534AB7}
+.ag-block.cumpleanos{background:#FCE7F3;border-color:#EC4899;color:#BE185D}
+.ag-block.evento{background:#FEF3C7;border-color:#F59E0B;color:#92400E}
+.ag-block-time{font-size:10px;font-weight:700;opacity:.75;margin-bottom:2px}
+.ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-block-meta{font-size:10px;opacity:.82;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-block-meta2{font-size:10px;opacity:.82;margin-top:1px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ag-conflict{outline:2px solid rgba(229,62,62,.35);outline-offset:1px}
 .agenda-toolbar{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;margin-bottom:8px}
 .agenda-date{display:flex;align-items:center;gap:8px;min-width:260px;position:relative}
 .agenda-date #ag-lbl{font-family:'Poppins',sans-serif;font-size:14px;font-weight:700;min-width:150px;text-align:center}
@@ -1390,7 +1390,7 @@ function rAg(){
     return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
   }).join('')}</div>`;
   h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
-  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}</span></div>`;}
+  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}–${minToTime(Math.min(m+slotDur,endDay))}</span></div>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
     h+=`<div class="ag-daycol">`;
@@ -1675,7 +1675,7 @@ function rCortesias(){
     const hasBenef=cort||membCalc.hasDescuento;
     const pill=document.createElement('div');
     pill.style.cssText=`display:flex;align-items:center;gap:4px;padding:4px 10px;border:1.5px solid ${hasBenef?'#C0DD97':'var(--border)'};border-radius:20px;font-size:12px;cursor:pointer;${hasBenef?'background:#EAF3DE;color:#3B6D11':''}`;
-    pill.innerHTML=`<span style="font-weight:700">${(D.jugadores.find(x=>x.nombre===j||x.nombre.startsWith(j+' ')||j.startsWith(x.nombre+' '))||{nombre:j}).nombre}</span><span style="opacity:.7;margin-left:2px">${label}</span><span style="margin-left:3px;font-size:13px">✎</span>`;
+    pill.innerHTML=`<span style="font-weight:700">${j.split(' ')[0]}</span><span style="opacity:.7;margin-left:2px">${label}</span><span style="margin-left:3px;font-size:13px">✎</span>`;
     pill.onclick=function(){openCortesia(j);};row.appendChild(pill);
   });
   el.appendChild(row);
@@ -1687,7 +1687,7 @@ function openCortesia(jugador){
   const overlay=document.createElement('div');overlay.id='modal-cortesia';overlay.style.cssText='position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(13,27,42,.5);z-index:200;display:flex;align-items:center;justify-content:center';
   const box=document.createElement('div');box.style.cssText='background:#fff;border-radius:16px;padding:1.5rem;width:360px;max-width:90vw;box-shadow:0 8px 32px rgba(0,0,0,.2)';
   const hdr=document.createElement('div');hdr.style.cssText='display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem';
-  hdr.innerHTML=`<div style="font-family:Poppins,sans-serif;font-size:15px;font-weight:700">${jugador}</div>`;
+  hdr.innerHTML=`<div style="font-family:Poppins,sans-serif;font-size:15px;font-weight:700">${jugador.split(' ')[0]}</div>`;
   const closeBtn=document.createElement('button');closeBtn.innerHTML='×';closeBtn.style.cssText='background:none;border:none;cursor:pointer;font-size:22px;color:#999;line-height:1';closeBtn.onclick=function(){overlay.remove();};hdr.appendChild(closeBtn);box.appendChild(hdr);
   const promos=D.promos||[];
   if(promos.length){const lbl=document.createElement('div');lbl.style.cssText='font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:#666;margin-bottom:8px';lbl.textContent='Aplicar promoción';box.appendChild(lbl);
@@ -1745,9 +1745,9 @@ function rCP(){
     return`<div class="ps"><div class="psh" onclick="tgPS(this)">${cat} <span style="font-size:10px;color:var(--text3);font-weight:400">(${its.length})</span><i class="ti ti-chevron-down" style="font-size:13px;color:var(--text3);transition:transform .2s"></i></div>
     <div class="psb open">${its.map(p=>{const q=cQty[p.id]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[p.id]||[];
       let asigLabel='';
-      if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${p.id}')">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
+      if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${p.id}')">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
         else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj}</span>`).join('');}
+        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
       const pelPH=esPelota?`<div class="pelota-panel" id="pelota-panel-${p.id}"><div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:7px">¿Quién paga las pelotas?</div><div style="display:flex;gap:5px;flex-wrap:wrap" id="pelota-jugs-${p.id}"></div><div id="pelota-calc-${p.id}" style="font-size:11px;color:var(--cyan-dark);margin-top:6px;background:var(--cyan-light);padding:4px 8px;border-radius:6px;display:none"></div></div>`:'';
       return`<div class="pr" id="prod-row-${p.id}" style="flex-direction:column;align-items:stretch;padding:8px 12px">
         <div style="display:flex;align-items:center;gap:8px">
@@ -1764,9 +1764,9 @@ function renderPelotaJugs(pid){
   const q=cQty[pid]||1;const sel=cAsig[pid]||[];const todos=sel.length===0;
   const container=document.getElementById('pelota-jugs-'+pid);const calc=document.getElementById('pelota-calc-'+pid);if(!container)return;container.innerHTML='';
   const btnTodos=document.createElement('button');btnTodos.className='jbtn-p'+(todos?' todos-sel':'');btnTodos.textContent='÷ Todos';btnTodos.onclick=function(){setPelotaAsig(pid,[]);};container.appendChild(btnTodos);
-  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j;btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
+  jugs.forEach(function(j){const btn=document.createElement('button');btn.className='jbtn-p'+((!todos&&sel.includes(j))?' sel':'');btn.textContent=j.split(' ')[0];btn.onclick=function(){togglePelotaJug(pid,j,jugs);};container.appendChild(btn);});
   const quienes=todos?jugs:sel;
-  if(calc){if(quienes.length>0){const costoPU=Math.ceil((p.precio*q)/quienes.length);calc.style.display='block';calc.textContent=(todos?'Todos':quienes.map(j=>j).join(' + '))+' → '+fmt(costoPU)+' c/u';}else calc.style.display='none';}
+  if(calc){if(quienes.length>0){const costoPU=Math.ceil((p.precio*q)/quienes.length);calc.style.display='block';calc.textContent=(todos?'Todos':quienes.map(j=>j.split(' ')[0]).join(' + '))+' → '+fmt(costoPU)+' c/u';}else calc.style.display='none';}
 }
 function setPelotaAsig(pid,arr){cAsig[pid]=arr;renderPelotaJugs(pid);updCS();rCP();}
 function togglePelotaJug(pid,jug,allJugs){
@@ -1786,9 +1786,9 @@ function chQ(pid,d){
 }
 function refreshProdRow(pid){
   const p=D.productos.find(x=>x.id===pid);if(!p)return;const q=cQty[pid]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[pid]||[];let asigLabel='';
-  if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const label=asigArr.length===0?'÷ todos':asigArr.map(j=>j).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${pid}')">${label} ✎ ${fmt(costoPU)}/c</span>`;}
+  if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const label=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${pid}')">${label} ✎ ${fmt(costoPU)}/c</span>`;}
     else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-    else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj}</span>`).join('');}
+    else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
   const row=document.getElementById('prod-row-'+pid);if(!row)return;const nameDiv=row.querySelector('[data-name]');if(nameDiv)nameDiv.innerHTML=p.nombre+asigLabel;
 }
 function updCS(){
@@ -1797,7 +1797,7 @@ function updCS(){
   g('cs-c').textContent=fmt(precioCancha);g('cs-p').textContent=fmt(tp);g('cs-t').textContent=fmt(tot);
   const added=D.productos.filter(p=>(cQty[p.id]||0)>0);let itemsHtml='';
   if(added.length){itemsHtml='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:5px">En comanda</div>'+
-    added.map(p=>{const q=cQty[p.id];const asig=cAsig[p.id];let al='';if(!asig||!asig.length)al=p.cat==='Pelotas'?'<span style="font-size:10px;background:#EAF3DE;color:#3B6D11;padding:1px 6px;border-radius:10px;font-weight:600">÷ todos</span>':'<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:1px 6px;border-radius:10px;font-weight:600">⚠ sin asignar</span>';else al=asig.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 6px;border-radius:10px;font-weight:600">${jj}</span>`).join(' ');
+    added.map(p=>{const q=cQty[p.id];const asig=cAsig[p.id];let al='';if(!asig||!asig.length)al=p.cat==='Pelotas'?'<span style="font-size:10px;background:#EAF3DE;color:#3B6D11;padding:1px 6px;border-radius:10px;font-weight:600">÷ todos</span>':'<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:1px 6px;border-radius:10px;font-weight:600">⚠ sin asignar</span>';else al=asig.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 6px;border-radius:10px;font-weight:600">${jj.split(' ')[0]}</span>`).join(' ');
     return`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:2px 0"><span>${q}× ${p.nombre} ${al}</span><span style="font-weight:600">${fmt(q*p.precio)}</span></div>`;}).join('');}
   let jugHtml='';
   if(jugs.length){jugHtml='<div style="border-top:.5px solid var(--border);margin-top:8px;padding-top:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Total por jugador</div>'+
@@ -1849,7 +1849,7 @@ function rCierreJugs(totales,jugs,r,cobPorJugador){
     const rowCls=est==='pagado'?'ok':est==='cubierto'?'cubierto':est==='cortesia'?'ok':'deuda';
     const descTag=t.descLabel?`<span class="bcyan" style="font-size:10px;padding:1px 5px">${t.descLabel}</span>`:'';
     const estIcon=est==='pagado'?'<i class="ti ti-circle-check" style="color:#3d6b0a;font-size:18px"></i>':est==='cubierto'?'<i class="ti ti-arrow-merge" style="color:var(--cyan-dark);font-size:18px"></i>':est==='cortesia'?'<i class="ti ti-gift" style="color:#3d6b0a;font-size:18px"></i>':'<i class="ti ti-clock" style="color:#92400E;font-size:18px"></i>';
-    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro')}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
+    const estBadge=est==='pagado'?`<span class="badge bgreen">Pagado ${cobJ>0?'('+fmt(cobJ)+')':''}</span>`:est==='cubierto'?`<span class="badge bcyan">Lo cubre ${(cierreEstados._cubBy&&cierreEstados._cubBy[j]||'otro').split(' ')[0]}</span>`:est==='cortesia'?`<span class="badge bgreen">Cortesía</span>`:`<span class="badge bamber">Pendiente ${fmt(pendJ)}</span>`;
     let optsHtml='';
     if(est!=='pagado'){
       const cubOpts=jugs.filter(j2=>j2!==j).map(j2=>{const sel2=est==='cubierto'&&cierreEstados._cubBy&&cierreEstados._cubBy[j]===j2;return`<button class="cjug-opt${sel2?' sel-cubierto':''}" onclick="setCierreEst('${j.replace(/'/g,"\\'")}','cubierto','${j2.replace(/'/g,"\\'")}')"><i class="ti ti-user" style="font-size:11px"></i> ${j2} lo cubre</button>`;}).join('');
