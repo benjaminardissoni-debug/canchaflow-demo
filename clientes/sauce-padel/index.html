@@ -1390,7 +1390,7 @@ function rAg(){
     return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
   }).join('')}</div>`;
   h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
-  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}</div><div style="font-size:10px;color:#94A3B8;font-weight:400">${minToTime(Math.min(m+slotDur,endDay))}</div></div>`;}
+  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}</span>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
     h+=`<div class="ag-daycol">`;
