@@ -179,6 +179,12 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .jcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);transition:all .15s}
 .jcard:hover{border-color:var(--cyan);box-shadow:0 4px 20px rgba(14,165,233,.12)}
+.jtable{width:100%;border-collapse:separate;border-spacing:0 4px}
+.jtable th{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;text-align:left}
+.jtable td{padding:10px 12px;background:var(--card);font-size:13px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
+.jtable td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px}
+.jtable td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
+.jtable tr:hover td{border-color:var(--cyan)}
 .tcard{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--cyan);border-radius:var(--r2);padding:1rem;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
 .pagorow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .pagorow:last-child{border-bottom:none}
@@ -366,8 +372,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </div>
 <!-- JUGADORES -->
 <div class="sec" id="sec-jugadores">
-  <div class="rb"><div></div><button class="btn p" onclick="openJ()"><i class="ti ti-user-plus"></i> Agregar jugador</button></div>
-  <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
+<div class="rb"><div></div><div style="display:flex;gap:8px;align-items:center"><button id="jvg" onclick="setJV('grid')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--cyan);background:var(--cyan);color:#fff;cursor:pointer;font-size:14px"><i class="ti ti-layout-grid"></i></button><button id="jvl" onclick="setJV('list')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-list"></i></button><button class="btn p" onclick="openJ()"><i class="ti ti-user-plus"></i> Agregar jugador</button></div></div>  <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
     <div style="flex:1;min-width:220px;position:relative"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3)"></i>
       <input id="jsearch" placeholder="Buscar nombre, teléfono, nivel..." style="padding-left:36px;background:var(--card)" oninput="rJ()"></div>
     <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative">
@@ -1959,6 +1964,7 @@ function rT(){
 
 // ── JUGADORES ────────────────────────────────────────────
 const _jfState={niv:new Set(),lado:new Set()};
+function setJV(v){window._jV=v;var g1=document.getElementById("jvg"),l1=document.getElementById("jvl");if(g1){g1.style.background=v==="grid"?"var(--cyan)":"var(--card)";g1.style.color=v==="grid"?"#fff":"var(--text2)";g1.style.borderColor=v==="grid"?"var(--cyan)":"var(--border)";}if(l1){l1.style.background=v==="list"?"var(--cyan)":"var(--card)";l1.style.color=v==="list"?"#fff":"var(--text2)";l1.style.borderColor=v==="list"?"var(--cyan)":"var(--border)";}rJ();}
 function toggleJfDropdown(type){
   const panel=g('jf-'+type+'-panel');
   const other=type==='niv'?'lado':'niv';
@@ -2004,7 +2010,8 @@ function rJ(){
   if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
   if(_jfState.niv.size)js=js.filter(j=>_jfState.niv.has(j.nivel));
   if(_jfState.lado.size)js=js.filter(j=>_jfState.lado.has(j.lado));
-  g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
+  var _v=window._jV||'grid';var jgel=document.getElementById('jgrid');jgel.style.gridTemplateColumns=_v==='list'?'1fr':'';if(_v==='list'){jgel.innerHTML=js.length?'<table class="jtable"><thead><tr><th>Nombre</th><th>Categoría</th><th>Posición</th><th>Teléfono</th><th>Acciones</th></tr></thead><tbody>'+js.map(function(j){var nc=getNColor(j.nivel);var wa=j.telefono?'<a href="https://wa.me/'+(j.telefono||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#25D366;color:#fff;font-size:13px"><i class="ti ti-brand-whatsapp"></i></a>':'';return '<tr><td style="font-weight:700;font-family:Poppins,sans-serif">'+j.nombre+'</td><td><span style="background:'+nc.b+';color:'+nc.t+';font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600">'+(j.nivel||'—')+'</span></td><td style="color:var(--text2)">'+(j.lado||'—')+'</td><td style="color:var(--text2)">'+(j.telefono||'—')+'</td><td><div style="display:flex;gap:6px;align-items:center">'+wa+'<button class="btn icon-only sm" onclick="openJ(\''+j.id+'\')"><i class="ti ti-edit" style="font-size:13px"></i></button><button class="btn icon-only sm d" onclick="delJ(\''+j.id+'\')"><i class="ti ti-trash" style="font-size:13px"></i></button></div></td></tr>';}).join('')+'</tbody></table>':'<p style="padding:2rem;color:var(--text3)">Sin jugadores</p>';return;}
+g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
     const membTag=memb?`<span class="bcyan" style="font-size:10px">${memb.nombre}</span>`:'';
     const ovTag=j.precioOv!==undefined&&j.precioOv!==''?`<span class="badge bamber" style="font-size:10px">$${Number(j.precioOv).toLocaleString('es-CL')} fijo</span>`:'';
     return`<div class="jcard"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-weight:700;font-family:Poppins,sans-serif;font-size:14px">${j.nombre}</div>
