@@ -1480,6 +1480,34 @@ function selBloqTipo(tipo){
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
   updateBlCobroWrap();
 }
+
+function renderBlPagos(){
+  var pagos=window._blPagos||[];
+  var list=document.getElementById('bl-pagos-list');
+  if(!list)return;
+  if(!pagos.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Sin pagos registrados.</div>';return;}
+  list.innerHTML=pagos.map(function(p,i){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--card);border-radius:8px;margin-bottom:4px;font-size:13px"><span style="font-weight:600">'+fmt(p.monto)+'</span><span style="color:var(--text2)">'+p.metodo+'</span><span style="color:var(--text3)">'+p.quien+'</span><button onclick="removeBlPago('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:14px"><i class="ti ti-x"></i></button></div>';}).join('');
+}
+function removeBlPago(i){if(!window._blPagos)return;window._blPagos.splice(i,1);renderBlPagos();}
+function addBlPago(){
+  var monto=parseInt(document.getElementById('bl-pago-monto').value)||0;
+  var metodo=document.getElementById('bl-pago-metodo').value;
+  var quien=document.getElementById('bl-pago-quien').value;
+  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!window._blPagos)window._blPagos=[];
+  window._blPagos.push({monto:monto,metodo:metodo,quien:quien});
+  document.getElementById('bl-pago-monto').value='';
+  renderBlPagos();
+}
+function updateBlCobroWrap(){
+  var wrap=document.getElementById('bl-cobro-wrap');
+  var tipo=document.getElementById('bl-tipos')?document.getElementById('bl-tipos').dataset.sel||'mantenimiento':'mantenimiento';
+  if(wrap)wrap.style.display=tipo==='clase'?'block':'none';
+  var alumnos=window.blAlumnos||[];
+  var quien=document.getElementById('bl-pago-quien');
+  if(quien){quien.innerHTML=alumnos.map(function(a){return'<option value="'+a+'">'+a+'</option>';}).join('')+'<option value="Todos">Todos</option>';}
+  renderBlPagos();
+}
 async function saveBloqueo(){
   const tipo=g('bl-tipos').dataset.sel||'mantenimiento';const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
   if(!fecha||!hi||!hf){alert('Completa fecha, hora inicio y hora fin.');return;}if(timeToMin(hf)<=timeToMin(hi)){alert('Hora fin debe ser posterior al inicio.');return;}
