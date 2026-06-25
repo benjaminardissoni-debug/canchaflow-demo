@@ -128,7 +128,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-head-time{background:var(--gray-light);color:var(--text2);border-right:1px solid var(--border);padding:8px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .ag-head-court{padding:8px 12px;color:#fff;text-align:center;border-right:1px solid rgba(255,255,255,.22)}
 .ag-head-court:last-child{border-right:none}
-.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em}
+.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
 .ag-head-court .cp{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:5px}
 .ag-body{display:grid;position:relative}
 .ag-timecol{position:relative;background:var(--gray-light);border-right:1px solid var(--border)}
@@ -1405,9 +1405,9 @@ function rAg(){
     layoutAgendaEvents(evs).forEach(ev=>{
       const dur=Math.max(0,ev.end-ev.start),isShort=ev.kind==='bloqueo'&&dur<(slotDur-5);
       const vGap=isShort?7:5,hInset=isShort?18:7;
-      const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+(vGap/2));
+      const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+1);
       const minH=(isShort?38:56)+(ev.meta2?14:0);
-      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
+      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-2);
       const width=(100/ev.lanes),left=ev.lane*width;
       const click=ev.kind==='reserva'?`clkSlot('${ev.id}')`:`openBloqueo('${ev.id}')`;
       h+=`<div class="ag-block ${ev.cls}${isShort?' short':''}${ev.conflict?' ag-conflict':''}" style="top:${top}px;height:${height}px;left:calc(${left}% + ${hInset}px);width:calc(${width}% - ${hInset*2}px)" onclick="${click}">
