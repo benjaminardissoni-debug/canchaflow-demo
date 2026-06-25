@@ -806,6 +806,17 @@ tr:hover td{background:rgba(242,244,247,.7)}
         <div style="position:relative"><div style="display:flex;gap:6px"><input id="bl-alumno-input" placeholder="Buscar jugador o escribir nombre libre" oninput="sugBlAlumno()" onkeydown="if(event.key==='Enter'){event.preventDefault();addBlAlumno();}" autocomplete="off"><button class="btn sm" onclick="addBlAlumno()" type="button"><i class="ti ti-plus"></i></button></div><div id="bl-alumno-drop" class="jdrop hidden"></div></div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Agrega uno o varios alumnos — útil para clases grupales.</div>
       </div>
+      <div id="bl-cobro-wrap" style="margin-top:12px;padding:12px;background:var(--gray-light);border-radius:10px;display:none">
+        <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Registro de pago</div>
+        <div id="bl-pagos-list" style="margin-bottom:8px"></div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;align-items:flex-end">
+          <div><lbl>Monto $</lbl><input type="number" id="bl-pago-monto" placeholder="0" style="width:100px"></div>
+          <div><lbl>Método</lbl><select id="bl-pago-metodo" style="width:130px"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Tarjeta">Tarjeta</option></select></div>
+          <div><lbl>Quién paga</lbl><select id="bl-pago-quien" style="width:150px"></select></div>
+          <button class="btn p sm" onclick="addBlPago()" type="button"><i class="ti ti-plus"></i> Agregar</button>
+        </div>
+      </div>
+    </div>
     </div>
     <div class="fr c2">
       <div><lbl>Fecha</lbl><input type="date" id="bl-fecha"></div>
@@ -2557,9 +2568,8 @@ function rClases(){
     const cancha=D.canchas.find(x=>x.id===c.canchaId)||{nombre:c.canchaId==='todas'?'Todas':'?'};
     const alumnos=c.alumnos||[];
     const pagos=c.pagos||{};
-    const alumnosHtml=alumnos.length?alumnos.map(function(a){var est=pagos[a]||'pendiente';var isPag=est==='pagado';return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:13px">'+a+'</span><button onclick="togglePagoClase(\''+c.id+'\',\''+a+'\')" style="padding:2px 8px;border-radius:20px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:'+(isPag?'#D1FAE5':'#FEF3C7')+';color:'+(isPag?'#065F46':'#92400E')+'">'+(isPag?'Pagado':'Pendiente')+'</button></div>';}).join(''):'<span style="color:var(--text3)">Sin registrar</span>';
-    const tots=alumnos.length;const pags=alumnos.filter(function(a){return(pagos[a]||'pendiente')==='pagado';}).length;
-    const estadoGen=tots===0?'':tots===pags?'<span style="color:#065F46;font-weight:600;font-size:12px">Todo pagado</span>':pags===0?'<span style="color:#92400E;font-weight:600;font-size:12px">Pendiente</span>':'<span style="color:#0369A1;font-weight:600;font-size:12px">'+pags+'/'+tots+' pagado</span>';
+    const alumnosHtml=alumnos.length?alumnos.join(', '):'<span style="color:var(--text3)">Sin registrar</span>';
+    var blPagosArr=c.pagos||[];var totalPagado=blPagosArr.reduce(function(s,p){return s+(p.monto||0);},0);var estadoGen=blPagosArr.length===0?'<span style="color:#92400E;font-size:12px;font-weight:600">Sin pagos</span>':'<div style="font-size:12px"><span style="color:#065F46;font-weight:700">'+fmt(totalPagado)+'</span><br>'+(blPagosArr.map(function(p){return'<span style="color:var(--text3)">'+p.quien+' · '+p.metodo+'</span>';}).join('<br>'))+'</div>';
     return`<tr><td>${fmtD(new Date(c.fecha+'T12:00:00'))}</td><td style="font-weight:600">${c.profesor||'<span style="color:var(--text3)">Sin registrar</span>'}</td><td>${alumnosHtml}</td><td>${cancha.nombre}</td><td>${c.horaInicio}-${c.horaFin}</td><td style="font-weight:700">${fmt(c.valor||0)}</td><td>${estadoGen}</td><td><button class="btn icon-only sm" onclick="openBloqueo('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td></tr>`;
   }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:14px">Sin clases registradas.</td></tr>';
 }
