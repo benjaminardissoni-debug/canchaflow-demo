@@ -2579,11 +2579,13 @@ function clearClFilter(){g('cl-search').value='';g('cl-periodo').value='todo';rC
 
 
 var _cobroClaseId=null;
-function openCobroCls(id){
+async function openCobroCls(id){
   var c=(D.bloqueos||[]).find(function(x){return x.id===id;});
   if(!c)return;
   _cobroClaseId=id;
-  window._cobroPagos=c.pagos?JSON.parse(JSON.stringify(c.pagos)):[];
+  var res=await sb.from('clase_pagos').select('*').eq('bloqueo_id',id).order('created_at');
+  window._cobroPagos=res.data?res.data.map(function(p){return{monto:p.monto,metodo:p.metodo,quien:p.quien};}):[];
+  c.pagos=window._cobroPagos;
   var alumnos=c.alumnos||[];
   document.getElementById('m-cobro-title').textContent='Cobro — '+(c.titulo||'Clase')+' '+c.fecha;
   document.getElementById('m-cobro-info').innerHTML='<div style="display:flex;gap:16px;flex-wrap:wrap"><span><strong>Profesor:</strong> '+(c.profesor||'—')+'</span><span><strong>Horario:</strong> '+c.horaInicio+'-'+c.horaFin+'</span><span><strong>Valor:</strong> '+fmt(c.valor||0)+'</span><span><strong>Alumnos:</strong> '+(alumnos.join(', ')||'Sin registrar')+'</span></div>';
@@ -2614,9 +2616,15 @@ function addCobroPago(){
 async function saveCobroPago(){
   var c=(D.bloqueos||[]).find(function(x){return x.id===_cobroClaseId;});
   if(!c)return;
-  c.pagos=window._cobroPagos||[];
-  var err=await sb.from('bloqueos').update({pagos:c.pagos}).eq('id',_cobroClaseId);
-  if(err&&err.error){alert('Error al guardar: '+err.error.message);return;}
+  var pagos=window._cobroPagos||[];
+  var del=await sb.from('clase_pagos').delete().eq('bloqueo_id',_cobroClaseId);
+  if(del.error){alert('Error al guardar: '+del.error.message);return;}
+  if(pagos.length){
+    var rows=pagos.map(function(p){return{bloqueo_id:_cobroClaseId,monto:p.monto,metodo:p.metodo,quien:p.quien};});
+    var ins=await sb.from('clase_pagos').insert(rows);
+    if(ins.error){alert('Error al guardar: '+ins.error.message);return;}
+  }
+  c.pagos=pagos;
   cM('m-cobro-clase');
   rClases();
 }
