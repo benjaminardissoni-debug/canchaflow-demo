@@ -339,7 +339,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     
     <div class="agenda-actions">
       <button class="btn p" onclick="openRes()"><i class="ti ti-plus"></i> Nueva reserva</button>
-      <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Bloqueo / Evento</button>
+      <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Clases / Eventos</button>
     </div>
   </div>
   <div id="ag-stats" class="hidden"></div>
@@ -397,7 +397,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </div>
 <!-- CLASES -->
 <div class="sec" id="sec-clases">
-  <div class="alert info" style="margin-bottom:1rem"><i class="ti ti-info-circle"></i><div><strong>Trazabilidad de clases.</strong> Los registros se crean desde la agenda (Bloqueo / Evento → tipo Clase). Esta vista es solo de seguimiento y filtrado.</div></div>
+  <div class="alert info" style="margin-bottom:1rem"><i class="ti ti-info-circle"></i><div><strong>Trazabilidad de clases.</strong> Los registros se crean desde la agenda (Clases / Eventos → tipo Clase). Esta vista es solo de seguimiento y filtrado.</div></div>
   <div id="clmet" class="g4" style="margin-bottom:1.25rem"></div>
   <div class="card" style="padding:0;overflow:hidden">
     <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
@@ -405,17 +405,12 @@ tr:hover td{background:rgba(242,244,247,.7)}
         <div style="display:flex;gap:8px;flex-wrap:wrap;flex:1">
           <div style="flex:1;min-width:160px;position:relative"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:14px;color:var(--text3)"></i>
             <input id="cl-search" placeholder="Buscar profesor o alumno..." style="padding-left:34px" oninput="rClases()"></div>
-          <select id="cl-periodo" onchange="rClases()" style="width:150px">
-            <option value="todo">Período: Todo</option>
-            <option value="semana">Esta semana</option>
-            <option value="mes">Este mes</option>
-            <option value="anio">Este año</option>
-          </select>
+          <div style="position:relative;display:inline-block"><button id="clmbtn" onclick="clToggle(event,'mes')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;color:var(--text1);font-family:Poppins,sans-serif"><span id="clmlbl">Mes</span><i class="ti ti-chevron-down" style="font-size:11px"></i></button><div id="clmpanel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:180px;max-height:280px;overflow-y:auto;padding:6px 0"><div id="clmlist"></div></div></div><div style="position:relative;display:inline-block"><button id="clpbtn" onclick="clToggle(event,'prof')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;color:var(--text1);font-family:Poppins,sans-serif"><span id="clplbl">Profesor</span><i class="ti ti-chevron-down" style="font-size:11px"></i></button><div id="clppanel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:180px;max-height:280px;overflow-y:auto;padding:6px 0"><div id="clplist"></div></div></div><div style="position:relative;display:inline-block"><button id="clebtn" onclick="clToggle(event,'estado')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;color:var(--text1);font-family:Poppins,sans-serif"><span id="clelbl">Estado pago</span><i class="ti ti-chevron-down" style="font-size:11px"></i></button><div id="clepanel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:160px;padding:6px 0"><label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:Poppins,sans-serif"><input type="checkbox" value="pendiente" onchange="clCheck(this,'estado')" style="accent-color:var(--cyan);width:14px;height:14px"> Pendiente</label><label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:Poppins,sans-serif"><input type="checkbox" value="pagado" onchange="clCheck(this,'estado')" style="accent-color:var(--cyan);width:14px;height:14px"> Pagado</label></div></div><button id="clclear" onclick="clClear()" style="display:none;padding:6px 12px;border-radius:8px;border:1.5px solid var(--amber);background:transparent;font-size:12px;cursor:pointer;color:var(--amber);font-family:Poppins,sans-serif">x Limpiar</button>
         </div>
         <button class="btn sm" onclick="clearClFilter()"><i class="ti ti-filter-off"></i> Limpiar</button>
       </div>
     </div>
-    <table><thead><tr><th>Fecha</th><th>Profesor</th><th>Alumno(s)</th><th>Cancha</th><th>Horario</th><th>Valor</th><th></th></tr></thead><tbody id="cltbody"></tbody></table>
+    <table><thead><tr><th>Fecha</th><th>Profesor</th><th>Alumno(s)</th><th>Cancha</th><th>Horario</th><th>Valor</th><th>Estado pago</th><th></th></tr></thead><tbody id="cltbody"></tbody></table>
   </div>
 </div>
 <!-- CAJA -->
@@ -2531,12 +2526,28 @@ function getClasesPeriodRange(periodo){
   return null;
 }
 function clearClFilter(){g('cl-search').value='';g('cl-periodo').value='todo';rClases();}
+
+var _clMes=new Set(),_clProf=new Set(),_clEstado=new Set();
+function clToggle(e,t){e.stopPropagation();['mes','prof','estado'].forEach(function(k){if(k!==t){var p=document.getElementById('cl'+k[0]+'panel');if(p)p.style.display='none';}});var p=document.getElementById('cl'+t[0]+'panel');if(p)p.style.display=p.style.display==='none'?'block':'none';}
+document.addEventListener('click',function(){['clmpanel','clppanel','clepanel'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});});
+function clCheck(el,t){var s=t==='mes'?_clMes:t==='prof'?_clProf:_clEstado;el.checked?s.add(el.value):s.delete(el.value);var lblId=t==='mes'?'clmlbl':t==='prof'?'clplbl':'clelbl';var base=t==='mes'?'Mes':t==='prof'?'Profesor':'Estado pago';var lbl=document.getElementById(lblId);lbl.textContent=s.size===0?base:s.size===1?[...s][0]:base+' ('+s.size+')';var btnId=t==='mes'?'clmbtn':t==='prof'?'clpbtn':'clebtn';var btn=document.getElementById(btnId);if(btn){btn.style.borderColor=s.size>0?'var(--cyan)':'var(--border)';btn.style.color=s.size>0?'var(--cyan)':'var(--text1)';}document.getElementById('clclear').style.display=(_clMes.size>0||_clProf.size>0||_clEstado.size>0)?'inline-flex':'none';rClases();}
+function clClear(){_clMes.clear();_clProf.clear();_clEstado.clear();document.querySelectorAll('#clmlist input,#clplist input,#clepanel input').forEach(function(el){el.checked=false;});[['clmlbl','Mes'],['clplbl','Profesor'],['clelbl','Estado pago']].forEach(function(x){var el=document.getElementById(x[0]);if(el)el.textContent=x[1];});['clmbtn','clpbtn','clebtn'].forEach(function(id){var b=document.getElementById(id);if(b){b.style.borderColor='var(--border)';b.style.color='var(--text1)';}});document.getElementById('clclear').style.display='none';rClases();}
+function togglePagoClase(id,alumno){var b=(D.bloqueos||[]).find(function(x){return x.id===id;});if(!b)return;if(!b.pagos)b.pagos={};b.pagos[alumno]=b.pagos[alumno]==='pagado'?'pendiente':'pagado';saveData();rClases();}
+function buildClFiltros(){
+  var clases=(D.bloqueos||[]).filter(function(b){return b.tipo==='clase';});
+  var meses={};clases.forEach(function(c){var d=new Date(c.fecha+'T12:00:00');var key=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');var lbl=d.toLocaleString('es-CL',{month:'long',year:'numeric'});lbl=lbl.charAt(0).toUpperCase()+lbl.slice(1);meses[key]=lbl;});
+  var mlist=document.getElementById('clmlist');if(mlist){var existingVals=new Set([..._clMes]);mlist.innerHTML=Object.keys(meses).sort().reverse().map(function(k){var chk=existingVals.has(k)?'checked':'';return '<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:Poppins,sans-serif"><input type="checkbox" value="'+k+'" '+chk+' onchange="clCheck(this,\'mes\')" style="accent-color:var(--cyan);width:14px;height:14px"> '+meses[k]+'</label>';}).join('');}
+  var profs=[...new Set(clases.map(function(c){return c.profesor;}).filter(Boolean))].sort();
+  var plist=document.getElementById('clplist');if(plist){var existingProfs=new Set([..._clProf]);plist.innerHTML=profs.map(function(p){var chk=existingProfs.has(p)?'checked':'';return '<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:Poppins,sans-serif"><input type="checkbox" value="'+p+'" '+chk+' onchange="clCheck(this,\'prof\')" style="accent-color:var(--cyan);width:14px;height:14px"> '+p+'</label>';}).join('');}
+}
 function rClases(){
-  const q=(g('cl-search').value||'').toLowerCase();const periodo=g('cl-periodo').value;
-  const range=getClasesPeriodRange(periodo);
+  buildClFiltros();
+  const q=(g('cl-search').value||'').toLowerCase();
   let clases=(D.bloqueos||[]).filter(b=>b.tipo==='clase');
-  if(range)clases=clases.filter(c=>c.fecha>=range.from&&c.fecha<=range.to);
+  if(_clMes.size)clases=clases.filter(function(c){var d=new Date(c.fecha+'T12:00:00');var key=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');return _clMes.has(key);});
+  if(_clProf.size)clases=clases.filter(function(c){return _clProf.has(c.profesor);});
   if(q)clases=clases.filter(c=>(c.profesor||'').toLowerCase().includes(q)||(c.alumnos||[]).some(a=>a.toLowerCase().includes(q)));
+  if(_clEstado.size)clases=clases.filter(function(c){var pagos=c.pagos||{};var alumnos=c.alumnos||[];return alumnos.some(function(a){return _clEstado.has(pagos[a]||'pendiente');});});
   clases=clases.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha));
   const totalValor=clases.reduce((s,c)=>s+(c.valor||0),0);
   const profesores=new Set(clases.map(c=>c.profesor).filter(Boolean));
@@ -2544,11 +2555,14 @@ function rClases(){
   g('clmet').innerHTML=[{l:'Clases',v:clases.length},{l:'Ingresos generados',v:fmt(totalValor)},{l:'Profesores activos',v:profesores.size},{l:'Alumnos atendidos',v:totalAlumnos}].map(m=>`<div class="met"><div class="ml">${m.l}</div><div class="mv">${m.v}</div></div>`).join('');
   g('cltbody').innerHTML=clases.length?clases.map(c=>{
     const cancha=D.canchas.find(x=>x.id===c.canchaId)||{nombre:c.canchaId==='todas'?'Todas':'?'};
-    const alumnosTxt=(c.alumnos||[]).length?(c.alumnos||[]).join(', '):'<span style="color:var(--text3)">Sin registrar</span>';
-    return`<tr><td>${fmtD(new Date(c.fecha+'T12:00:00'))}</td><td style="font-weight:600">${c.profesor||'<span style="color:var(--text3)">Sin registrar</span>'}</td><td>${alumnosTxt}</td><td>${cancha.nombre}</td><td>${c.horaInicio}–${c.horaFin}</td><td style="font-weight:700">${fmt(c.valor||0)}</td><td><button class="btn icon-only sm" onclick="openBloqueo('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td></tr>`;
-  }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:14px">Sin clases registradas en este período.</td></tr>';
+    const alumnos=c.alumnos||[];
+    const pagos=c.pagos||{};
+    const alumnosHtml=alumnos.length?alumnos.map(function(a){var est=pagos[a]||'pendiente';var isPag=est==='pagado';return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:13px">'+a+'</span><button onclick="togglePagoClase(\''+c.id+'\',\''+a+'\')" style="padding:2px 8px;border-radius:20px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:'+(isPag?'#D1FAE5':'#FEF3C7')+';color:'+(isPag?'#065F46':'#92400E')+'">'+(isPag?'Pagado':'Pendiente')+'</button></div>';}).join(''):'<span style="color:var(--text3)">Sin registrar</span>';
+    const tots=alumnos.length;const pags=alumnos.filter(function(a){return(pagos[a]||'pendiente')==='pagado';}).length;
+    const estadoGen=tots===0?'':tots===pags?'<span style="color:#065F46;font-weight:600;font-size:12px">Todo pagado</span>':pags===0?'<span style="color:#92400E;font-weight:600;font-size:12px">Pendiente</span>':'<span style="color:#0369A1;font-weight:600;font-size:12px">'+pags+'/'+tots+' pagado</span>';
+    return`<tr><td>${fmtD(new Date(c.fecha+'T12:00:00'))}</td><td style="font-weight:600">${c.profesor||'<span style="color:var(--text3)">Sin registrar</span>'}</td><td>${alumnosHtml}</td><td>${cancha.nombre}</td><td>${c.horaInicio}-${c.horaFin}</td><td style="font-weight:700">${fmt(c.valor||0)}</td><td>${estadoGen}</td><td><button class="btn icon-only sm" onclick="openBloqueo('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td></tr>`;
+  }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:14px">Sin clases registradas.</td></tr>';
 }
-
 // ── DEMO DATA ─────────────────────────────────────────────
 function loadDemoData(){
   const today=new Date();
