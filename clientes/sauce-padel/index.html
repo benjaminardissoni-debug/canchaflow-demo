@@ -336,16 +336,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn icon-only" onclick="openAgDatePicker()" title="Elegir fecha"><i class="ti ti-calendar-search"></i></button>
       <input type="date" id="ag-datepick" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="jumpToAgDate()">
     </div>
-    <div class="ag-legend">
-      <span class="ag-key"><span class="ag-dot res"></span>Reserva</span>
-      <span class="ag-key"><span class="ag-dot inc"></span>Incompleta</span>
-      <span class="ag-key"><span class="ag-dot play"></span>En juego</span>
-      <span class="ag-key"><span class="ag-dot close"></span>Cerrada</span>
-      <span class="ag-key"><span class="ag-dot maint"></span>Mant.</span>
-      <span class="ag-key"><span class="ag-dot class"></span>Clase</span>
-      <span class="ag-key"><span class="ag-dot event"></span>Evento</span>
-      <span class="ag-key"><span class="ag-dot holiday"></span>Feriado</span>
-    </div>
+    
     <div class="agenda-actions">
       <button class="btn p" onclick="openRes()"><i class="ti ti-plus"></i> Nueva reserva</button>
       <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Bloqueo / Evento</button>
@@ -1387,7 +1378,7 @@ function rAg(){
     if(fer){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Feriado: ${fmt(D.cfg.precioFeriado||24000)} todo el día</span>`;}
     else if(finde){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Fin de semana: ${fmt(D.cfg.precioFinSemana||24000)} todo el día</span>`;}
     else pInfo=tramos.length?tramos.map(t=>`<span class="pm" style="font-size:11px">${t.nombre}: ${fmt(t.precio)}</span>`).join(' '):`<span class="pn">${fmt(c.pN||0)}</span> <span style="color:rgba(255,255,255,.4);font-size:11px">·</span> <span class="pa">${fmt(c.pA||0)} >${D.cfg.alto||'17:30'}</span>`;
-    return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
+    return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div></div>`;
   }).join('')}</div>`;
   h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
   for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}</span></div>`;}
