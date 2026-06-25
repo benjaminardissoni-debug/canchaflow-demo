@@ -12,7 +12,7 @@
 
 </script>
 <style>
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0}body{font-family:'Poppins',sans-serif}
 /* feedback táctil visual */
 .btn:active,.btn:active *{transform:scale(0.96);opacity:0.85;transition:transform 0.08s,opacity 0.08s}
 .ag-free:active,.ag-res:active,.ag-blq:active,.ag-clase:active{transform:scale(0.97);opacity:0.8;transition:transform 0.08s,opacity 0.08s}
@@ -32,27 +32,27 @@
 }
 body{font-family:'Inter',system-ui,sans-serif;font-size:14px;color:var(--text);background:var(--bg);-webkit-font-smoothing:antialiased}
 .layout{display:flex;min-height:100vh}
-.sidebar{width:220px;background:var(--card);border-right:1px solid var(--border);display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:20}
+.sidebar{width:220px;background:#0D1B2A;border-right:none;display:flex;flex-direction:column;flex-shrink:0;position:fixed;top:0;left:0;height:100vh;z-index:20}
 .sb-logo{padding:1.5rem 1.25rem 1rem;border-bottom:1px solid var(--border)}
 .sb-logo-text{display:flex;align-items:center;gap:10px}
 .sb-logo-icon{width:36px;height:36px;background:var(--green);border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sb-logo-icon i{font-size:20px;color:var(--navy)}
 .sb-brand{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;line-height:1.1}
-.sb-brand .c{color:var(--text)}.sb-brand .f{color:var(--cyan-dark)}
+.sb-brand .c{color:#fff}.sb-brand .f{color:#18A9E6}
 .sb-sub{font-size:9px;color:var(--text3);letter-spacing:.08em;margin-top:2px;font-family:'Poppins',sans-serif}
-.sb-nav{flex:1;padding:.75rem;overflow-y:auto}
+.sb-nav{flex:1;padding:.75rem;overflow-y:auto;color:rgba(255,255,255,.72)}
 .sb-section{font-size:9px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);padding:.5rem .5rem .25rem;font-family:'Poppins',sans-serif;font-weight:600}
-.nb{width:100%;padding:9px 12px;border:none;border-radius:var(--r);cursor:pointer;font-size:13px;background:transparent;color:var(--text2);display:flex;align-items:center;gap:10px;transition:all .15s;text-align:left;font-family:'Inter',sans-serif;font-weight:500;margin-bottom:2px;border-left:3px solid transparent}
+.nb{width:100%;padding:9px 12px;border:none;border-radius:14px;cursor:pointer;font-size:15px;background:transparent;color:rgba(255,255,255,.72);display:flex;align-items:center;gap:10px;transition:all .15s;text-align:left;font-family:'Inter',sans-serif;font-weight:500;margin-bottom:2px;border-left:3px solid transparent}
 .nb i{font-size:17px;flex-shrink:0}
-.nb:hover{background:var(--gray-light);color:var(--text)}
+.nb:hover{background:rgba(255,255,255,.08);color:#fff}
 .nb.active{background:var(--cyan-light);color:var(--cyan-dark);font-weight:700;border-left:3px solid var(--cyan)}
 .nb.active i{color:var(--cyan-dark)}
-.sb-footer{padding:1rem .75rem;border-top:1px solid var(--border)}
+.sb-footer{padding:1rem .75rem;border-top:1px solid rgba(255,255,255,.08)}
 .sb-user{display:flex;align-items:center;gap:10px}
 .sb-avatar{width:32px;height:32px;border-radius:50%;background:var(--cyan);display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .sb-avatar i{font-size:16px;color:#fff}
-.sb-uname{font-size:12px;color:var(--text);font-weight:500}
-.sb-urole{font-size:10px;color:var(--text3)}
+.sb-uname{font-size:12px;color:#fff;font-weight:500}
+.sb-urole{font-size:10px;color:rgba(255,255,255,.5)}
 .sb-logout{margin-left:auto;background:transparent;border:none;cursor:pointer;color:var(--text3);padding:4px;border-radius:6px}
 .sb-logout:hover{color:var(--text);background:var(--gray-light)}
 .main{flex:1;margin-left:220px;display:flex;flex-direction:column;min-height:100vh}
@@ -128,12 +128,12 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-head-time{background:var(--gray-light);color:var(--text2);border-right:1px solid var(--border);padding:8px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .ag-head-court{padding:8px 12px;color:#fff;text-align:center;border-right:1px solid rgba(255,255,255,.22)}
 .ag-head-court:last-child{border-right:none}
-.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:13px;font-weight:700;letter-spacing:.06em}
+.ag-head-court .cn{font-family:'Poppins',sans-serif;font-size:16px;font-weight:700;letter-spacing:.06em}
 .ag-head-court .cp{display:flex;align-items:center;justify-content:center;gap:5px;flex-wrap:wrap;margin-top:5px}
 .ag-body{display:grid;position:relative}
 .ag-timecol{position:relative;background:var(--gray-light);border-right:1px solid var(--border)}
 .ag-time{position:absolute;left:0;right:0;border-top:1px solid var(--border)}
-.ag-time span{position:absolute;top:-8px;right:12px;background:var(--gray-light);padding-left:6px;font-size:11px;font-weight:600;color:var(--text2)}
+.ag-time span{position:absolute;top:-8px;left:0;right:0;text-align:center;background:transparent;font-size:12px;font-weight:700;color:#0D1B2A;font-family:'Poppins',sans-serif}
 .ag-daycol{position:relative;border-right:1px solid var(--border);background:var(--card)}
 .ag-daycol:last-child{border-right:none}
 .ag-gridline{position:absolute;left:0;right:0;border-top:1px solid var(--border);pointer-events:none}
@@ -336,16 +336,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn icon-only" onclick="openAgDatePicker()" title="Elegir fecha"><i class="ti ti-calendar-search"></i></button>
       <input type="date" id="ag-datepick" style="position:absolute;opacity:0;width:1px;height:1px;pointer-events:none" onchange="jumpToAgDate()">
     </div>
-    <div class="ag-legend">
-      <span class="ag-key"><span class="ag-dot res"></span>Reserva</span>
-      <span class="ag-key"><span class="ag-dot inc"></span>Incompleta</span>
-      <span class="ag-key"><span class="ag-dot play"></span>En juego</span>
-      <span class="ag-key"><span class="ag-dot close"></span>Cerrada</span>
-      <span class="ag-key"><span class="ag-dot maint"></span>Mant.</span>
-      <span class="ag-key"><span class="ag-dot class"></span>Clase</span>
-      <span class="ag-key"><span class="ag-dot event"></span>Evento</span>
-      <span class="ag-key"><span class="ag-dot holiday"></span>Feriado</span>
-    </div>
+    
     <div class="agenda-actions">
       <button class="btn p" onclick="openRes()"><i class="ti ti-plus"></i> Nueva reserva</button>
       <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Bloqueo / Evento</button>
@@ -1387,10 +1378,10 @@ function rAg(){
     if(fer){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Feriado: ${fmt(D.cfg.precioFeriado||24000)} todo el día</span>`;}
     else if(finde){pInfo=`<span class="badge" style="background:rgba(255,255,255,.2);color:#fff;font-size:11px"><i class="ti ti-flag-3" style="font-size:10px"></i> Fin de semana: ${fmt(D.cfg.precioFinSemana||24000)} todo el día</span>`;}
     else pInfo=tramos.length?tramos.map(t=>`<span class="pm" style="font-size:11px">${t.nombre}: ${fmt(t.precio)}</span>`).join(' '):`<span class="pn">${fmt(c.pN||0)}</span> <span style="color:rgba(255,255,255,.4);font-size:11px">·</span> <span class="pa">${fmt(c.pA||0)} >${D.cfg.alto||'17:30'}</span>`;
-    return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div><div class="cp">${pInfo}</div></div>`;
+    return`<div class="ag-head-court" style="${(fer||finde)?'background:#D6336C':''}"><div class="cn">${c.nombre.toUpperCase()}</div></div>`;
   }).join('')}</div>`;
   h+=`<div class="ag-body" style="grid-template-columns:${isMobile?mobTimeCol:'110px'} repeat(${canchas.length},${isMobile?mobCourtCol:'minmax(190px,1fr)'});height:${bodyH}px"><div class="ag-timecol">`;
-  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}–${minToTime(Math.min(m+slotDur,endDay))}</span></div>`;}
+  for(let m=startDay;m<endDay;m+=slotDur){const top=(m-startDay)*pxPerMin+topPad;h+=`<div class="ag-time" style="top:${top}px"><span>${minToTime(m)}</span></div>`;}
   h+=`</div>`;
   canchas.forEach(c=>{
     h+=`<div class="ag-daycol">`;
@@ -1414,9 +1405,9 @@ function rAg(){
     layoutAgendaEvents(evs).forEach(ev=>{
       const dur=Math.max(0,ev.end-ev.start),isShort=ev.kind==='bloqueo'&&dur<(slotDur-5);
       const vGap=isShort?7:5,hInset=isShort?18:7;
-      const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+(vGap/2));
+      const top=Math.max(topPad,(ev.start-startDay)*pxPerMin+topPad+1);
       const minH=(isShort?38:56)+(ev.meta2?14:0);
-      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-vGap);
+      const height=Math.max(minH,(Math.min(ev.end,endDay)-Math.max(ev.start,startDay))*pxPerMin-2);
       const width=(100/ev.lanes),left=ev.lane*width;
       const click=ev.kind==='reserva'?`clkSlot('${ev.id}')`:`openBloqueo('${ev.id}')`;
       h+=`<div class="ag-block ${ev.cls}${isShort?' short':''}${ev.conflict?' ag-conflict':''}" style="top:${top}px;height:${height}px;left:calc(${left}% + ${hInset}px);width:calc(${width}% - ${hInset*2}px)" onclick="${click}">
