@@ -413,6 +413,27 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <table><thead><tr><th>Fecha</th><th>Profesor</th><th>Alumno(s)</th><th>Cancha</th><th>Horario</th><th>Valor</th><th>Estado pago</th><th></th></tr></thead><tbody id="cltbody"></tbody></table>
   </div>
 </div>
+
+<!-- MODAL COBRO CLASE -->
+<div class="mbg hidden" id="m-cobro-clase">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-header"><div class="modal-title" id="m-cobro-title">Registro de cobro</div><button class="btn icon-only" onclick="cM('m-cobro-clase')"><i class="ti ti-x"></i></button></div>
+    <div id="m-cobro-info" style="background:var(--gray-light);border-radius:10px;padding:12px;margin-bottom:1rem;font-size:13px"></div>
+    <div style="font-size:12px;font-weight:700;color:var(--text2);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Pagos registrados</div>
+    <div id="m-cobro-pagos-list" style="margin-bottom:12px"></div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end;padding:12px;background:var(--gray-light);border-radius:10px">
+      <div><lbl>Monto $</lbl><input type="number" id="m-cobro-monto" placeholder="0" style="width:110px"></div>
+      <div><lbl>Método</lbl><select id="m-cobro-metodo" style="width:140px"><option value="Efectivo">Efectivo</option><option value="Transferencia">Transferencia</option><option value="Tarjeta">Tarjeta</option></select></div>
+      <div><lbl>Quién paga</lbl><select id="m-cobro-quien" style="width:160px"></select></div>
+      <button class="btn p sm" onclick="addCobroPago()" type="button"><i class="ti ti-plus"></i> Agregar</button>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:1rem">
+      <button class="btn" onclick="cM('m-cobro-clase')">Cancelar</button>
+      <button class="btn p" onclick="saveCobroPago()"><i class="ti ti-device-floppy"></i> Guardar</button>
+    </div>
+  </div>
+</div>
+
 <!-- CAJA -->
 <div class="sec" id="sec-caja">
   <div class="rb"><div></div><button class="btn p" onclick="openCD()"><i class="ti ti-printer"></i> Cierre del día</button></div>
@@ -1468,6 +1489,35 @@ function selBloqTipo(tipo){
   const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
   const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
+  updateBlCobroWrap();
+}
+
+function renderBlPagos(){
+  var pagos=window._blPagos||[];
+  var list=document.getElementById('bl-pagos-list');
+  if(!list)return;
+  if(!pagos.length){list.innerHTML='<div style="font-size:12px;color:var(--text3)">Sin pagos registrados.</div>';return;}
+  list.innerHTML=pagos.map(function(p,i){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--card);border-radius:8px;margin-bottom:4px;font-size:13px"><span style="font-weight:600">'+fmt(p.monto)+'</span><span style="color:var(--text2)">'+p.metodo+'</span><span style="color:var(--text3)">'+p.quien+'</span><button onclick="removeBlPago('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:14px"><i class="ti ti-x"></i></button></div>';}).join('');
+}
+function removeBlPago(i){if(!window._blPagos)return;window._blPagos.splice(i,1);renderBlPagos();}
+function addBlPago(){
+  var monto=parseInt(document.getElementById('bl-pago-monto').value)||0;
+  var metodo=document.getElementById('bl-pago-metodo').value;
+  var quien=document.getElementById('bl-pago-quien').value;
+  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!window._blPagos)window._blPagos=[];
+  window._blPagos.push({monto:monto,metodo:metodo,quien:quien});
+  document.getElementById('bl-pago-monto').value='';
+  renderBlPagos();
+}
+function updateBlCobroWrap(){
+  var wrap=document.getElementById('bl-cobro-wrap');
+  var tipo=document.getElementById('bl-tipos')?document.getElementById('bl-tipos').dataset.sel||'mantenimiento':'mantenimiento';
+  if(wrap)wrap.style.display=tipo==='clase'?'block':'none';
+  var alumnos=window.blAlumnos||[];
+  var quien=document.getElementById('bl-pago-quien');
+  if(quien){quien.innerHTML=alumnos.map(function(a){return'<option value="'+a+'">'+a+'</option>';}).join('')+'<option value="Todos">Todos</option>';}
+  renderBlPagos();
 }
 async function saveBloqueo(){
   const tipo=g('bl-tipos').dataset.sel||'mantenimiento';const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
@@ -2527,6 +2577,57 @@ function getClasesPeriodRange(periodo){
 }
 function clearClFilter(){g('cl-search').value='';g('cl-periodo').value='todo';rClases();}
 
+
+var _cobroClaseId=null;
+async function openCobroCls(id){
+  var c=(D.bloqueos||[]).find(function(x){return x.id===id;});
+  if(!c)return;
+  _cobroClaseId=id;
+  var res=await sb.from('clase_pagos').select('*').eq('bloqueo_id',id).order('created_at');
+  window._cobroPagos=res.data?res.data.map(function(p){return{monto:p.monto,metodo:p.metodo,quien:p.quien};}):[];
+  c.pagos=window._cobroPagos;
+  var alumnos=c.alumnos||[];
+  document.getElementById('m-cobro-title').textContent='Cobro — '+(c.titulo||'Clase')+' '+c.fecha;
+  document.getElementById('m-cobro-info').innerHTML='<div style="display:flex;gap:16px;flex-wrap:wrap"><span><strong>Profesor:</strong> '+(c.profesor||'—')+'</span><span><strong>Horario:</strong> '+c.horaInicio+'-'+c.horaFin+'</span><span><strong>Valor:</strong> '+fmt(c.valor||0)+'</span><span><strong>Alumnos:</strong> '+(alumnos.join(', ')||'Sin registrar')+'</span></div>';
+  var quien=document.getElementById('m-cobro-quien');
+  if(quien)quien.innerHTML=alumnos.map(function(a){return'<option value="'+a+'">'+a+'</option>';}).join('')+'<option value="Todos">Todos</option>';
+  renderCobroPagos();
+  document.getElementById('m-cobro-clase').classList.remove('hidden');
+}
+function renderCobroPagos(){
+  var pagos=window._cobroPagos||[];
+  var list=document.getElementById('m-cobro-pagos-list');
+  if(!list)return;
+  if(!pagos.length){list.innerHTML='<div style="font-size:13px;color:var(--text3);padding:8px 0">Sin pagos registrados aun.</div>';return;}
+  var total=pagos.reduce(function(s,p){return s+(p.monto||0);},0);
+  list.innerHTML=pagos.map(function(p,i){return'<div style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--card);border-radius:8px;margin-bottom:4px;font-size:13px"><span style="font-weight:700">'+fmt(p.monto)+'</span><span style="background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600">'+p.metodo+'</span><span style="color:var(--text2)">'+p.quien+'</span><button onclick="removeCobroPago('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:14px"><i class="ti ti-x"></i></button></div>';}).join('')+'<div style="padding:8px 0;font-size:13px;font-weight:700;border-top:1px solid var(--border);margin-top:4px">Total cobrado: '+fmt(total)+'</div>';
+}
+function removeCobroPago(i){if(!window._cobroPagos)return;window._cobroPagos.splice(i,1);renderCobroPagos();}
+function addCobroPago(){
+  var monto=parseInt(document.getElementById('m-cobro-monto').value)||0;
+  var metodo=document.getElementById('m-cobro-metodo').value;
+  var quien=document.getElementById('m-cobro-quien').value;
+  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!window._cobroPagos)window._cobroPagos=[];
+  window._cobroPagos.push({monto:monto,metodo:metodo,quien:quien});
+  document.getElementById('m-cobro-monto').value='';
+  renderCobroPagos();
+}
+async function saveCobroPago(){
+  var c=(D.bloqueos||[]).find(function(x){return x.id===_cobroClaseId;});
+  if(!c)return;
+  var pagos=window._cobroPagos||[];
+  var del=await sb.from('clase_pagos').delete().eq('bloqueo_id',_cobroClaseId);
+  if(del.error){alert('Error al guardar: '+del.error.message);return;}
+  if(pagos.length){
+    var rows=pagos.map(function(p){return{bloqueo_id:_cobroClaseId,monto:p.monto,metodo:p.metodo,quien:p.quien};});
+    var ins=await sb.from('clase_pagos').insert(rows);
+    if(ins.error){alert('Error al guardar: '+ins.error.message);return;}
+  }
+  c.pagos=pagos;
+  cM('m-cobro-clase');
+  rClases();
+}
 var _clMes=new Set(),_clProf=new Set(),_clEstado=new Set();
 function clToggle(e,t){e.stopPropagation();['mes','prof','estado'].forEach(function(k){if(k!==t){var p=document.getElementById('cl'+k[0]+'panel');if(p)p.style.display='none';}});var p=document.getElementById('cl'+t[0]+'panel');if(p)p.style.display=p.style.display==='none'?'block':'none';}
 document.addEventListener('click',function(){['clmpanel','clppanel','clepanel'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});});
@@ -2557,10 +2658,9 @@ function rClases(){
     const cancha=D.canchas.find(x=>x.id===c.canchaId)||{nombre:c.canchaId==='todas'?'Todas':'?'};
     const alumnos=c.alumnos||[];
     const pagos=c.pagos||{};
-    const alumnosHtml=alumnos.length?alumnos.map(function(a){var est=pagos[a]||'pendiente';var isPag=est==='pagado';return '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px"><span style="font-size:13px">'+a+'</span><button onclick="togglePagoClase(\''+c.id+'\',\''+a+'\')" style="padding:2px 8px;border-radius:20px;border:none;cursor:pointer;font-size:11px;font-weight:600;background:'+(isPag?'#D1FAE5':'#FEF3C7')+';color:'+(isPag?'#065F46':'#92400E')+'">'+(isPag?'Pagado':'Pendiente')+'</button></div>';}).join(''):'<span style="color:var(--text3)">Sin registrar</span>';
-    const tots=alumnos.length;const pags=alumnos.filter(function(a){return(pagos[a]||'pendiente')==='pagado';}).length;
-    const estadoGen=tots===0?'':tots===pags?'<span style="color:#065F46;font-weight:600;font-size:12px">Todo pagado</span>':pags===0?'<span style="color:#92400E;font-weight:600;font-size:12px">Pendiente</span>':'<span style="color:#0369A1;font-weight:600;font-size:12px">'+pags+'/'+tots+' pagado</span>';
-    return`<tr><td>${fmtD(new Date(c.fecha+'T12:00:00'))}</td><td style="font-weight:600">${c.profesor||'<span style="color:var(--text3)">Sin registrar</span>'}</td><td>${alumnosHtml}</td><td>${cancha.nombre}</td><td>${c.horaInicio}-${c.horaFin}</td><td style="font-weight:700">${fmt(c.valor||0)}</td><td>${estadoGen}</td><td><button class="btn icon-only sm" onclick="openBloqueo('${c.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td></tr>`;
+    const alumnosHtml=alumnos.length?alumnos.join(', '):'<span style="color:var(--text3)">Sin registrar</span>';
+    var blPagosArr=c.pagos||[];var totalPagado=blPagosArr.reduce(function(s,p){return s+(p.monto||0);},0);var estadoGen=blPagosArr.length===0?'<span style="color:#92400E;font-size:12px;font-weight:600">Sin pagos</span>':'<div style="font-size:12px"><span style="color:#065F46;font-weight:700">'+fmt(totalPagado)+'</span><br>'+(blPagosArr.map(function(p){return'<span style="color:var(--text3)">'+p.quien+' · '+p.metodo+'</span>';}).join('<br>'))+'</div>';
+    return`<tr><td>${fmtD(new Date(c.fecha+'T12:00:00'))}</td><td style="font-weight:600">${c.profesor||'<span style="color:var(--text3)">Sin registrar</span>'}</td><td>${alumnosHtml}</td><td>${cancha.nombre}</td><td>${c.horaInicio}-${c.horaFin}</td><td style="font-weight:700">${fmt(c.valor||0)}</td><td>${estadoGen}</td><td style="display:flex;gap:4px"><button class="btn icon-only sm" onclick="openCobroCls('${c.id}')" title="Registrar cobro"><i class="ti ti-cash" style="font-size:13px"></i></button><button class="btn icon-only sm" onclick="openBloqueo('${c.id}')" title="Editar clase"><i class="ti ti-edit" style="font-size:13px"></i></button></td></tr>`;
   }).join(''):'<tr><td colspan="8" style="text-align:center;color:var(--text3);padding:14px">Sin clases registradas.</td></tr>';
 }
 // ── DEMO DATA ─────────────────────────────────────────────
