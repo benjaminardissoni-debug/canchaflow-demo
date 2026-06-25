@@ -370,8 +370,15 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
     <div style="flex:1;min-width:220px;position:relative"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3)"></i>
       <input id="jsearch" placeholder="Buscar nombre, teléfono, nivel..." style="padding-left:36px;background:var(--card)" oninput="rJ()"></div>
-    <select id="jfnivel" onchange="rJ()" style="width:180px;background:var(--card)"></select>
-    <select id="jfdesc" onchange="rJ()" style="width:180px;background:var(--card)"><option value="">Todos los tipos</option></select>
+    <div id="jf-niveles" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">Nivel:</span>
+    </div>
+    <div id="jf-lados" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
+      <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">Lado:</span>
+      <button class="jf-chip" data-lado="Drive" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Drive</button>
+      <button class="jf-chip" data-lado="Revés" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Revés</button>
+      <button class="jf-chip" data-lado="Ambos" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Ambos</button>
+    </div>
   </div>
   <div id="jgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem"></div>
 </div>
@@ -1224,7 +1231,7 @@ function initMobCancha(){
 }
 function updSelNiveles(){
   const nivs=getNiveles();
-  ['j-nivel','jfnivel'].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=(id==='jfnivel'?'<option value="">Todos los niveles</option>':'')+nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});
+  [('j-nivel')].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});const jfn=g('jf-niveles');if(jfn){const existingChips=jfn.querySelectorAll('.jf-chip');existingChips.forEach(e=>e.remove());nivs.forEach(n=>{const b=document.createElement('button');b.className='jf-chip';b.dataset.nivel=n;b.dataset.active='0';b.textContent=n;b.style.cssText="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif";b.onclick=()=>toggleChip(b,'nivel');jfn.appendChild(b);});}
   const jfd=g('jfdesc');if(jfd){jfd.innerHTML='<option value="">Todos los tipos</option>'+(D.cfg.membs||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');}
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
@@ -1939,10 +1946,22 @@ function rT(){
 }
 
 // ── JUGADORES ────────────────────────────────────────────
+function toggleChip(el,type){
+  const active=el.getAttribute('data-active')==='1';
+  el.setAttribute('data-active',active?'0':'1');
+  el.style.background=active?'var(--card)':'var(--cyan)';
+  el.style.color=active?'':'#fff';
+  el.style.borderColor=active?'var(--border)':'var(--cyan)';
+  rJ();
+}
 function rJ(){
-  const q=(g('jsearch').value||'').toLowerCase();const fn=g('jfnivel').value;const fd=g('jfdesc').value;
-  let js=D.jugadores;if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
-  if(fn)js=js.filter(j=>j.nivel===fn);if(fd)js=js.filter(j=>j.memb===fd);
+  const q=(g('jsearch').value||'').toLowerCase();
+  const nivSel=[...document.querySelectorAll('#jf-niveles .jf-chip[data-active="1"]')].map(e=>e.dataset.nivel);
+  const ladoSel=[...document.querySelectorAll('#jf-lados .jf-chip[data-active="1"]')].map(e=>e.dataset.lado);
+  let js=D.jugadores;
+  if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
+  if(nivSel.length)js=js.filter(j=>nivSel.includes(j.nivel));
+  if(ladoSel.length)js=js.filter(j=>ladoSel.includes(j.lado));
   g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
     const membTag=memb?`<span class="bcyan" style="font-size:10px">${memb.nombre}</span>`:'';
     const ovTag=j.precioOv!==undefined&&j.precioOv!==''?`<span class="badge bamber" style="font-size:10px">$${Number(j.precioOv).toLocaleString('es-CL')} fijo</span>`:'';
