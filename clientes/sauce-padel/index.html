@@ -370,16 +370,28 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
     <div style="flex:1;min-width:220px;position:relative"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3)"></i>
       <input id="jsearch" placeholder="Buscar nombre, teléfono, nivel..." style="padding-left:36px;background:var(--card)" oninput="rJ()"></div>
-    <div id="jf-niveles" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">Nivel:</span>
-    </div>
-    <div id="jf-lados" style="display:flex;gap:6px;flex-wrap:wrap;align-items:center">
-      <span style="font-size:12px;color:var(--text3);font-weight:600;white-space:nowrap">Lado:</span>
-      <button class="jf-chip" data-lado="Drive" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Drive</button>
-      <button class="jf-chip" data-lado="Revés" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Revés</button>
-      <button class="jf-chip" data-lado="Ambos" onclick="toggleChip(this,'lado')" style="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif">Ambos</button>
-    </div>
-  </div>
+    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative">
+      <!-- Dropdown Categoría -->
+      <div style="position:relative">
+        <button id="jf-niv-btn" onclick="toggleJfDropdown('niv')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--text1)">
+          <span id="jf-niv-label">Categoría</span><i class="ti ti-chevron-down" style="font-size:12px"></i>
+        </button>
+        <div id="jf-niv-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:180px;padding:8px 0;max-height:320px;overflow-y:auto">
+          <div id="jf-niv-list"></div>
+        </div>
+      </div>
+      <!-- Dropdown Posición -->
+      <div style="position:relative">
+        <button id="jf-lado-btn" onclick="toggleJfDropdown('lado')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--text1)">
+          <span id="jf-lado-label">Posición</span><i class="ti ti-chevron-down" style="font-size:12px"></i>
+        </button>
+        <div id="jf-lado-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:160px;padding:8px 0">
+          <div id="jf-lado-list"></div>
+        </div>
+      </div>
+      <!-- Limpiar filtros -->
+      <button id="jf-clear" onclick="clearJfFilters()" style="display:none;padding:6px 12px;border-radius:8px;border:1.5px solid var(--amber);background:transparent;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--amber)">✕ Limpiar</button>
+    </div></div>
   <div id="jgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem"></div>
 </div>
 <!-- INVENTARIO -->
@@ -1231,7 +1243,7 @@ function initMobCancha(){
 }
 function updSelNiveles(){
   const nivs=getNiveles();
-  [('j-nivel')].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});const jfn=g('jf-niveles');if(jfn){const existingChips=jfn.querySelectorAll('.jf-chip');existingChips.forEach(e=>e.remove());nivs.forEach(n=>{const b=document.createElement('button');b.className='jf-chip';b.dataset.nivel=n;b.dataset.active='0';b.textContent=n;b.style.cssText="padding:4px 12px;border-radius:20px;border:1.5px solid var(--border);background:var(--card);font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif";b.onclick=()=>toggleChip(b,'nivel');jfn.appendChild(b);});}
+  [('j-nivel')].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});const jfnl=g('jf-niv-list');if(jfnl){jfnl.innerHTML=nivs.map(n=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''"><input type="checkbox" data-niv="${n}" onchange="toggleJfCheck(this,'niv')" style="accent-color:var(--cyan);width:14px;height:14px"> ${n}</label>`).join('');}buildJfLados();
   const jfd=g('jfdesc');if(jfd){jfd.innerHTML='<option value="">Todos los tipos</option>'+(D.cfg.membs||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');}
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
@@ -1946,22 +1958,52 @@ function rT(){
 }
 
 // ── JUGADORES ────────────────────────────────────────────
-function toggleChip(el,type){
-  const active=el.getAttribute('data-active')==='1';
-  el.setAttribute('data-active',active?'0':'1');
-  el.style.background=active?'var(--card)':'var(--cyan)';
-  el.style.color=active?'':'#fff';
-  el.style.borderColor=active?'var(--border)':'var(--cyan)';
+const _jfState={niv:new Set(),lado:new Set()};
+function toggleJfDropdown(type){
+  const panel=g('jf-'+type+'-panel');
+  const other=type==='niv'?'lado':'niv';
+  g('jf-'+other+'-panel').style.display='none';
+  panel.style.display=panel.style.display==='none'?'block':'none';
+}
+document.addEventListener('click',function(e){
+  ['niv','lado'].forEach(t=>{const p=g('jf-'+t+'-panel');if(p&&!p.contains(e.target)&&!g('jf-'+t+'-btn').contains(e.target))p.style.display='none';});
+});
+function buildJfLados(){
+  const list=g('jf-lado-list');if(!list)return;
+  const lados=['Drive','Revés','Ambos'];
+  list.innerHTML=lados.map(l=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''"><input type="checkbox" data-lado="${l}" onchange="toggleJfCheck(this,'lado')" style="accent-color:var(--cyan);width:14px;height:14px"> ${l}</label>`).join('');
+}
+function toggleJfCheck(el,type){
+  if(el.checked)_jfState[type].add(el.dataset[type]);
+  else _jfState[type].delete(el.dataset[type]);
+  updateJfLabel(type);
+  updateClearBtn();
   rJ();
+}
+function updateJfLabel(type){
+  const sel=_jfState[type];
+  const labelEl=g('jf-'+type+'-label');
+  if(!labelEl)return;
+  const base=type==='niv'?'Categoría':'Posición';
+  labelEl.textContent=sel.size===0?base:sel.size===1?[...sel][0]:`${base} (${sel.size})`;
+  const btn=g('jf-'+type+'-btn');
+  btn.style.borderColor=sel.size>0?'var(--cyan)':'var(--border)';
+  btn.style.color=sel.size>0?'var(--cyan)':'var(--text1)';
+}
+function updateClearBtn(){
+  const cl=g('jf-clear');if(cl)cl.style.display=(_jfState.niv.size>0||_jfState.lado.size>0)?'block':'none';
+}
+function clearJfFilters(){
+  _jfState.niv.clear();_jfState.lado.clear();
+  document.querySelectorAll('#jf-niv-list input,#jf-lado-list input').forEach(el=>el.checked=false);
+  updateJfLabel('niv');updateJfLabel('lado');updateClearBtn();rJ();
 }
 function rJ(){
   const q=(g('jsearch').value||'').toLowerCase();
-  const nivSel=[...document.querySelectorAll('#jf-niveles .jf-chip[data-active="1"]')].map(e=>e.dataset.nivel);
-  const ladoSel=[...document.querySelectorAll('#jf-lados .jf-chip[data-active="1"]')].map(e=>e.dataset.lado);
   let js=D.jugadores;
   if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
-  if(nivSel.length)js=js.filter(j=>nivSel.includes(j.nivel));
-  if(ladoSel.length)js=js.filter(j=>ladoSel.includes(j.lado));
+  if(_jfState.niv.size)js=js.filter(j=>_jfState.niv.has(j.nivel));
+  if(_jfState.lado.size)js=js.filter(j=>_jfState.lado.has(j.lado));
   g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
     const membTag=memb?`<span class="bcyan" style="font-size:10px">${memb.nombre}</span>`:'';
     const ovTag=j.precioOv!==undefined&&j.precioOv!==''?`<span class="badge bamber" style="font-size:10px">$${Number(j.precioOv).toLocaleString('es-CL')} fijo</span>`:'';
