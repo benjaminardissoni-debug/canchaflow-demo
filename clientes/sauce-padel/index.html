@@ -969,7 +969,7 @@ const fmt=n=>'$'+Math.round(n).toLocaleString('es-CL');
 const fmtD=d=>d.toLocaleDateString('es-CL',{weekday:'short',day:'numeric',month:'short'});
 const fmtDL=d=>d.toLocaleDateString('es-CL',{weekday:'long',day:'numeric',month:'long',year:'numeric'});
 const fmtT=iso=>iso?new Date(iso).toLocaleTimeString('es-CL',{hour:'2-digit',minute:'2-digit'}):'';
-const ds=d=>d.toISOString().slice(0,10);
+const ds=d=>{const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0");return `${y}-${m}-${day}`;};
 const isH=iso=>iso&&new Date(iso).toDateString()===new Date().toDateString();
 function sv(){try{localStorage.setItem('cf-demo-v1',JSON.stringify(D));}catch(e){}}
 
