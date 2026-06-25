@@ -179,12 +179,6 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .g2{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
 .jcard{background:var(--card);border:1px solid var(--border);border-radius:var(--r2);padding:1rem;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow);transition:all .15s}
 .jcard:hover{border-color:var(--cyan);box-shadow:0 4px 20px rgba(14,165,233,.12)}
-.jtable{width:100%;border-collapse:separate;border-spacing:0 4px}
-.jtable th{font-size:11px;font-weight:600;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;padding:6px 12px;text-align:left}
-.jtable td{padding:10px 12px;background:var(--card);font-size:13px;border-top:1px solid var(--border);border-bottom:1px solid var(--border)}
-.jtable td:first-child{border-left:1px solid var(--border);border-radius:10px 0 0 10px}
-.jtable td:last-child{border-right:1px solid var(--border);border-radius:0 10px 10px 0}
-.jtable tr:hover td{border-color:var(--cyan)}
 .tcard{background:var(--card);border:1px solid var(--border);border-left:4px solid var(--cyan);border-radius:var(--r2);padding:1rem;display:flex;flex-direction:column;gap:8px;box-shadow:var(--shadow)}
 .pagorow{display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
 .pagorow:last-child{border-bottom:none}
@@ -372,31 +366,13 @@ tr:hover td{background:rgba(242,244,247,.7)}
 </div>
 <!-- JUGADORES -->
 <div class="sec" id="sec-jugadores">
-<div class="rb"><div></div><div style="display:flex;gap:8px;align-items:center"><button id="jvg" onclick="setJV('grid')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--cyan);background:var(--cyan);color:#fff;cursor:pointer;font-size:14px"><i class="ti ti-layout-grid"></i></button><button id="jvl" onclick="setJV('list')" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text2);cursor:pointer;font-size:14px"><i class="ti ti-list"></i></button><button class="btn p" onclick="openJ()"><i class="ti ti-user-plus"></i> Agregar jugador</button></div></div>  <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
+  <div class="rb"><div></div><button class="btn p" onclick="openJ()"><i class="ti ti-user-plus"></i> Agregar jugador</button></div>
+  <div style="display:flex;gap:10px;margin-bottom:1.25rem;flex-wrap:wrap">
     <div style="flex:1;min-width:220px;position:relative"><i class="ti ti-search" style="position:absolute;left:11px;top:50%;transform:translateY(-50%);font-size:15px;color:var(--text3)"></i>
       <input id="jsearch" placeholder="Buscar nombre, teléfono, nivel..." style="padding-left:36px;background:var(--card)" oninput="rJ()"></div>
-    <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:center;position:relative">
-      <!-- Dropdown Categoría -->
-      <div style="position:relative">
-        <button id="jf-niv-btn" onclick="toggleJfDropdown('niv')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--text1)">
-          <span id="jf-niv-label">Categoría</span><i class="ti ti-chevron-down" style="font-size:12px"></i>
-        </button>
-        <div id="jf-niv-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:180px;padding:8px 0;max-height:320px;overflow-y:auto">
-          <div id="jf-niv-list"></div>
-        </div>
-      </div>
-      <!-- Dropdown Posición -->
-      <div style="position:relative">
-        <button id="jf-lado-btn" onclick="toggleJfDropdown('lado')" style="display:flex;align-items:center;gap:6px;padding:6px 14px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);font-size:13px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--text1)">
-          <span id="jf-lado-label">Posición</span><i class="ti ti-chevron-down" style="font-size:12px"></i>
-        </button>
-        <div id="jf-lado-panel" style="display:none;position:absolute;top:calc(100% + 6px);left:0;background:var(--card);border:1.5px solid var(--border);border-radius:10px;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:999;min-width:160px;padding:8px 0">
-          <div id="jf-lado-list"></div>
-        </div>
-      </div>
-      <!-- Limpiar filtros -->
-      <button id="jf-clear" onclick="clearJfFilters()" style="display:none;padding:6px 12px;border-radius:8px;border:1.5px solid var(--amber);background:transparent;font-size:12px;cursor:pointer;font-family:'Poppins',sans-serif;color:var(--amber)">✕ Limpiar</button>
-    </div></div>
+    <select id="jfnivel" onchange="rJ()" style="width:180px;background:var(--card)"></select>
+    <select id="jfdesc" onchange="rJ()" style="width:180px;background:var(--card)"><option value="">Todos los tipos</option></select>
+  </div>
   <div id="jgrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:1rem"></div>
 </div>
 <!-- INVENTARIO -->
@@ -1248,7 +1224,7 @@ function initMobCancha(){
 }
 function updSelNiveles(){
   const nivs=getNiveles();
-  [('j-nivel')].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});const jfnl=g('jf-niv-list');if(jfnl){jfnl.innerHTML=nivs.map(n=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''"><input type="checkbox" data-niv="${n}" onchange="toggleJfCheck(this,'niv')" style="accent-color:var(--cyan);width:14px;height:14px"> ${n}</label>`).join('');}buildJfLados();
+  ['j-nivel','jfnivel'].forEach(id=>{const el=g(id);if(!el)return;el.innerHTML=(id==='jfnivel'?'<option value="">Todos los niveles</option>':'')+nivs.map(n=>`<option value="${n}">${n}</option>`).join('');});
   const jfd=g('jfdesc');if(jfd){jfd.innerHTML='<option value="">Todos los tipos</option>'+(D.cfg.membs||[]).map(m=>`<option value="${m.id}">${m.nombre}</option>`).join('');}
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
@@ -1963,55 +1939,11 @@ function rT(){
 }
 
 // ── JUGADORES ────────────────────────────────────────────
-const _jfState={niv:new Set(),lado:new Set()};
-function setJV(v){window._jV=v;var g1=document.getElementById("jvg"),l1=document.getElementById("jvl");if(g1){g1.style.background=v==="grid"?"var(--cyan)":"var(--card)";g1.style.color=v==="grid"?"#fff":"var(--text2)";g1.style.borderColor=v==="grid"?"var(--cyan)":"var(--border)";}if(l1){l1.style.background=v==="list"?"var(--cyan)":"var(--card)";l1.style.color=v==="list"?"#fff":"var(--text2)";l1.style.borderColor=v==="list"?"var(--cyan)":"var(--border)";}rJ();}
-function toggleJfDropdown(type){
-  const panel=g('jf-'+type+'-panel');
-  const other=type==='niv'?'lado':'niv';
-  g('jf-'+other+'-panel').style.display='none';
-  panel.style.display=panel.style.display==='none'?'block':'none';
-}
-document.addEventListener('click',function(e){
-  ['niv','lado'].forEach(t=>{const p=g('jf-'+t+'-panel');if(p&&!p.contains(e.target)&&!g('jf-'+t+'-btn').contains(e.target))p.style.display='none';});
-});
-function buildJfLados(){
-  const list=g('jf-lado-list');if(!list)return;
-  const lados=['Drive','Revés','Ambos'];
-  list.innerHTML=lados.map(l=>`<label style="display:flex;align-items:center;gap:8px;padding:7px 14px;cursor:pointer;font-size:13px;font-family:'Poppins',sans-serif" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''"><input type="checkbox" data-lado="${l}" onchange="toggleJfCheck(this,'lado')" style="accent-color:var(--cyan);width:14px;height:14px"> ${l}</label>`).join('');
-}
-function toggleJfCheck(el,type){
-  if(el.checked)_jfState[type].add(el.dataset[type]);
-  else _jfState[type].delete(el.dataset[type]);
-  updateJfLabel(type);
-  updateClearBtn();
-  rJ();
-}
-function updateJfLabel(type){
-  const sel=_jfState[type];
-  const labelEl=g('jf-'+type+'-label');
-  if(!labelEl)return;
-  const base=type==='niv'?'Categoría':'Posición';
-  labelEl.textContent=sel.size===0?base:sel.size===1?[...sel][0]:`${base} (${sel.size})`;
-  const btn=g('jf-'+type+'-btn');
-  btn.style.borderColor=sel.size>0?'var(--cyan)':'var(--border)';
-  btn.style.color=sel.size>0?'var(--cyan)':'var(--text1)';
-}
-function updateClearBtn(){
-  const cl=g('jf-clear');if(cl)cl.style.display=(_jfState.niv.size>0||_jfState.lado.size>0)?'block':'none';
-}
-function clearJfFilters(){
-  _jfState.niv.clear();_jfState.lado.clear();
-  document.querySelectorAll('#jf-niv-list input,#jf-lado-list input').forEach(el=>el.checked=false);
-  updateJfLabel('niv');updateJfLabel('lado');updateClearBtn();rJ();
-}
 function rJ(){
-  const q=(g('jsearch').value||'').toLowerCase();
-  let js=D.jugadores;
-  if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
-  if(_jfState.niv.size)js=js.filter(j=>_jfState.niv.has(j.nivel));
-  if(_jfState.lado.size)js=js.filter(j=>_jfState.lado.has(j.lado));
-  var _v=window._jV||'grid';var jgel=document.getElementById('jgrid');jgel.style.gridTemplateColumns=_v==='list'?'1fr':'';if(_v==='list'){jgel.innerHTML=js.length?'<table class="jtable"><thead><tr><th>Nombre</th><th>Categoría</th><th>Posición</th><th>Teléfono</th><th>Acciones</th></tr></thead><tbody>'+js.map(function(j){var nc=getNColor(j.nivel);var wa=j.telefono?'<a href="https://wa.me/'+(j.telefono||'').replace(/[^0-9]/g,'')+'" target="_blank" style="display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;border-radius:50%;background:#25D366;color:#fff;font-size:13px"><i class="ti ti-brand-whatsapp"></i></a>':'';return '<tr><td style="font-weight:700;font-family:Poppins,sans-serif">'+j.nombre+'</td><td><span style="background:'+nc.b+';color:'+nc.t+';font-size:11px;padding:3px 9px;border-radius:20px;font-weight:600">'+(j.nivel||'—')+'</span></td><td style="color:var(--text2)">'+(j.lado||'—')+'</td><td style="color:var(--text2)">'+(j.telefono||'—')+'</td><td><div style="display:flex;gap:6px;align-items:center">'+wa+'<button class="btn icon-only sm" onclick="openJ(\''+j.id+'\')"><i class="ti ti-edit" style="font-size:13px"></i></button><button class="btn icon-only sm d" onclick="delJ(\''+j.id+'\')"><i class="ti ti-trash" style="font-size:13px"></i></button></div></td></tr>';}).join('')+'</tbody></table>':'<p style="padding:2rem;color:var(--text3)">Sin jugadores</p>';return;}
-g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
+  const q=(g('jsearch').value||'').toLowerCase();const fn=g('jfnivel').value;const fd=g('jfdesc').value;
+  let js=D.jugadores;if(q)js=js.filter(j=>j.nombre.toLowerCase().includes(q)||(j.telefono||'').includes(q)||(j.nivel||'').toLowerCase().includes(q));
+  if(fn)js=js.filter(j=>j.nivel===fn);if(fd)js=js.filter(j=>j.memb===fd);
+  g('jgrid').innerHTML=js.length?js.map(j=>{const nc=getNColor(j.nivel);const memb=(D.cfg.membs||[]).find(m=>m.id===j.memb);
     const membTag=memb?`<span class="bcyan" style="font-size:10px">${memb.nombre}</span>`:'';
     const ovTag=j.precioOv!==undefined&&j.precioOv!==''?`<span class="badge bamber" style="font-size:10px">$${Number(j.precioOv).toLocaleString('es-CL')} fijo</span>`:'';
     return`<div class="jcard"><div style="display:flex;justify-content:space-between;align-items:flex-start"><div style="font-weight:700;font-family:Poppins,sans-serif;font-size:14px">${j.nombre}</div>
