@@ -122,9 +122,9 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .login-brand{font-family:'Poppins',sans-serif;font-size:24px;font-weight:700;line-height:1}
 .login-brand .c{color:var(--navy)}.login-brand .f{color:var(--cyan-dark)}
 .login-tagline{font-size:12px;color:var(--text3);letter-spacing:.06em;margin-bottom:2rem;font-family:'Poppins',sans-serif}
-.ag-wrap{overflow-x:auto;border-radius:var(--r2);box-shadow:var(--shadow);background:var(--card);border:1px solid var(--border)}
+.ag-wrap{border-radius:var(--r2);box-shadow:var(--shadow);background:var(--card);border:1px solid var(--border)}.ag-cal-scroll{overflow-x:auto}
 .ag-cal{min-width:860px;background:var(--card)}
-.ag-head{display:grid;position:relative;z-index:2;background:var(--cyan);border-bottom:1px solid var(--border)}
+.ag-head{display:grid;position:sticky;top:0;z-index:10;background:var(--cyan);border-bottom:1px solid var(--border)}
 .ag-head-time{background:var(--gray-light);color:var(--text2);border-right:1px solid var(--border);padding:8px 14px;font-family:'Poppins',sans-serif;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em}
 .ag-head-court{padding:8px 12px;color:#fff;text-align:center;border-right:1px solid rgba(255,255,255,.22)}
 .ag-head-court:last-child{border-right:none}
@@ -355,7 +355,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="ag-mob-mode-btn" id="agmode-list" onclick="setMobAgendaMode('list')"><i class="ti ti-list"></i> Lista</button>
     </div>
   </div>
-  <div class="ag-wrap"><div class="ag-cal" id="ag-tbl"></div></div>
+  <div class="ag-wrap"><div class="ag-cal-scroll"><div class="ag-cal" id="ag-tbl"></div></div></div>
 </div>
 <!-- TURNOS -->
 <div class="sec" id="sec-turnos">
@@ -978,8 +978,8 @@ const FERIADOS_CHILE_2026=[
   {fecha:'2026-12-25',nombre:'Navidad'}
 ];
 // ── CONEXIÓN SUPABASE ──────────────────────────────────────
-const SUPABASE_URL='https://djufzbswezexwxptuujg.supabase.co';
-const SUPABASE_KEY='sb_publishable_VfbdWm2rDFk5pB9__pT1iA_7zXW9VQt';
+const SUPABASE_URL='https://mfufcecghjwellqolpsg.supabase.co';
+const SUPABASE_KEY='sb_publishable_-Vyn5Qasp-OOo2ozA024wA_XD-o1o3v';
 const sb=window.supabase.createClient(SUPABASE_URL,SUPABASE_KEY);
 
 let D={canchas:[],productos:[],reservas:[],jugadores:[],deudas:[],promos:[],bloqueos:[],feriadosPropios:[],feriadosOficialesEliminados:[],cfg:{ini:'07:00',fin:'23:30',dur:90,pAdmin:'1234',pRecep:'5678',tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel Las Torres',precioFeriado:24000,precioFinSemana:24000}};
@@ -1577,8 +1577,7 @@ function clkSlot(rid){
   </div>`;
   const bp=g('slot-buscar');if(r.estado!=='cerrado'&&fa>0){bp.classList.remove('hidden');g('psearch').value='';g('presults').innerHTML='';}else bp.classList.add('hidden');
   const ac=g('slot-actions');ac.innerHTML='';
-  if(r.estado==='reservada'){ac.innerHTML+=`<button class="btn p" onclick="iniciar('${r.id}')"><i class="ti ti-clock-play"></i> Iniciar turno</button>`;ac.innerHTML+=`<button class="btn" onclick="editRes('${r.id}')"><i class="ti ti-edit"></i> Editar</button>`;ac.innerHTML+=`<button class="btn d sm" onclick="delRes('${r.id}')"><i class="ti ti-trash"></i> Cancelar</button>`;}
-  if(r.estado==='abierto')ac.innerHTML+=`<button class="btn p" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Abrir comanda</button>`;
+if(r.estado==='reservada'||r.estado==='faltan'){ac.innerHTML+=`<button class="btn p" onclick="iniciar('${r.id}')"><i class="ti ti-clock-play"></i> Iniciar turno</button>`;ac.innerHTML+=`<button class="btn" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Agregar productos</button>`;ac.innerHTML+=`<button class="btn" onclick="editRes('${r.id}')"><i class="ti ti-edit"></i> Editar</button>`;ac.innerHTML+=`<button class="btn d sm" onclick="delRes('${r.id}')"><i class="ti ti-trash"></i> Cancelar</button>`;}  if(r.estado==='abierto')ac.innerHTML+=`<button class="btn p" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Abrir comanda</button>`;
   g('m-slot').classList.remove('hidden');
 }
 function rPart(){
