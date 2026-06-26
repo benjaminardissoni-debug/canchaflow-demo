@@ -644,6 +644,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div class="fr c2">
       <div><lbl>Cancha</lbl><select id="res-cancha" onchange="updRP()"></select></div>
       <div><lbl>Horario</lbl><select id="res-horario" onchange="updRP()"></select></div>
+      <div id="res-custom-container" style="margin-top:6px"><button type="button" onclick="toggleHoraCustom()" id="res-custom-btn" style="padding:5px 12px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;font-size:12px;cursor:pointer;color:var(--text2);font-family:Poppins,sans-serif;display:flex;align-items:center;gap:6px"><i class="ti ti-clock-edit" style="font-size:14px"></i> Usar hora personalizada</button><div id="res-horario-custom-wrap" style="display:none;gap:8px;margin-top:6px;align-items:center"><input type="time" id="res-hora-custom" oninput="updRP()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px"> <span style="font-size:12px;color:var(--text3)">a</span> <input type="time" id="res-hora-custom-fin" oninput="updRP()" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px"></div></div>
     </div>
     <div id="res-precio-box" style="background:var(--gray-light);border:1px solid var(--border);border-radius:var(--r);padding:12px;margin-bottom:1rem">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
@@ -1625,8 +1626,21 @@ function sugJ(i){
   drop.classList.remove('hidden');
 }
 function pickJ(i,n){g('rj'+i).value=n;g('rjd'+i).classList.add('hidden');}
+function toggleHoraCustom(){
+  const wrap=g('res-horario-custom-wrap');
+  const btn=g('res-custom-btn');
+  const hs=g('res-horario');
+  if(wrap.style.display==='none'||!wrap.style.display){
+    wrap.style.display='flex';hs.disabled=true;
+    btn.innerHTML='<i class="ti ti-x" style="font-size:14px"></i> Cancelar hora personalizada';
+  } else {
+    wrap.style.display='none';hs.disabled=false;
+    btn.innerHTML='<i class="ti ti-clock-edit" style="font-size:14px"></i> Usar hora personalizada';
+  }
+  updRP();
+}
 function updRP(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;if(!cid||!hor)return;
+  const cid=g('res-cancha').value;const wrap=g('res-horario-custom-wrap');const useCustom=wrap&&wrap.style.display!=='none';const hor=useCustom?(g('res-hora-custom')?.value||''):g('res-horario').value;if(!cid||!hor)return;
   const p=pcP(cid,hor,agCtx);const pl=getPrecioLabel(hor,agCtx);g('res-pbase').textContent=fmt(p);g('res-ptipo').textContent=pl.label;g('res-ptipo').className=pl.cls;
   const tramos=D.cfg.tramos||[];const ref=g('res-tramos-ref');
   if(tramos.length&&!pl.isFeriado&&!pl.isFinde){
@@ -1642,12 +1656,14 @@ function openRes(fecha,horario,cid,editR){
   const fer=isFeriado(fc);const finde=!fer&&isFinde(fc);g('res-flbl').textContent=fmtDL(new Date(fc+'T12:00:00'))+(fer?` · 🚩 ${fer.nombre}`:'')+(finde?' · 🚩 Fin de semana':'');
   const cs=g('res-cancha');cs.innerHTML=[...D.canchas].map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');if(cid)cs.value=cid;
   const hs=g('res-horario');hs.innerHTML=genSlots().map(s=>`<option value="${s.start}">${s.label}</option>`).join('');if(horario){for(const o of hs.options)if(o.value===horario){o.selected=true;break;}}
+  // Botón hora personalizada
+
   bJI(editR?editR.jugadores:[]);g('res-contacto').value=editR?editR.contacto||'':'';g('res-notas').value=editR?editR.notas||'':'';
   const ov=g('res-pov');ov.dataset.m='';if(editR&&editR.pOv!==undefined){ov.value=editR.pOv;ov.dataset.m='1';}else ov.value='';
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
 }
 async function saveRes(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;const fec=agCtx||ds(getAF());
+  const cid=g('res-cancha').value;const wrap2=g('res-horario-custom-wrap');const useCustom2=wrap2&&wrap2.style.display!=='none';const horBase=useCustom2?(g('res-hora-custom')?.value||''):g('res-horario').value;const horFin=useCustom2?(g('res-hora-custom-fin')?.value||''):null;const hor=horBase;const fec=agCtx||ds(getAF());
   const jugs=[0,1,2,3].map(i=>g('rj'+i).value.trim());const contacto=g('res-contacto').value.trim();const notas=g('res-notas').value.trim();
   const ovr=g('res-pov').value;const pOv=ovr!==''?parseInt(ovr):undefined;
   const conflict=hasCalendarConflict({fecha:fec,canchaId:cid,start:timeToMin(hor),end:timeToMin(hor)+(D.cfg.dur||90),ignoreReservaId:eRid});
