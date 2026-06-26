@@ -1577,7 +1577,8 @@ function clkSlot(rid){
   </div>`;
   const bp=g('slot-buscar');if(r.estado!=='cerrado'&&fa>0){bp.classList.remove('hidden');g('psearch').value='';g('presults').innerHTML='';}else bp.classList.add('hidden');
   const ac=g('slot-actions');ac.innerHTML='';
-if(r.estado==='reservada'||r.estado==='faltan'){ac.innerHTML+=`<button class="btn p" onclick="iniciar('${r.id}')"><i class="ti ti-clock-play"></i> Iniciar turno</button>`;ac.innerHTML+=`<button class="btn" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Agregar productos</button>`;ac.innerHTML+=`<button class="btn" onclick="editRes('${r.id}')"><i class="ti ti-edit"></i> Editar</button>`;ac.innerHTML+=`<button class="btn d sm" onclick="delRes('${r.id}')"><i class="ti ti-trash"></i> Cancelar</button>`;}  if(r.estado==='abierto')ac.innerHTML+=`<button class="btn p" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Abrir comanda</button>`;
+  if(r.estado==='reservada'){ac.innerHTML+=`<button class="btn p" onclick="iniciar('${r.id}')"><i class="ti ti-clock-play"></i> Iniciar turno</button>`;ac.innerHTML+=`<button class="btn" onclick="editRes('${r.id}')"><i class="ti ti-edit"></i> Editar</button>`;ac.innerHTML+=`<button class="btn d sm" onclick="delRes('${r.id}')"><i class="ti ti-trash"></i> Cancelar</button>`;}
+  if(r.estado==='abierto')ac.innerHTML+=`<button class="btn p" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Abrir comanda</button>`;
   g('m-slot').classList.remove('hidden');
 }
 function rPart(){
