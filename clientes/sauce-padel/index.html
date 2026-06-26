@@ -1640,7 +1640,7 @@ function toggleHoraCustom(){
   updRP();
 }
 function updRP(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;if(!cid||!hor)return;
+  const cid=g('res-cancha').value;const wrap=g('res-horario-custom-wrap');const useCustom=wrap&&wrap.style.display!=='none';const hor=useCustom?(g('res-hora-custom')?.value||''):g('res-horario').value;if(!cid||!hor)return;
   const p=pcP(cid,hor,agCtx);const pl=getPrecioLabel(hor,agCtx);g('res-pbase').textContent=fmt(p);g('res-ptipo').textContent=pl.label;g('res-ptipo').className=pl.cls;
   const tramos=D.cfg.tramos||[];const ref=g('res-tramos-ref');
   if(tramos.length&&!pl.isFeriado&&!pl.isFinde){
@@ -1663,7 +1663,7 @@ function openRes(fecha,horario,cid,editR){
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
 }
 async function saveRes(){
-  const cid=g('res-cancha').value;const hor=g('res-horario').value;const fec=agCtx||ds(getAF());
+  const cid=g('res-cancha').value;const wrap2=g('res-horario-custom-wrap');const useCustom2=wrap2&&wrap2.style.display!=='none';const horBase=useCustom2?(g('res-hora-custom')?.value||''):g('res-horario').value;const horFin=useCustom2?(g('res-hora-custom-fin')?.value||''):null;const hor=horBase;const fec=agCtx||ds(getAF());
   const jugs=[0,1,2,3].map(i=>g('rj'+i).value.trim());const contacto=g('res-contacto').value.trim();const notas=g('res-notas').value.trim();
   const ovr=g('res-pov').value;const pOv=ovr!==''?parseInt(ovr):undefined;
   const conflict=hasCalendarConflict({fecha:fec,canchaId:cid,start:timeToMin(hor),end:timeToMin(hor)+(D.cfg.dur||90),ignoreReservaId:eRid});
