@@ -1641,12 +1641,27 @@ function openRes(fecha,horario,cid,editR){
   const fc=fecha||(editR?editR.fecha:ds(getAF()));agCtx=fc;
   const fer=isFeriado(fc);const finde=!fer&&isFinde(fc);g('res-flbl').textContent=fmtDL(new Date(fc+'T12:00:00'))+(fer?` · 🚩 ${fer.nombre}`:'')+(finde?' · 🚩 Fin de semana':'');
   const cs=g('res-cancha');cs.innerHTML=[...D.canchas].map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');if(cid)cs.value=cid;
-  const hs=g('res-horario');hs.innerHTML=genSlots().map(s=>`<option value="${s.start}">${s.label}</option>`).join('')+'<option value="__custom__">⏱ Hora personalizada...</option>';if(horario){for(const o of hs.options)if(o.value===horario){o.selected=true;break;}}
-  hs.onchange=function(){
-    const wrap=g('res-horario-custom-wrap');
-    if(this.value==='__custom__'){if(!wrap){const d=document.createElement('div');d.id='res-horario-custom-wrap';d.style='display:flex;gap:8px;margin-top:6px;align-items:center';d.innerHTML='<input type="time" id="res-hora-custom" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px"> <span style="font-size:12px;color:var(--text3)">a</span> <input type="time" id="res-hora-custom-fin" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px">';hs.parentNode.insertBefore(d,hs.nextSibling);}if(g('res-hora-custom'))g('res-hora-custom').oninput=updRP;}else{if(wrap)wrap.remove();}
-    updRP();
-  };
+  const hs=g('res-horario');hs.innerHTML=genSlots().map(s=>`<option value="${s.start}">${s.label}</option>`).join('');if(horario){for(const o of hs.options)if(o.value===horario){o.selected=true;break;}}
+  // Botón hora personalizada
+  let customWrap=g('res-horario-custom-wrap');
+  if(!customWrap){
+    const btn=document.createElement('button');
+    btn.type='button';btn.id='res-custom-btn';
+    btn.style='margin-top:6px;padding:5px 12px;border-radius:8px;border:1.5px dashed var(--border);background:transparent;font-size:12px;cursor:pointer;color:var(--text2);font-family:Poppins,sans-serif;display:flex;align-items:center;gap:6px';
+    btn.innerHTML='<i class="ti ti-clock-edit" style="font-size:14px"></i> Usar hora personalizada';
+    btn.onclick=function(){
+      let w=g('res-horario-custom-wrap');
+      if(w){w.remove();this.innerHTML='<i class="ti ti-clock-edit" style="font-size:14px"></i> Usar hora personalizada';hs.disabled=false;return;}
+      const d=document.createElement('div');d.id='res-horario-custom-wrap';
+      d.style='display:flex;gap:8px;margin-top:6px;align-items:center';
+      d.innerHTML='<input type="time" id="res-hora-custom" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px"> <span style="font-size:12px;color:var(--text3)">a</span> <input type="time" id="res-hora-custom-fin" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);font-family:Poppins,sans-serif;font-size:13px">';
+      hs.parentNode.insertBefore(d,btn);
+      hs.disabled=true;
+      this.innerHTML='<i class="ti ti-x" style="font-size:14px"></i> Cancelar hora personalizada';
+      g('res-hora-custom').oninput=updRP;g('res-hora-custom-fin').oninput=updRP;
+    };
+    hs.parentNode.insertBefore(btn,hs.nextSibling);
+  }
   bJI(editR?editR.jugadores:[]);g('res-contacto').value=editR?editR.contacto||'':'';g('res-notas').value=editR?editR.notas||'':'';
   const ov=g('res-pov');ov.dataset.m='';if(editR&&editR.pOv!==undefined){ov.value=editR.pOv;ov.dataset.m='1';}else ov.value='';
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
