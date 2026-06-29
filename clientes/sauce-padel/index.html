@@ -837,10 +837,12 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div><lbl>Hora inicio</lbl><input type="time" id="bl-inicio"></div>
       <div><lbl>Hora fin</lbl><input type="time" id="bl-fin"></div>
     </div>
-    <div class="fr">
+    <div class="fr" id="bl-genIngreso-wrap">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
         <input type="checkbox" id="bl-genIngreso" style="width:auto" onchange="tgBloqIngreso()">¿Este bloque genera ingreso para el club?</label>
-      <div id="bl-ingreso-wrap" class="hidden" style="margin-top:8px">
+    </div>
+    <div id="bl-ingreso-wrap" class="hidden" style="margin-top:4px">
+      <div class="fr">
         <lbl id="bl-valor-lbl">Valor del bloque $</lbl><input type="number" id="bl-valor" placeholder="Ej: 15000">
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Se sumará a los ingresos de Caja en la fecha indicada.</div>
       </div>
@@ -1508,7 +1510,7 @@ function selBloqTipo(tipo){
   const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
   const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
-  var chkWrap=document.getElementById('bl-genIngreso').closest('.fr');
+  var chkWrap=document.getElementById('bl-genIngreso-wrap');
   if(tipo==='clase'){g('bl-genIngreso').checked=true;g('bl-ingreso-wrap').classList.remove('hidden');chkWrap.style.display='none';}else{chkWrap.style.display='';tgBloqIngreso();}
   updateBlCobroWrap();
 }
