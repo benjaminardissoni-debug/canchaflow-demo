@@ -1527,7 +1527,8 @@ function addBlPago(){
   var monto=parseInt(document.getElementById('bl-pago-monto').value)||0;
   var metodo=document.getElementById('bl-pago-metodo').value;
   var quien=document.getElementById('bl-pago-quien').value;
-  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!monto){alert('Ingresa el monto.');return;}
+  if(!quien)quien='Todos';
   if(!window._blPagos)window._blPagos=[];
   window._blPagos.push({monto:monto,metodo:metodo,quien:quien});
   document.getElementById('bl-pago-monto').value='';
@@ -2649,7 +2650,8 @@ function addCobroPago(){
   var monto=parseInt(document.getElementById('m-cobro-monto').value)||0;
   var metodo=document.getElementById('m-cobro-metodo').value;
   var quien=document.getElementById('m-cobro-quien').value;
-  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!monto){alert('Ingresa el monto.');return;}
+  if(!quien)quien='Todos';
   if(!window._cobroPagos)window._cobroPagos=[];
   window._cobroPagos.push({monto:monto,metodo:metodo,quien:quien});
   document.getElementById('m-cobro-monto').value='';
