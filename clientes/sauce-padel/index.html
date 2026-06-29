@@ -1508,6 +1508,8 @@ function selBloqTipo(tipo){
   const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
   const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
+  var chkWrap=document.getElementById('bl-genIngreso').closest('.fr');
+  if(tipo==='clase'){g('bl-genIngreso').checked=true;g('bl-ingreso-wrap').classList.remove('hidden');chkWrap.style.display='none';}else{chkWrap.style.display='';tgBloqIngreso();}
   updateBlCobroWrap();
 }
 
@@ -1541,7 +1543,7 @@ function updateBlCobroWrap(){
 async function saveBloqueo(){
   const tipo=g('bl-tipos').dataset.sel||'mantenimiento';const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
   if(!fecha||!hi||!hf){alert('Completa fecha, hora inicio y hora fin.');return;}if(timeToMin(hf)<=timeToMin(hi)){alert('Hora fin debe ser posterior al inicio.');return;}
-  const canchaVal=g('bl-cancha').value;const genIngreso=g('bl-genIngreso').checked;const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
+  const canchaVal=g('bl-cancha').value;const genIngreso=tipo==='clase'?true:g('bl-genIngreso').checked;const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
   const eid=g('bl-id').value;
   const conflict=hasCalendarConflict({fecha,canchaId:canchaVal,start:timeToMin(hi),end:timeToMin(hf),ignoreBloqueoId:eid||null});
   if(conflict){alert(`No se puede guardar: se cruza con ${describeConflict(conflict)}.`);return;}
@@ -1565,11 +1567,10 @@ async function saveBloqueo(){
   const datos={tipo,titulo,fecha,canchaId:canchaVal,horaInicio:hi,horaFin:hf,genIngreso,valor,profesor:profesor||undefined,alumnos:tipo==='clase'?[...blAlumnos]:undefined};
   if(eid){const idx=D.bloqueos.findIndex(b=>b.id===eid);if(idx>=0)D.bloqueos[idx]={...D.bloqueos[idx],...datos};}
   else D.bloqueos.push({id:bloqueoId,...datos});
-  if(tipo==='clase'&&window._blPagos&&window._blPagos.length){
+  if(tipo==='clase'){await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);if(window._blPagos&&window._blPagos.length){
     const pagoRows=window._blPagos.map(p=>({bloqueo_id:bloqueoId,monto:p.monto,metodo:p.metodo,alumno:p.quien,quien:p.quien}));
     await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);
-    await sb.from('clase_pagos').insert(pagoRows);
-  }
+    await sb.from('clase_pagos').insert(pagoRows);}}
   window._blPagos=[];
   rAg();rCaja();cM('m-bloqueo');
 }
