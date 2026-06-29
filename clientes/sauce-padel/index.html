@@ -1576,7 +1576,6 @@ async function saveBloqueo(){
     await sb.from('clase_pagos').insert(pagoRows);}}
   window._blPagos=[];
   rAg();rCaja();cM('m-bloqueo');
-  if(tipo==='clase'&&!eid){openCobroCls(bloqueoId);}
 }
 async function delBloqueo(){
   const eid=g('bl-id').value;if(!eid)return;if(!confirm('¿Eliminar este bloqueo/evento?'))return;
