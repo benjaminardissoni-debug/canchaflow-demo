@@ -860,7 +860,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
             <option value="Credito">Crédito</option>
           </select>
           <select id="bl-pago-quien" style="flex:1;min-width:120px"><option value="Todos">Todos</option></select>
-          <button class="btn sm p" onclick="addBlPago()" type="button"><i class="ti ti-plus"></i> Agregar</button>
+          <button class="btn sm p" onclick="addBlPago(document.getElementById('bl-pago-monto').value)" type="button"><i class="ti ti-plus"></i> Agregar</button>
         </div>
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Opcional — registra el pago si el alumno paga al momento.</div>
       </div>
@@ -1523,8 +1523,8 @@ function renderBlPagos(){
   list.innerHTML=pagos.map(function(p,i){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--card);border-radius:8px;margin-bottom:4px;font-size:13px"><span style="font-weight:600">'+fmt(p.monto)+'</span><span style="color:var(--text2)">'+p.metodo+'</span><span style="color:var(--text3)">'+p.quien+'</span><button onclick="removeBlPago('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:14px"><i class="ti ti-x"></i></button></div>';}).join('');
 }
 function removeBlPago(i){if(!window._blPagos)return;window._blPagos.splice(i,1);renderBlPagos();}
-function addBlPago(){
-  var monto=parseInt(document.getElementById('bl-pago-monto').value)||0;
+function addBlPago(montoVal){
+  var monto=parseInt(montoVal||document.getElementById('bl-pago-monto').value)||0;
   var metodo=document.getElementById('bl-pago-metodo').value;
   var quien=document.getElementById('bl-pago-quien').value;
   if(!monto){alert('Ingresa el monto.');return;}
