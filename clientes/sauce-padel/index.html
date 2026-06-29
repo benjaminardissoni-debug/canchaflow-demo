@@ -1492,12 +1492,12 @@ function openBloqueo(id,fecha,horario,cid){
     g('m-bloqueo-title').textContent='Editar bloqueo / evento';g('bl-id').value=b.id;selBloqTipo(b.tipo);
     g('bl-desc').value=b.titulo||'';g('bl-fecha').value=b.fecha;csel.value=b.canchaId;
     g('bl-profesor').value=b.profesor||'';blAlumnos=[...(b.alumnos||[])];renderBlAlumnos();
-    g('bl-inicio').value=b.horaInicio;g('bl-fin').value=b.horaFin;g('bl-genIngreso').checked=!!b.genIngreso;g('bl-valor').value=b.valor||'';tgBloqIngreso();g('bl-del-btn').classList.remove('hidden');
+    g('bl-inicio').value=b.horaInicio;g('bl-fin').value=b.horaFin;g('bl-valor').value=b.valor||'';if(b.tipo!=='clase'){g('bl-genIngreso').checked=!!b.genIngreso;tgBloqIngreso();}g('bl-del-btn').classList.remove('hidden');
   }else{
     g('m-bloqueo-title').textContent='Nuevo bloqueo / evento';selBloqTipo('mantenimiento');
     const hi=horario||'',hf=horario?minToTime(Math.min(timeToMin(horario)+(D.cfg.dur||90),timeToMin(D.cfg.fin||'23:30'))):'';
     g('bl-desc').value='';g('bl-fecha').value=fecha||ds(getAF());csel.value=cid||D.canchas[0]?.id||'';g('bl-profesor').value='';renderBlAlumnos();g('bl-alumno-input').value='';
-    g('bl-inicio').value=hi;g('bl-fin').value=hf;g('bl-genIngreso').checked=false;g('bl-valor').value='';tgBloqIngreso();g('bl-del-btn').classList.add('hidden');
+    g('bl-inicio').value=hi;g('bl-fin').value=hf;g('bl-genIngreso').checked=false;g('bl-valor').value='';g('bl-del-btn').classList.add('hidden');
   }
   g('m-bloqueo').classList.remove('hidden');
 }
