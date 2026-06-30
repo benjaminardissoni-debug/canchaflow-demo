@@ -441,6 +441,17 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div class="tab active" onclick="cTab('hoy')" id="rtab-hoy">Hoy</div>
     <div class="tab" onclick="cTab('semana')" id="rtab-semana">Semana</div>
     <div class="tab" onclick="cTab('mes')" id="rtab-mes">Mes</div>
+    <div class="tab" onclick="cTab('custom')" id="rtab-custom">Personalizado</div>
+  </div>
+  <div id="caja-custom-range" class="hidden" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <div><lbl style="font-size:11px">Desde</lbl><input type="date" id="caja-from" onchange="rCaja()" style="height:34px"></div>
+    <div><lbl style="font-size:11px">Hasta</lbl><input type="date" id="caja-to" onchange="rCaja()" style="height:34px"></div>
+  </div>
+  <div style="margin-bottom:12px">
+    <lbl style="font-size:11px">Filtrar por cancha</lbl>
+    <select id="caja-cancha" onchange="rCaja()" style="height:34px;max-width:220px">
+      <option value="">Todas las canchas</option>
+    </select>
   </div>
   <div id="cmet" class="g4"></div>
   <div class="g2" style="gap:1rem;margin-bottom:1.25rem">
@@ -2520,9 +2531,16 @@ async function saveEditCerrada(){
 }
 
 // ── CAJA ──────────────────────────────────────────────────
-function cTab(t){cajaT=t;['hoy','semana','mes'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));rCaja();}
+function cTab(t){cajaT=t;['hoy','semana','mes','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
+  g('caja-custom-range').classList.toggle('hidden',t!=='custom');
+  if(t==='custom'&&!g('caja-from').value){const now=ds(new Date());g('caja-from').value=now;g('caja-to').value=now;}
+  rCaja();}
 function getCajaRange(){
   const now=new Date();let from;
+  if(cajaT==='custom'){
+    const cf=g('caja-from')?.value,ct=g('caja-to')?.value;
+    return{from:cf||ds(now),to:ct||ds(now)};
+  }
   if(cajaT==='hoy'){from=new Date(now);from.setHours(0,0,0,0);}
   else if(cajaT==='semana'){from=new Date(now);from.setDate(from.getDate()-7);}
   else{from=new Date(now);from.setDate(from.getDate()-30);}
@@ -2530,7 +2548,12 @@ function getCajaRange(){
 }
 function rCaja(){
   const{from,to}=getCajaRange();
-  const res=D.reservas.filter(r=>r.estado==='cerrado'&&r.fecha>=from&&r.fecha<=to);
+  const canchaSel=g('caja-cancha')?.value||'';
+  if(g('caja-cancha')&&!g('caja-cancha').dataset.loaded){
+    g('caja-cancha').innerHTML='<option value="">Todas las canchas</option>'+D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+    g('caja-cancha').dataset.loaded='1';
+  }
+  const res=D.reservas.filter(r=>r.estado==='cerrado'&&r.fecha>=from&&r.fecha<=to&&(!canchaSel||r.canchaId===canchaSel));
   let tC=0,tP=0,tCob=0,tPend=0;const mets={};const pV={};
   res.forEach(r=>{const{precioCancha}=calcTotalesPorJugador(r,{},{});tC+=precioCancha;const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);tP+=tp;
     (r.productos||[]).forEach(p=>{if(!pV[p.nombre])pV[p.nombre]=0;pV[p.nombre]+=p.qty;});
