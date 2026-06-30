@@ -439,11 +439,14 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="rb"><div></div><button class="btn p" onclick="openCD()"><i class="ti ti-printer"></i> Cierre del día</button></div>
   <div class="tab-row">
     <div class="tab active" onclick="cTab('hoy')" id="rtab-hoy">Hoy</div>
-    <div class="tab" onclick="cTab('semana')" id="rtab-semana">Semana</div>
-    <div class="tab" onclick="cTab('mes')" id="rtab-mes">Mes</div>
     <div class="tab" onclick="cTab('custom')" id="rtab-custom">Personalizado</div>
   </div>
   <div id="caja-custom-range" class="hidden" style="gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;background:var(--gray-light);border-radius:var(--r);padding:6px 8px">
+      <button class="btn icon-only sm" onclick="cajaShiftDia(-1)" title="Día anterior"><i class="ti ti-chevron-left"></i></button>
+      <button class="btn sm" onclick="cajaHoy()">Hoy</button>
+      <button class="btn icon-only sm" onclick="cajaShiftDia(1)" title="Día siguiente"><i class="ti ti-chevron-right"></i></button>
+    </div>
     <div><lbl style="font-size:11px">Desde</lbl><input type="date" id="caja-from" onchange="rCaja()" style="height:34px"></div>
     <div><lbl style="font-size:11px">Hasta</lbl><input type="date" id="caja-to" onchange="rCaja()" style="height:34px"></div>
   </div>
@@ -2531,21 +2534,24 @@ async function saveEditCerrada(){
 }
 
 // ── CAJA ──────────────────────────────────────────────────
-function cTab(t){cajaT=t;['hoy','semana','mes','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
+function cTab(t){cajaT=t;['hoy','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
   const cr=g('caja-custom-range');
   if(t==='custom'){cr.classList.remove('hidden');cr.style.display='flex';if(!g('caja-from').value){const now=ds(new Date());g('caja-from').value=now;g('caja-to').value=now;}}
   else{cr.classList.add('hidden');cr.style.display='none';}
   rCaja();}
+function cajaShiftDia(delta){
+  const cur=g('caja-from').value?new Date(g('caja-from').value+'T12:00:00'):new Date();
+  cur.setDate(cur.getDate()+delta);const nd=ds(cur);
+  g('caja-from').value=nd;g('caja-to').value=nd;rCaja();
+}
+function cajaHoy(){const nd=ds(new Date());g('caja-from').value=nd;g('caja-to').value=nd;rCaja();}
 function getCajaRange(){
-  const now=new Date();let from;
+  const now=new Date();
   if(cajaT==='custom'){
     const cf=g('caja-from')?.value,ct=g('caja-to')?.value;
     return{from:cf||ds(now),to:ct||ds(now)};
   }
-  if(cajaT==='hoy'){from=new Date(now);from.setHours(0,0,0,0);}
-  else if(cajaT==='semana'){from=new Date(now);from.setDate(from.getDate()-7);}
-  else{from=new Date(now);from.setDate(from.getDate()-30);}
-  return{from:ds(from),to:ds(now)};
+  return{from:ds(now),to:ds(now)};
 }
 function rCaja(){
   const{from,to}=getCajaRange();
