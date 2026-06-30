@@ -443,7 +443,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div class="tab" onclick="cTab('mes')" id="rtab-mes">Mes</div>
     <div class="tab" onclick="cTab('custom')" id="rtab-custom">Personalizado</div>
   </div>
-  <div id="caja-custom-range" class="hidden" style="display:flex;gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+  <div id="caja-custom-range" class="hidden" style="gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
     <div><lbl style="font-size:11px">Desde</lbl><input type="date" id="caja-from" onchange="rCaja()" style="height:34px"></div>
     <div><lbl style="font-size:11px">Hasta</lbl><input type="date" id="caja-to" onchange="rCaja()" style="height:34px"></div>
   </div>
@@ -2532,8 +2532,9 @@ async function saveEditCerrada(){
 
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','semana','mes','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
-  g('caja-custom-range').classList.toggle('hidden',t!=='custom');
-  if(t==='custom'&&!g('caja-from').value){const now=ds(new Date());g('caja-from').value=now;g('caja-to').value=now;}
+  const cr=g('caja-custom-range');
+  if(t==='custom'){cr.classList.remove('hidden');cr.style.display='flex';if(!g('caja-from').value){const now=ds(new Date());g('caja-from').value=now;g('caja-to').value=now;}}
+  else{cr.classList.add('hidden');cr.style.display='none';}
   rCaja();}
 function getCajaRange(){
   const now=new Date();let from;
