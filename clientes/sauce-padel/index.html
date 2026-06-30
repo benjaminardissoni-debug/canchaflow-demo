@@ -439,8 +439,22 @@ tr:hover td{background:rgba(242,244,247,.7)}
   <div class="rb"><div></div><button class="btn p" onclick="openCD()"><i class="ti ti-printer"></i> Cierre del día</button></div>
   <div class="tab-row">
     <div class="tab active" onclick="cTab('hoy')" id="rtab-hoy">Hoy</div>
-    <div class="tab" onclick="cTab('semana')" id="rtab-semana">Semana</div>
-    <div class="tab" onclick="cTab('mes')" id="rtab-mes">Mes</div>
+    <div class="tab" onclick="cTab('custom')" id="rtab-custom">Personalizado</div>
+  </div>
+  <div id="caja-custom-range" class="hidden" style="gap:8px;align-items:center;margin-bottom:12px;flex-wrap:wrap">
+    <div style="display:flex;align-items:center;gap:6px;background:var(--gray-light);border-radius:var(--r);padding:6px 8px">
+      <button class="btn icon-only sm" onclick="cajaShiftDia(-1)" title="Día anterior"><i class="ti ti-chevron-left"></i></button>
+      <button class="btn sm" onclick="cajaHoy()">Hoy</button>
+      <button class="btn icon-only sm" onclick="cajaShiftDia(1)" title="Día siguiente"><i class="ti ti-chevron-right"></i></button>
+    </div>
+    <div><lbl style="font-size:11px">Desde</lbl><input type="date" id="caja-from" onchange="rCaja()" style="height:34px"></div>
+    <div><lbl style="font-size:11px">Hasta</lbl><input type="date" id="caja-to" onchange="rCaja()" style="height:34px"></div>
+  </div>
+  <div style="margin-bottom:12px">
+    <lbl style="font-size:11px">Filtrar por cancha</lbl>
+    <select id="caja-cancha" onchange="rCaja()" style="height:34px;max-width:220px">
+      <option value="">Todas las canchas</option>
+    </select>
   </div>
   <div id="cmet" class="g4"></div>
   <div class="g2" style="gap:1rem;margin-bottom:1.25rem">
@@ -837,12 +851,32 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <div><lbl>Hora inicio</lbl><input type="time" id="bl-inicio"></div>
       <div><lbl>Hora fin</lbl><input type="time" id="bl-fin"></div>
     </div>
-    <div class="fr">
+    <div class="fr" id="bl-genIngreso-wrap">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
         <input type="checkbox" id="bl-genIngreso" style="width:auto" onchange="tgBloqIngreso()">¿Este bloque genera ingreso para el club?</label>
-      <div id="bl-ingreso-wrap" class="hidden" style="margin-top:8px">
+    </div>
+    <div id="bl-ingreso-wrap" class="hidden" style="margin-top:4px">
+      <div class="fr">
         <lbl id="bl-valor-lbl">Valor del bloque $</lbl><input type="number" id="bl-valor" placeholder="Ej: 15000">
         <div style="font-size:11px;color:var(--text3);margin-top:4px">Se sumará a los ingresos de Caja en la fecha indicada.</div>
+      </div>
+    </div>
+    <div id="bl-cobro-wrap" style="display:none;margin-top:4px">
+      <div class="fr">
+        <lbl style="font-weight:700;font-size:13px">Pago inmediato</lbl>
+        <div id="bl-pagos-list" style="margin-bottom:8px"></div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="number" id="bl-pago-monto" placeholder="Monto $" style="flex:1;min-width:100px">
+          <select id="bl-pago-metodo" style="flex:1;min-width:120px">
+            <option value="Efectivo">Efectivo</option>
+            <option value="Transferencia">Transferencia</option>
+            <option value="Debito">Débito</option>
+            <option value="Credito">Crédito</option>
+          </select>
+          <select id="bl-pago-quien" style="flex:1;min-width:120px"><option value="Todos">Todos</option></select>
+          <button class="btn sm p" onclick="addBlPago(document.getElementById('bl-pago-monto').value)" type="button"><i class="ti ti-plus"></i> Agregar</button>
+        </div>
+        <div style="font-size:11px;color:var(--text3);margin-top:4px">Opcional — registra el pago si el alumno paga al momento.</div>
       </div>
     </div>
     <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:4px">
@@ -1465,7 +1499,7 @@ function addBlAlumno(){
 }
 function delBlAlumno(i){blAlumnos.splice(i,1);renderBlAlumnos();}
 function openBloqueo(id,fecha,horario,cid){
-  g('bl-id').value='';blAlumnos=[];
+  g('bl-id').value='';blAlumnos=[];window._blPagos=[];
   const th=Object.entries(BLOQ_TIPOS).map(([k,t])=>`<label class="bl-tipo-opt" data-tipo="${k}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600;flex:1;min-width:120px;justify-content:center" onclick="selBloqTipo('${k}')"><i class="ti ${t.icon}"></i>${t.label}</label>`).join('');
   g('bl-tipos').innerHTML=th;
   const csel=g('bl-cancha');csel.innerHTML=D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
@@ -1474,12 +1508,12 @@ function openBloqueo(id,fecha,horario,cid){
     g('m-bloqueo-title').textContent='Editar bloqueo / evento';g('bl-id').value=b.id;selBloqTipo(b.tipo);
     g('bl-desc').value=b.titulo||'';g('bl-fecha').value=b.fecha;csel.value=b.canchaId;
     g('bl-profesor').value=b.profesor||'';blAlumnos=[...(b.alumnos||[])];renderBlAlumnos();
-    g('bl-inicio').value=b.horaInicio;g('bl-fin').value=b.horaFin;g('bl-genIngreso').checked=!!b.genIngreso;g('bl-valor').value=b.valor||'';tgBloqIngreso();g('bl-del-btn').classList.remove('hidden');
+    g('bl-inicio').value=b.horaInicio;g('bl-fin').value=b.horaFin;g('bl-valor').value=b.valor||'';if(b.tipo!=='clase'){g('bl-genIngreso').checked=!!b.genIngreso;tgBloqIngreso();}g('bl-del-btn').classList.remove('hidden');
   }else{
     g('m-bloqueo-title').textContent='Nuevo bloqueo / evento';selBloqTipo('mantenimiento');
     const hi=horario||'',hf=horario?minToTime(Math.min(timeToMin(horario)+(D.cfg.dur||90),timeToMin(D.cfg.fin||'23:30'))):'';
     g('bl-desc').value='';g('bl-fecha').value=fecha||ds(getAF());csel.value=cid||D.canchas[0]?.id||'';g('bl-profesor').value='';renderBlAlumnos();g('bl-alumno-input').value='';
-    g('bl-inicio').value=hi;g('bl-fin').value=hf;g('bl-genIngreso').checked=false;g('bl-valor').value='';tgBloqIngreso();g('bl-del-btn').classList.add('hidden');
+    g('bl-inicio').value=hi;g('bl-fin').value=hf;g('bl-genIngreso').checked=false;g('bl-valor').value='';g('bl-del-btn').classList.add('hidden');
   }
   g('m-bloqueo').classList.remove('hidden');
 }
@@ -1490,6 +1524,8 @@ function selBloqTipo(tipo){
   const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
   const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
+  var chkWrap=document.getElementById('bl-genIngreso-wrap');
+  if(tipo==='clase'){g('bl-genIngreso').checked=true;g('bl-ingreso-wrap').classList.remove('hidden');chkWrap.style.display='none';}else{chkWrap.style.display='';tgBloqIngreso();}
   updateBlCobroWrap();
 }
 
@@ -1501,11 +1537,12 @@ function renderBlPagos(){
   list.innerHTML=pagos.map(function(p,i){return '<div style="display:flex;align-items:center;gap:8px;padding:6px 8px;background:var(--card);border-radius:8px;margin-bottom:4px;font-size:13px"><span style="font-weight:600">'+fmt(p.monto)+'</span><span style="color:var(--text2)">'+p.metodo+'</span><span style="color:var(--text3)">'+p.quien+'</span><button onclick="removeBlPago('+i+')" style="margin-left:auto;background:none;border:none;cursor:pointer;color:var(--red);font-size:14px"><i class="ti ti-x"></i></button></div>';}).join('');
 }
 function removeBlPago(i){if(!window._blPagos)return;window._blPagos.splice(i,1);renderBlPagos();}
-function addBlPago(){
-  var monto=parseInt(document.getElementById('bl-pago-monto').value)||0;
+function addBlPago(montoVal){
+  var monto=parseInt(montoVal||document.getElementById('bl-pago-monto').value)||0;
   var metodo=document.getElementById('bl-pago-metodo').value;
   var quien=document.getElementById('bl-pago-quien').value;
-  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!monto){alert('Ingresa el monto.');return;}
+  if(!quien)quien='Todos';
   if(!window._blPagos)window._blPagos=[];
   window._blPagos.push({monto:monto,metodo:metodo,quien:quien});
   document.getElementById('bl-pago-monto').value='';
@@ -1523,7 +1560,7 @@ function updateBlCobroWrap(){
 async function saveBloqueo(){
   const tipo=g('bl-tipos').dataset.sel||'mantenimiento';const fecha=g('bl-fecha').value,hi=g('bl-inicio').value,hf=g('bl-fin').value;
   if(!fecha||!hi||!hf){alert('Completa fecha, hora inicio y hora fin.');return;}if(timeToMin(hf)<=timeToMin(hi)){alert('Hora fin debe ser posterior al inicio.');return;}
-  const canchaVal=g('bl-cancha').value;const genIngreso=g('bl-genIngreso').checked;const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
+  const canchaVal=g('bl-cancha').value;const genIngreso=tipo==='clase'?true:g('bl-genIngreso').checked;const valor=genIngreso?(parseInt(g('bl-valor').value)||0):0;
   const eid=g('bl-id').value;
   const conflict=hasCalendarConflict({fecha,canchaId:canchaVal,start:timeToMin(hi),end:timeToMin(hf),ignoreBloqueoId:eid||null});
   if(conflict){alert(`No se puede guardar: se cruza con ${describeConflict(conflict)}.`);return;}
@@ -1547,6 +1584,11 @@ async function saveBloqueo(){
   const datos={tipo,titulo,fecha,canchaId:canchaVal,horaInicio:hi,horaFin:hf,genIngreso,valor,profesor:profesor||undefined,alumnos:tipo==='clase'?[...blAlumnos]:undefined};
   if(eid){const idx=D.bloqueos.findIndex(b=>b.id===eid);if(idx>=0)D.bloqueos[idx]={...D.bloqueos[idx],...datos};}
   else D.bloqueos.push({id:bloqueoId,...datos});
+  if(tipo==='clase'){await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);if(window._blPagos&&window._blPagos.length){
+    const pagoRows=window._blPagos.map(p=>({bloqueo_id:bloqueoId,monto:p.monto,metodo:p.metodo,alumno:p.quien,quien:p.quien}));
+    await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);
+    await sb.from('clase_pagos').insert(pagoRows);}}
+  window._blPagos=[];
   rAg();rCaja();cM('m-bloqueo');
 }
 async function delBloqueo(){
@@ -2492,17 +2534,33 @@ async function saveEditCerrada(){
 }
 
 // ── CAJA ──────────────────────────────────────────────────
-function cTab(t){cajaT=t;['hoy','semana','mes'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));rCaja();}
+function cTab(t){cajaT=t;['hoy','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
+  const cr=g('caja-custom-range');
+  if(t==='custom'){cr.classList.remove('hidden');cr.style.display='flex';if(!g('caja-from').value){const now=ds(new Date());g('caja-from').value=now;g('caja-to').value=now;}}
+  else{cr.classList.add('hidden');cr.style.display='none';}
+  rCaja();}
+function cajaShiftDia(delta){
+  const cur=g('caja-from').value?new Date(g('caja-from').value+'T12:00:00'):new Date();
+  cur.setDate(cur.getDate()+delta);const nd=ds(cur);
+  g('caja-from').value=nd;g('caja-to').value=nd;rCaja();
+}
+function cajaHoy(){const nd=ds(new Date());g('caja-from').value=nd;g('caja-to').value=nd;rCaja();}
 function getCajaRange(){
-  const now=new Date();let from;
-  if(cajaT==='hoy'){from=new Date(now);from.setHours(0,0,0,0);}
-  else if(cajaT==='semana'){from=new Date(now);from.setDate(from.getDate()-7);}
-  else{from=new Date(now);from.setDate(from.getDate()-30);}
-  return{from:ds(from),to:ds(now)};
+  const now=new Date();
+  if(cajaT==='custom'){
+    const cf=g('caja-from')?.value,ct=g('caja-to')?.value;
+    return{from:cf||ds(now),to:ct||ds(now)};
+  }
+  return{from:ds(now),to:ds(now)};
 }
 function rCaja(){
   const{from,to}=getCajaRange();
-  const res=D.reservas.filter(r=>r.estado==='cerrado'&&r.fecha>=from&&r.fecha<=to);
+  const canchaSel=g('caja-cancha')?.value||'';
+  if(g('caja-cancha')&&!g('caja-cancha').dataset.loaded){
+    g('caja-cancha').innerHTML='<option value="">Todas las canchas</option>'+D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+    g('caja-cancha').dataset.loaded='1';
+  }
+  const res=D.reservas.filter(r=>r.estado==='cerrado'&&r.fecha>=from&&r.fecha<=to&&(!canchaSel||r.canchaId===canchaSel));
   let tC=0,tP=0,tCob=0,tPend=0;const mets={};const pV={};
   res.forEach(r=>{const{precioCancha}=calcTotalesPorJugador(r,{},{});tC+=precioCancha;const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);tP+=tp;
     (r.productos||[]).forEach(p=>{if(!pV[p.nombre])pV[p.nombre]=0;pV[p.nombre]+=p.qty;});
@@ -2622,7 +2680,8 @@ function addCobroPago(){
   var monto=parseInt(document.getElementById('m-cobro-monto').value)||0;
   var metodo=document.getElementById('m-cobro-metodo').value;
   var quien=document.getElementById('m-cobro-quien').value;
-  if(!monto||!quien){alert('Ingresa monto y quien paga.');return;}
+  if(!monto){alert('Ingresa el monto.');return;}
+  if(!quien)quien='Todos';
   if(!window._cobroPagos)window._cobroPagos=[];
   window._cobroPagos.push({monto:monto,metodo:metodo,quien:quien});
   document.getElementById('m-cobro-monto').value='';
