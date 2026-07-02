@@ -703,7 +703,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div class="modal-header">
       <div class="modal-title" id="com-title">Comanda</div>
       <div style="display:flex;gap:6px">
-        <button class="btn warn sm" onclick="openMPin()"><i class="ti ti-lock"></i> Cerrar turno</button>
+        <button class="btn warn sm" id="com-cerrar-btn" onclick="openMPin()"><i class="ti ti-lock"></i> Cerrar turno</button>
         <button class="btn icon-only" onclick="cM('m-com')"><i class="ti ti-x"></i></button>
       </div>
     </div>
@@ -1839,7 +1839,11 @@ function quitarCortesia(jugador){const r=D.reservas.find(x=>x.id===cRid);if(!r)r
 function openCom(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;cRid=rid;cQty={};cAsig={};cSJ=null;cSC=null;
   (r.productos||[]).forEach(p=>{cQty[p.id]=p.qty;if(p.asignados)cAsig[p.id]=p.asignados;else if(p.jugador)cAsig[p.id]=[p.jugador];});
-  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};g('com-title').textContent=`Comanda · ${c.nombre} · ${r.horario}`;
+  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};
+  const esCerrada=r.estado==='cerrado';
+  if(esCerrada&&role!=='owner'){cRid=null;return;}
+  g('com-title').textContent=esCerrada?`Editar comanda cerrada · ${c.nombre} · ${r.horario}`:`Comanda · ${c.nombre} · ${r.horario}`;
+  const btnCierre=g('com-cerrar-btn');if(btnCierre)btnCierre.style.display=esCerrada?'none':'';
   const jugs=(r.jugadores||[]).filter(j=>j);const pcBruto=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario,r.fecha);const cuotaBase=Math.ceil(pcBruto/Math.max(jugs.length,1));
   rCPtags();rCCats();rCP();rPagos();rCortesias();g('com-search').value='';g('pago-m').value='';g('pago-q').value='';g('m-com').classList.remove('hidden');
 }
@@ -1930,9 +1934,13 @@ function rPB(){
 }
 function addPago(){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const m=parseInt(g('pago-m').value)||0;if(m<=0)return;if(!r.pagos)r.pagos=[];r.pagos.push({monto:m,metodo:g('pago-met').value,quien:g('pago-q').value||'',fecha:new Date().toISOString()});g('pago-m').value='';rPagos();rPB();scheduleAutosave(cRid);}
 function delPago(i){const r=D.reservas.find(x=>x.id===cRid);if(r){r.pagos.splice(i,1);rPagos();scheduleAutosave(cRid);}}
-function saveCom(){
+async function saveCom(){
   document.querySelectorAll('.pelota-panel').forEach(p=>p.classList.remove('open'));const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
-  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));sv();rAll();cM('m-com');
+  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));
+  const ok=await syncReservaCompleta(cRid);
+  if(!ok){alert('No se pudieron guardar los cambios. Revisa tu conexión.');return;}
+  if(r.estado==='cerrado')audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  rAll();cM('m-com');
 }
 // ── NUEVO CIERRE REDISEÑADO ──────────────────────────────
 function openMCT(){
@@ -2609,7 +2617,7 @@ function rCaja(){
   if(blq.length){cblqCard.classList.remove('hidden');g('cblq').innerHTML=blq.map(b=>{const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;return`<div class="sl"><span style="color:var(--text2)">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${bt.label}${b.titulo?' · '+b.titulo:''}</span><span style="font-weight:700">${fmt(b.valor)}</span></div>`;}).join('');}
   else{cblqCard.classList.add('hidden');}
   g('chist').innerHTML=res.length?res.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const{precioCancha}=calcTotalesPorJugador(r,{},{});const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const t=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,t-cob);const mets2=[...new Set((r.pagos||[]).map(p=>p.metodo))].join(', ')||'—';
-    const editBtn=role==='owner'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
+    const editBtn=role==='owner'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openCom('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
     return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td>${editBtn}</tr>`;
   }).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
 }
