@@ -285,6 +285,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <input id="login-pass" type="password" value="" placeholder="Contraseña" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
     <div id="lerr" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:10px;text-align:center">⚠ Correo o contraseña incorrectos.</div>
     <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
+    <div style="margin-top:12px;text-align:center"><a href="#" onclick="resetPass();return false" style="font-size:12px;color:var(--cyan-dark);text-decoration:none">¿Olvidaste tu contraseña?</a></div>
 
   </div>
 </div>
@@ -1286,6 +1287,21 @@ function updSelNiveles(){
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
 
+async function resetPass(){
+  const email=(g('login-email').value||'').trim().toLowerCase();
+  if(!email){g('lerr').textContent='Escribe tu correo arriba y presiona de nuevo.';g('lerr').classList.remove('hidden');return;}
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  g('lerr').classList.remove('hidden');
+  if(!error)g('lerr').style.color='var(--cyan-dark)';
+  g('lerr').textContent=error?('No se pudo enviar: '+error.message):'📧 Te enviamos un correo para restablecer tu contraseña.';
+}
+sb.auth.onAuthStateChange(async(event)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    const np=prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
+    if(np&&np.length>=6){const{error}=await sb.auth.updateUser({password:np});alert(error?('No se pudo actualizar: '+error.message):'Contraseña actualizada ✅ Ya puedes ingresar con ella.');}
+    else if(np!==null)alert('Muy corta: mínimo 6 caracteres. Vuelve a abrir el link del correo.');
+  }
+});
 async function doLogin(){
   ld();
   const email=(g('login-email').value||'').trim().toLowerCase();const pass=(g('login-pass').value||'').trim();
@@ -1294,12 +1310,12 @@ async function doLogin(){
   if(error||!data.user){g('lerr').textContent='Email o contraseña incorrectos.';g('lerr').classList.remove('hidden');g('login-pass').value='';g('login-pass').focus();return;}
   const{data:perfil,error:errPerfil}=await sb.from('perfiles').select('rol,nombre').eq('id',data.user.id).single();
   if(errPerfil||!perfil){g('lerr').textContent='Tu cuenta no tiene un perfil asignado. Contacta al administrador.';g('lerr').classList.remove('hidden');await sb.auth.signOut();return;}
-  const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
+  const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
   const u=rolMap[perfil.rol]||rolMap.recepcion;
   role=u.rol;g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
-  g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
+  g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
   _auditEmail=data.user.email;_auditNombre=perfil.nombre||email;if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
-  document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
+  document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
   await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
   rAll();
 }
@@ -1988,9 +2004,11 @@ async function confCierre(){
     if(est==='pagado'||est==='cortesia'||est==='cubierto'){}
     else{if(pendJ>0){deudasNuevas.push({jugador_id:jug?jug.id:null,jugador_nombre:j,telefono:tel,fecha:r.fecha,concepto:'Turno '+r.horario+' - '+cancha.nombre,monto:pendJ,pagado:0,estado:'Pendiente',bloqueado:false});}}
   });
+  const okSync=await syncReservaCompleta(cRid);
+  if(!okSync){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
   r.estado='cerrado';r.cierreAt=new Date().toISOString();
-  const ok=await syncReservaCompleta(cRid);
-  if(!ok){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
+  const{error:errCierre}=await sb.from('reservas').update({estado:'cerrado',cierre_at:r.cierreAt}).eq('id',cRid);
+  if(errCierre){r.estado='abierto';r.cierreAt=null;alert('No se pudo cerrar el turno: '+errCierre.message);return;}
   audit('Cerró turno','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
   for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
   if(deudasNuevas.length){
@@ -2438,7 +2456,7 @@ async function delVD(id){
 let ecRid=null,ecQty={};
 
 function openEditCerrada(rid){
-  if(role!=='admin')return;
+  if(role!=='owner')return;
   const r=D.reservas.find(x=>x.id===rid);if(!r||r.estado!=='cerrado')return;
   ecRid=rid;
   // Inicializar cantidades con lo que ya tiene la comanda
@@ -2591,7 +2609,7 @@ function rCaja(){
   if(blq.length){cblqCard.classList.remove('hidden');g('cblq').innerHTML=blq.map(b=>{const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;return`<div class="sl"><span style="color:var(--text2)">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${bt.label}${b.titulo?' · '+b.titulo:''}</span><span style="font-weight:700">${fmt(b.valor)}</span></div>`;}).join('');}
   else{cblqCard.classList.add('hidden');}
   g('chist').innerHTML=res.length?res.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const{precioCancha}=calcTotalesPorJugador(r,{},{});const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const t=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,t-cob);const mets2=[...new Set((r.pagos||[]).map(p=>p.metodo))].join(', ')||'—';
-    const editBtn=role==='admin'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
+    const editBtn=role==='owner'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
     return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td>${editBtn}</tr>`;
   }).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
 }
@@ -2849,12 +2867,12 @@ function loadDemoData(){
   if(session&&session.user){
     const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
     if(perfil){
-      const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
+      const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
       const u=rolMap[perfil.rol]||rolMap.recepcion;
       role=u.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
-      g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
+      g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
       if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||session.user.email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
-      document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
+      document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
       await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
       rAll();
       g('login-screen').style.display='none';
