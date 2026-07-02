@@ -1179,11 +1179,18 @@ async function cargarDatosDesdeSupabase(){
   if(errBloq){console.error('Error cargando bloqueos:',errBloq);D.bloqueos=[];}
   else{
     const bloqIds=(bloqueosRaw||[]).map(b=>b.id);
-    let alumnoRows=[];
-    if(bloqIds.length){const{data}=await sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds);alumnoRows=data||[];}
+    let alumnoRows=[],clasePagoRows=[];
+    if(bloqIds.length){
+      const[ba,cp]=await Promise.all([
+        sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds),
+        sb.from('clase_pagos').select('*').in('bloqueo_id',bloqIds)
+      ]);
+      alumnoRows=ba.data||[];clasePagoRows=cp.data||[];
+    }
     D.bloqueos=(bloqueosRaw||[]).map(b=>{
       const alumnos=alumnoRows.filter(a=>a.bloqueo_id===b.id).map(a=>{const j=a.jugador_id?D.jugadores.find(jj=>jj.id===a.jugador_id):null;return j?j.nombre:(a.nombre_libre||'');}).filter(Boolean);
-      return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined};
+      const pagosClase=b.tipo==='clase'?clasePagoRows.filter(p=>p.bloqueo_id===b.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||p.alumno||'Todos'})):undefined;
+      return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined,pagos:pagosClase};
     });
   }
   updSelNiveles();
@@ -1588,8 +1595,9 @@ async function saveBloqueo(){
   if(tipo==='clase'){await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);if(window._blPagos&&window._blPagos.length){
     const pagoRows=window._blPagos.map(p=>({bloqueo_id:bloqueoId,monto:p.monto,metodo:p.metodo,alumno:p.quien,quien:p.quien}));
     await sb.from('clase_pagos').insert(pagoRows);}}
+  if(tipo==='clase'){const bMem=D.bloqueos.find(b=>b.id===bloqueoId);if(bMem)bMem.pagos=[...(window._blPagos||[])];}
   window._blPagos=[];
-  rAg();rCaja();cM('m-bloqueo');
+  rAg();rCaja();rClases();cM('m-bloqueo');
 }
 async function delBloqueo(){
   const eid=g('bl-id').value;if(!eid)return;if(!confirm('¿Eliminar este bloqueo/evento?'))return;
