@@ -1179,11 +1179,18 @@ async function cargarDatosDesdeSupabase(){
   if(errBloq){console.error('Error cargando bloqueos:',errBloq);D.bloqueos=[];}
   else{
     const bloqIds=(bloqueosRaw||[]).map(b=>b.id);
-    let alumnoRows=[];
-    if(bloqIds.length){const{data}=await sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds);alumnoRows=data||[];}
+    let alumnoRows=[],clasePagoRows=[];
+    if(bloqIds.length){
+      const[ba,cp]=await Promise.all([
+        sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds),
+        sb.from('clase_pagos').select('*').in('bloqueo_id',bloqIds)
+      ]);
+      alumnoRows=ba.data||[];clasePagoRows=cp.data||[];
+    }
     D.bloqueos=(bloqueosRaw||[]).map(b=>{
       const alumnos=alumnoRows.filter(a=>a.bloqueo_id===b.id).map(a=>{const j=a.jugador_id?D.jugadores.find(jj=>jj.id===a.jugador_id):null;return j?j.nombre:(a.nombre_libre||'');}).filter(Boolean);
-      return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined};
+      const pagosClase=b.tipo==='clase'?clasePagoRows.filter(p=>p.bloqueo_id===b.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||p.alumno||'Todos'})):undefined;
+      return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined,pagos:pagosClase};
     });
   }
   updSelNiveles();
@@ -1509,6 +1516,7 @@ function openBloqueo(id,fecha,horario,cid){
     g('bl-desc').value=b.titulo||'';g('bl-fecha').value=b.fecha;csel.value=b.canchaId;
     g('bl-profesor').value=b.profesor||'';blAlumnos=[...(b.alumnos||[])];renderBlAlumnos();
     g('bl-inicio').value=b.horaInicio;g('bl-fin').value=b.horaFin;g('bl-valor').value=b.valor||'';if(b.tipo!=='clase'){g('bl-genIngreso').checked=!!b.genIngreso;tgBloqIngreso();}g('bl-del-btn').classList.remove('hidden');
+    if(b.tipo==='clase'){sb.from('clase_pagos').select('*').eq('bloqueo_id',b.id).order('created_at').then(res=>{window._blPagos=(res.data||[]).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||p.alumno||'Todos'}));renderBlPagos();updateBlCobroWrap();});}
   }else{
     g('m-bloqueo-title').textContent='Nuevo bloqueo / evento';selBloqTipo('mantenimiento');
     const hi=horario||'',hf=horario?minToTime(Math.min(timeToMin(horario)+(D.cfg.dur||90),timeToMin(D.cfg.fin||'23:30'))):'';
@@ -1586,10 +1594,10 @@ async function saveBloqueo(){
   else D.bloqueos.push({id:bloqueoId,...datos});
   if(tipo==='clase'){await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);if(window._blPagos&&window._blPagos.length){
     const pagoRows=window._blPagos.map(p=>({bloqueo_id:bloqueoId,monto:p.monto,metodo:p.metodo,alumno:p.quien,quien:p.quien}));
-    await sb.from('clase_pagos').delete().eq('bloqueo_id',bloqueoId);
     await sb.from('clase_pagos').insert(pagoRows);}}
+  if(tipo==='clase'){const bMem=D.bloqueos.find(b=>b.id===bloqueoId);if(bMem)bMem.pagos=[...(window._blPagos||[])];}
   window._blPagos=[];
-  rAg();rCaja();cM('m-bloqueo');
+  rAg();rCaja();rClases();cM('m-bloqueo');
 }
 async function delBloqueo(){
   const eid=g('bl-id').value;if(!eid)return;if(!confirm('¿Eliminar este bloqueo/evento?'))return;
@@ -2707,7 +2715,6 @@ function clToggle(e,t){e.stopPropagation();['mes','prof','estado'].forEach(funct
 document.addEventListener('click',function(){['clmpanel','clppanel','clepanel'].forEach(function(id){var el=document.getElementById(id);if(el)el.style.display='none';});});
 function clCheck(el,t){var s=t==='mes'?_clMes:t==='prof'?_clProf:_clEstado;el.checked?s.add(el.value):s.delete(el.value);var lblId=t==='mes'?'clmlbl':t==='prof'?'clplbl':'clelbl';var base=t==='mes'?'Mes':t==='prof'?'Profesor':'Estado pago';var lbl=document.getElementById(lblId);lbl.textContent=s.size===0?base:s.size===1?[...s][0]:base+' ('+s.size+')';var btnId=t==='mes'?'clmbtn':t==='prof'?'clpbtn':'clebtn';var btn=document.getElementById(btnId);if(btn){btn.style.borderColor=s.size>0?'var(--cyan)':'var(--border)';btn.style.color=s.size>0?'var(--cyan)':'var(--text1)';}document.getElementById('clclear').style.display=(_clMes.size>0||_clProf.size>0||_clEstado.size>0)?'inline-flex':'none';rClases();}
 function clClear(){_clMes.clear();_clProf.clear();_clEstado.clear();document.querySelectorAll('#clmlist input,#clplist input,#clepanel input').forEach(function(el){el.checked=false;});[['clmlbl','Mes'],['clplbl','Profesor'],['clelbl','Estado pago']].forEach(function(x){var el=document.getElementById(x[0]);if(el)el.textContent=x[1];});['clmbtn','clpbtn','clebtn'].forEach(function(id){var b=document.getElementById(id);if(b){b.style.borderColor='var(--border)';b.style.color='var(--text1)';}});document.getElementById('clclear').style.display='none';rClases();}
-function togglePagoClase(id,alumno){var b=(D.bloqueos||[]).find(function(x){return x.id===id;});if(!b)return;if(!b.pagos)b.pagos={};b.pagos[alumno]=b.pagos[alumno]==='pagado'?'pendiente':'pagado';saveData();rClases();}
 function buildClFiltros(){
   var clases=(D.bloqueos||[]).filter(function(b){return b.tipo==='clase';});
   var meses={};clases.forEach(function(c){var d=new Date(c.fecha+'T12:00:00');var key=d.getFullYear()+'-'+(d.getMonth()+1).toString().padStart(2,'0');var lbl=d.toLocaleString('es-CL',{month:'long',year:'numeric'});lbl=lbl.charAt(0).toUpperCase()+lbl.slice(1);meses[key]=lbl;});
@@ -2842,8 +2849,12 @@ function loadDemoData(){
   if(session&&session.user){
     const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
     if(perfil){
-      role=perfil.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
-      try{D=JSON.parse(localStorage.getItem('cf-data-v1'))||D;}catch(e){}
+      const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
+      const u=rolMap[perfil.rol]||rolMap.recepcion;
+      role=u.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
+      g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
+      if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||session.user.email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
+      document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
       await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
       rAll();
       g('login-screen').style.display='none';
