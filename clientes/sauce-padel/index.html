@@ -285,6 +285,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <input id="login-pass" type="password" value="" placeholder="Contraseña" style="padding-left:38px" onkeydown="if(event.key==='Enter')doLogin()"></div></div>
     <div id="lerr" class="hidden" style="color:var(--danger);font-size:12px;margin-bottom:10px;text-align:center">⚠ Correo o contraseña incorrectos.</div>
     <button class="btn p" style="width:100%;justify-content:center;height:44px;font-size:14px" onclick="doLogin()"><i class="ti ti-login"></i> Ingresar</button>
+    <div style="margin-top:12px;text-align:center"><a href="#" onclick="resetPass();return false" style="font-size:12px;color:var(--cyan-dark);text-decoration:none">¿Olvidaste tu contraseña?</a></div>
 
   </div>
 </div>
@@ -697,12 +698,18 @@ tr:hover td{background:rgba(242,244,247,.7)}
     <div id="slot-actions" style="display:flex;gap:8px;flex-wrap:wrap"></div>
   </div>
 </div>
+<div class="mbg hidden" id="m-ver-cerrada">
+  <div class="modal">
+    <div class="modal-header"><div class="modal-title" id="vc-title">Detalle del turno</div><button class="btn icon-only" onclick="cM('m-ver-cerrada')"><i class="ti ti-x"></i></button></div>
+    <div id="vc-body"></div>
+  </div>
+</div>
 <div class="mbg hidden" id="m-com">
   <div class="modal wide">
     <div class="modal-header">
       <div class="modal-title" id="com-title">Comanda</div>
       <div style="display:flex;gap:6px">
-        <button class="btn warn sm" onclick="openMPin()"><i class="ti ti-lock"></i> Cerrar turno</button>
+        <button class="btn warn sm" id="com-cerrar-btn" onclick="openMPin()"><i class="ti ti-lock"></i> Cerrar turno</button>
         <button class="btn icon-only" onclick="cM('m-com')"><i class="ti ti-x"></i></button>
       </div>
     </div>
@@ -1286,6 +1293,21 @@ function updSelNiveles(){
   const jm=g('j-memb');if(jm){jm.innerHTML='<option value="">Sin descuento</option>'+(D.cfg.membs||[]).map(m=>{const lbl=m.tipo==='fijo'?`-$${m.valor}`:m.tipo==='pct'?`-${m.valor}%`:`$${m.valor} fijo`;return`<option value="${m.id}">${m.nombre} (${lbl})</option>`;}).join('');}
 }
 
+async function resetPass(){
+  const email=(g('login-email').value||'').trim().toLowerCase();
+  if(!email){g('lerr').textContent='Escribe tu correo arriba y presiona de nuevo.';g('lerr').classList.remove('hidden');return;}
+  const{error}=await sb.auth.resetPasswordForEmail(email,{redirectTo:location.origin+location.pathname});
+  g('lerr').classList.remove('hidden');
+  if(!error)g('lerr').style.color='var(--cyan-dark)';
+  g('lerr').textContent=error?('No se pudo enviar: '+error.message):'📧 Te enviamos un correo para restablecer tu contraseña.';
+}
+sb.auth.onAuthStateChange(async(event)=>{
+  if(event==='PASSWORD_RECOVERY'){
+    const np=prompt('Ingresa tu nueva contraseña (mínimo 6 caracteres):');
+    if(np&&np.length>=6){const{error}=await sb.auth.updateUser({password:np});alert(error?('No se pudo actualizar: '+error.message):'Contraseña actualizada ✅ Ya puedes ingresar con ella.');}
+    else if(np!==null)alert('Muy corta: mínimo 6 caracteres. Vuelve a abrir el link del correo.');
+  }
+});
 async function doLogin(){
   ld();
   const email=(g('login-email').value||'').trim().toLowerCase();const pass=(g('login-pass').value||'').trim();
@@ -1294,12 +1316,12 @@ async function doLogin(){
   if(error||!data.user){g('lerr').textContent='Email o contraseña incorrectos.';g('lerr').classList.remove('hidden');g('login-pass').value='';g('login-pass').focus();return;}
   const{data:perfil,error:errPerfil}=await sb.from('perfiles').select('rol,nombre').eq('id',data.user.id).single();
   if(errPerfil||!perfil){g('lerr').textContent='Tu cuenta no tiene un perfil asignado. Contacta al administrador.';g('lerr').classList.remove('hidden');await sb.auth.signOut();return;}
-  const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
+  const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
   const u=rolMap[perfil.rol]||rolMap.recepcion;
   role=u.rol;g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
-  g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
+  g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
   _auditEmail=data.user.email;_auditNombre=perfil.nombre||email;if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
-  document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
+  document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
   await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
   rAll();
 }
@@ -1628,6 +1650,7 @@ function clkSlot(rid){
   const bp=g('slot-buscar');if(r.estado!=='cerrado'&&fa>0){bp.classList.remove('hidden');g('psearch').value='';g('presults').innerHTML='';}else bp.classList.add('hidden');
   const ac=g('slot-actions');ac.innerHTML='';
 if(r.estado==='reservada'||r.estado==='faltan'){ac.innerHTML+=`<button class="btn p" onclick="iniciar('${r.id}')"><i class="ti ti-clock-play"></i> Iniciar turno</button>`;ac.innerHTML+=`<button class="btn" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Agregar productos</button>`;ac.innerHTML+=`<button class="btn" onclick="editRes('${r.id}')"><i class="ti ti-edit"></i> Editar</button>`;ac.innerHTML+=`<button class="btn d sm" onclick="delRes('${r.id}')"><i class="ti ti-trash"></i> Cancelar</button>`;}  if(r.estado==='abierto')ac.innerHTML+=`<button class="btn p" onclick="cM('m-slot');openCom('${r.id}')"><i class="ti ti-shopping-cart"></i> Abrir comanda</button>`;
+  if(r.estado==='cerrado')ac.innerHTML+=`<button class="btn" onclick="cM('m-slot');openVerCerrada('${r.id}')"><i class="ti ti-eye"></i> Ver detalle del turno</button>`;
   g('m-slot').classList.remove('hidden');
 }
 function rPart(){
@@ -1823,7 +1846,11 @@ function quitarCortesia(jugador){const r=D.reservas.find(x=>x.id===cRid);if(!r)r
 function openCom(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;cRid=rid;cQty={};cAsig={};cSJ=null;cSC=null;
   (r.productos||[]).forEach(p=>{cQty[p.id]=p.qty;if(p.asignados)cAsig[p.id]=p.asignados;else if(p.jugador)cAsig[p.id]=[p.jugador];});
-  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};g('com-title').textContent=`Comanda · ${c.nombre} · ${r.horario}`;
+  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};
+  const esCerrada=r.estado==='cerrado';
+  if(esCerrada&&role!=='owner'){cRid=null;return;}
+  g('com-title').textContent=esCerrada?`Editar comanda cerrada · ${c.nombre} · ${r.horario}`:`Comanda · ${c.nombre} · ${r.horario}`;
+  const btnCierre=g('com-cerrar-btn');if(btnCierre)btnCierre.style.display=esCerrada?'none':'';
   const jugs=(r.jugadores||[]).filter(j=>j);const pcBruto=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario,r.fecha);const cuotaBase=Math.ceil(pcBruto/Math.max(jugs.length,1));
   rCPtags();rCCats();rCP();rPagos();rCortesias();g('com-search').value='';g('pago-m').value='';g('pago-q').value='';g('m-com').classList.remove('hidden');
 }
@@ -1914,9 +1941,13 @@ function rPB(){
 }
 function addPago(){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const m=parseInt(g('pago-m').value)||0;if(m<=0)return;if(!r.pagos)r.pagos=[];r.pagos.push({monto:m,metodo:g('pago-met').value,quien:g('pago-q').value||'',fecha:new Date().toISOString()});g('pago-m').value='';rPagos();rPB();scheduleAutosave(cRid);}
 function delPago(i){const r=D.reservas.find(x=>x.id===cRid);if(r){r.pagos.splice(i,1);rPagos();scheduleAutosave(cRid);}}
-function saveCom(){
+async function saveCom(){
   document.querySelectorAll('.pelota-panel').forEach(p=>p.classList.remove('open'));const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
-  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));sv();rAll();cM('m-com');
+  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));
+  const ok=await syncReservaCompleta(cRid);
+  if(!ok){alert('No se pudieron guardar los cambios. Revisa tu conexión.');return;}
+  if(r.estado==='cerrado')audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  rAll();cM('m-com');
 }
 // ── NUEVO CIERRE REDISEÑADO ──────────────────────────────
 function openMCT(){
@@ -1988,9 +2019,11 @@ async function confCierre(){
     if(est==='pagado'||est==='cortesia'||est==='cubierto'){}
     else{if(pendJ>0){deudasNuevas.push({jugador_id:jug?jug.id:null,jugador_nombre:j,telefono:tel,fecha:r.fecha,concepto:'Turno '+r.horario+' - '+cancha.nombre,monto:pendJ,pagado:0,estado:'Pendiente',bloqueado:false});}}
   });
+  const okSync=await syncReservaCompleta(cRid);
+  if(!okSync){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
   r.estado='cerrado';r.cierreAt=new Date().toISOString();
-  const ok=await syncReservaCompleta(cRid);
-  if(!ok){alert('No se pudo cerrar el turno. Revisa tu conexión e intenta de nuevo.');return;}
+  const{error:errCierre}=await sb.from('reservas').update({estado:'cerrado',cierre_at:r.cierreAt}).eq('id',cRid);
+  if(errCierre){r.estado='abierto';r.cierreAt=null;alert('No se pudo cerrar el turno: '+errCierre.message);return;}
   audit('Cerró turno','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
   for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
   if(deudasNuevas.length){
@@ -2438,7 +2471,7 @@ async function delVD(id){
 let ecRid=null,ecQty={};
 
 function openEditCerrada(rid){
-  if(role!=='admin')return;
+  if(role!=='owner')return;
   const r=D.reservas.find(x=>x.id===rid);if(!r||r.estado!=='cerrado')return;
   ecRid=rid;
   // Inicializar cantidades con lo que ya tiene la comanda
@@ -2541,6 +2574,30 @@ async function saveEditCerrada(){
   cM('m-edit-cerrada');rCaja();rAll();
 }
 
+function openVerCerrada(rid){
+  const r=D.reservas.find(x=>x.id===rid);if(!r)return;
+  const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
+  const{totales,precioCancha,jugs}=calcTotalesPorJugador(r,{},{});
+  const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const tot=precioCancha+tp;
+  const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,tot-cob);
+  g('vc-title').textContent=`Turno cerrado · ${c.nombre} · ${r.horario} · ${fmtD(new Date(r.fecha+'T12:00:00'))}`;
+  const prodsHtml=(r.productos||[]).length?(r.productos||[]).map(p=>{const asig=(p.asignados&&p.asignados.length)?p.asignados.map(j=>j.split(' ')[0]).join(', '):(p.cat==='Pelotas'?'÷ todos':'—');return `<div class="sl"><span>${p.qty}× ${p.nombre} <span style="font-size:11px;color:var(--text3)">(${asig})</span></span><span style="font-weight:600">${fmt(p.qty*p.precio)}</span></div>`;}).join(''):'<p style="font-size:12px;color:var(--text3)">Sin productos.</p>';
+  const pagosHtml=(r.pagos||[]).length?(r.pagos||[]).map(p=>`<div class="sl"><span>${p.metodo}${p.quien?' · '+p.quien:''}</span><span style="font-weight:600">${fmt(p.monto)}</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin pagos.</p>';
+  const jugHtml=jugs.length?jugs.map(j=>{const t=totales[j];return `<div class="sl"><span>${j}${t.descLabel?` <span class="bcyan" style="font-size:10px;padding:1px 5px">${t.descLabel}</span>`:''}</span><span style="font-weight:600">${fmt(t.total)}</span></div>`;}).join(''):'';
+  g('vc-body').innerHTML=`
+    <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:12px;font-size:13px">
+      <div class="sl"><span style="color:var(--text2)">Cancha</span><span style="font-weight:600">${fmt(precioCancha)}</span></div>
+      <div class="sl"><span style="color:var(--text2)">Productos</span><span style="font-weight:600">${fmt(tp)}</span></div>
+      <div class="sl tot"><span>Total</span><span>${fmt(tot)}</span></div>
+      <div class="sl"><span style="color:var(--text2)">Cobrado</span><span style="color:#3d6b0a;font-weight:700">${fmt(cob)}</span></div>
+      <div class="sl"><span style="color:var(--text2)">Pendiente</span><span style="color:${pend>0?'#92400E':'#3d6b0a'};font-weight:700">${fmt(pend)}</span></div>
+    </div>
+    <div class="card-title">Productos</div>${prodsHtml}
+    <div class="card-title" style="margin-top:12px">Pagos</div>${pagosHtml}
+    ${jugHtml?`<div class="card-title" style="margin-top:12px">Total por jugador</div>${jugHtml}`:''}`;
+  g('m-ver-cerrada').classList.remove('hidden');
+}
+
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
   const cr=g('caja-custom-range');
@@ -2591,7 +2648,7 @@ function rCaja(){
   if(blq.length){cblqCard.classList.remove('hidden');g('cblq').innerHTML=blq.map(b=>{const bt=BLOQ_TIPOS[b.tipo]||BLOQ_TIPOS.evento;return`<div class="sl"><span style="color:var(--text2)">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${bt.label}${b.titulo?' · '+b.titulo:''}</span><span style="font-weight:700">${fmt(b.valor)}</span></div>`;}).join('');}
   else{cblqCard.classList.add('hidden');}
   g('chist').innerHTML=res.length?res.slice().sort((a,b)=>b.fecha.localeCompare(a.fecha)).map(r=>{const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const{precioCancha}=calcTotalesPorJugador(r,{},{});const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const t=precioCancha+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,t-cob);const mets2=[...new Set((r.pagos||[]).map(p=>p.metodo))].join(', ')||'—';
-    const editBtn=role==='admin'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openEditCerrada('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:'<td></td>';
+    const editBtn=role==='owner'?`<td><button class="btn icon-only sm warn" title="Editar comanda" onclick="openCom('${r.id}')"><i class="ti ti-edit" style="font-size:13px"></i></button></td>`:`<td><button class="btn icon-only sm" title="Ver detalle" onclick="openVerCerrada('${r.id}')"><i class="ti ti-eye" style="font-size:13px"></i></button></td>`;
     return`<tr><td>${c.nombre}</td><td>${r.horario}</td><td>${fmtD(new Date(r.fecha+'T12:00:00'))}</td><td>${(r.jugadores||[]).filter(j=>j).length}</td><td>${fmt(precioCancha)}</td><td>${fmt(tp)}</td><td style="font-weight:700">${fmt(t)}</td><td style="color:#3d6b0a">${fmt(cob)}</td><td style="color:${pend>0?'#92400E':'#3d6b0a'}">${fmt(pend)}</td><td>${mets2}</td>${editBtn}</tr>`;
   }).join(''):'<tr><td colspan="11" style="text-align:center;color:var(--text3);padding:14px">Sin turnos cerrados en este período.</td></tr>';
 }
@@ -2849,12 +2906,12 @@ function loadDemoData(){
   if(session&&session.user){
     const{data:perfil}=await sb.from('perfiles').select('*').eq('id',session.user.id).single();
     if(perfil){
-      const rolMap={admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
+      const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
       const u=rolMap[perfil.rol]||rolMap.recepcion;
       role=u.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
-      g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='admin'?'ra':'rr');
+      g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
       if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||session.user.email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
-      document.querySelectorAll('.ao').forEach(el=>el.style.display=u.rol!=='admin'?'none':'');
+      document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
       await cargarDatosDesdeSupabase();mostrarBannerSuscripcion();
       rAll();
       g('login-screen').style.display='none';
