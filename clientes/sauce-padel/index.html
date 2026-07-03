@@ -1244,30 +1244,13 @@ function scheduleAutosave(rid){
 }
 async function syncReservaCompleta(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;
-  const payload={cancha_id:r.canchaId,fecha:r.fecha,horario:r.horario,contacto:r.contacto||null,estado:r.estado,precio_override:r.pOv!==undefined?r.pOv:null,notas:r.notas||null,apertura_at:r.aperturaAt||null,cierre_at:r.cierreAt||null};
-  const{error:errUpd}=await sb.from('reservas').update(payload).eq('id',rid);
-  if(errUpd){console.error('Error sincronizando reserva:',errUpd);return false;}
-
-  // Jugadores: borrar y reinsertar (simple y seguro para un array chico de máx 4)
-  await sb.from('reserva_jugadores').delete().eq('reserva_id',rid);
-  const jugRows=(r.jugadores||[]).map((nombre,pos)=>{if(!nombre)return null;const j=D.jugadores.find(jj=>jj.nombre===nombre);return{reserva_id:rid,jugador_id:j?j.id:null,nombre_libre:j?null:nombre,posicion:pos};}).filter(Boolean);
-  if(jugRows.length)await sb.from('reserva_jugadores').insert(jugRows);
-
-  // Productos: borrar y reinsertar
-  await sb.from('reserva_productos').delete().eq('reserva_id',rid);
-  const prodRows=(r.productos||[]).map(p=>({reserva_id:rid,producto_id:p.id,nombre:p.nombre,precio:p.precio,qty:p.qty,categoria:p.cat||null,asignados:p.asignados||[]}));
-  if(prodRows.length)await sb.from('reserva_productos').insert(prodRows);
-
-  // Pagos: borrar y reinsertar
-  await sb.from('reserva_pagos').delete().eq('reserva_id',rid);
-  const pagoRows=(r.pagos||[]).map(p=>({reserva_id:rid,monto:p.monto,metodo:p.metodo,quien:p.quien||null,fecha:p.fecha}));
-  if(pagoRows.length)await sb.from('reserva_pagos').insert(pagoRows);
-
-  // Cortesías: borrar y reinsertar (tipo/valor/promoId se serializan en motivo como JSON)
-  await sb.from('reserva_cortesias').delete().eq('reserva_id',rid);
-  const cortRows=(r.cortesias||[]).map(c=>({reserva_id:rid,jugador:c.jugador,motivo:JSON.stringify({tipo:c.tipo,valor:c.valor,promoId:c.promoId})}));
-  if(cortRows.length)await sb.from('reserva_cortesias').insert(cortRows);
-
+  const reserva={cancha_id:r.canchaId,fecha:r.fecha,horario:r.horario,contacto:r.contacto||null,estado:r.estado,precio_override:r.pOv!==undefined?r.pOv:null,notas:r.notas||null,apertura_at:r.aperturaAt||null,cierre_at:r.cierreAt||null};
+  const jugadores=(r.jugadores||[]).map((nombre,pos)=>{if(!nombre)return null;const j=D.jugadores.find(jj=>jj.nombre===nombre);return{jugador_id:j?j.id:null,nombre_libre:j?null:nombre,posicion:pos};}).filter(Boolean);
+  const productos=(r.productos||[]).map(p=>({producto_id:p.id,nombre:p.nombre,precio:p.precio,qty:p.qty,categoria:p.cat||null,asignados:p.asignados||[]}));
+  const pagos=(r.pagos||[]).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||null,fecha:p.fecha}));
+  const cortesias=(r.cortesias||[]).map(c=>({jugador:c.jugador,motivo:JSON.stringify({tipo:c.tipo,valor:c.valor,promoId:c.promoId})}));
+  const{error}=await sb.rpc('guardar_reserva_completa',{p_rid:rid,p_reserva:reserva,p_jugadores:jugadores,p_productos:productos,p_pagos:pagos,p_cortesias:cortesias});
+  if(error){console.error('Error sincronizando reserva:',error);return false;}
   return true;
 }
 
