@@ -1721,7 +1721,7 @@ async function delBloqueo(){
 function clkSlot(rid){
   sRid=rid;const r=D.reservas.find(x=>x.id===rid);if(!r)return;
   const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};const jugs=(r.jugadores||[]).filter(j=>j);const fa=4-jugs.length;
-  const pc=r.pOv!==undefined?r.pOv:pcP(r.canchaId,r.horario,r.fecha);const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);
+  const{precioCancha:pcReal}=calcTotalesPorJugador(r,{},{});const pc=pcReal;const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);
   const tot=pc+tp;const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,tot-cob);
   g('m-slot-title').textContent=`${c.nombre} · ${r.horario}`;
   const eb=r.estado==='abierto'?'<span class="badge bgreen">En juego</span>':r.estado==='cerrado'?'<span class="badge bg">Cerrada</span>':fa>0?`<span class="badge bamber">Faltan ${fa}</span>`:'<span class="badge bblue">Reservada</span>';
