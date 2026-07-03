@@ -2577,18 +2577,24 @@ async function saveEditCerrada(){
 function openVerCerrada(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;
   const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
-  const{totales,precioCancha,jugs}=calcTotalesPorJugador(r,{},{});
+  const jugs=(r.jugadores||[]).filter(j=>j);const nJug=Math.max(jugs.length,1);
+  const{totales,precioCancha}=calcTotalesPorJugador(r,{},{});
+  const consumo={};jugs.forEach(j=>consumo[j]={cancha:totales[j]?totales[j].cancha:0,descLabel:totales[j]?totales[j].descLabel:'',prods:[],total:totales[j]?totales[j].cancha:0});
+  (r.productos||[]).forEach(p=>{
+    const asig=(p.asignados||[]).filter(a=>a);const monto=p.precio*p.qty;
+    if(p.cat==='Pelotas'&&asig.length===0){const cpj=Math.ceil(monto/nJug);jugs.forEach(j=>{consumo[j].prods.push({nombre:`${p.qty}× ${p.nombre}`,monto:cpj,compartido:true});consumo[j].total+=cpj;});}
+    else if(asig.length>0){const cpj=Math.ceil(monto/asig.length);asig.forEach(j=>{if(!consumo[j])return;consumo[j].prods.push({nombre:`${p.qty}× ${p.nombre}`,monto:cpj,compartido:asig.length>1});consumo[j].total+=cpj;});}
+  });
   const tp=(r.productos||[]).reduce((s,p)=>s+p.precio*p.qty,0);const tot=precioCancha+tp;
   const cob=(r.pagos||[]).reduce((s,p)=>s+p.monto,0);const pend=Math.max(0,tot-cob);
   g('vc-title').textContent=`Turno cerrado · ${c.nombre} · ${r.horario} · ${fmtD(new Date(r.fecha+'T12:00:00'))}`;
-  const prodsHtml=(r.productos||[]).length?(r.productos||[]).map(p=>{const asig=(p.asignados&&p.asignados.length)?p.asignados.map(j=>j.split(' ')[0]).join(', '):(p.cat==='Pelotas'?'÷ todos':'—');return `<div class="sl"><span>${p.qty}× ${p.nombre} <span style="font-size:11px;color:var(--text3)">(${asig})</span></span><span style="font-weight:600">${fmt(p.qty*p.precio)}</span></div>`;}).join(''):'<p style="font-size:12px;color:var(--text3)">Sin productos.</p>';
   const pagosHtml=(r.pagos||[]).length?(r.pagos||[]).map(p=>`<div class="sl"><span>${p.metodo}${p.quien?' · '+p.quien:''}</span><span style="font-weight:600">${fmt(p.monto)}</span></div>`).join(''):'<p style="font-size:12px;color:var(--text3)">Sin pagos.</p>';
-  const jugHtml=jugs.length?jugs.map(j=>{const t=totales[j];
-    const canchaLine=`<div class="sl" style="font-size:12px;color:var(--text2)"><span>Cancha${t.descLabel?` · ${t.descLabel}`:''}</span><span>${fmt(t.cancha)}</span></div>`;
-    const prodLines=(t.productos||[]).map(p=>`<div class="sl" style="font-size:12px;color:var(--text2)"><span>${p.nombre}${p.compartido?' <span style=\"font-size:10px;opacity:.7\">(compartido)</span>':''}</span><span>${fmt(p.monto)}</span></div>`).join('');
+  const jugHtml=jugs.length?jugs.map(j=>{const t=consumo[j];
+    const lines=[`<div class="sl" style="font-size:12px;color:var(--text2)"><span>Cancha${t.descLabel?` · ${t.descLabel}`:''}</span><span>${fmt(t.cancha)}</span></div>`]
+      .concat((t.prods||[]).map(p=>`<div class="sl" style="font-size:12px;color:var(--text2)"><span>${p.nombre}${p.compartido?' <span style=\"font-size:10px;opacity:.6\">(compartido)</span>':''}</span><span>${fmt(p.monto)}</span></div>`)).join('');
     return `<div style="border:1px solid var(--border);border-radius:var(--r2);padding:8px 10px;margin-bottom:6px">
       <div class="sl" style="border-bottom:1px solid var(--border);padding-bottom:4px;margin-bottom:4px"><span style="font-weight:700">${j}</span><span style="font-weight:700">${fmt(t.total)}</span></div>
-      ${canchaLine}${prodLines}</div>`;}).join(''):'';
+      ${lines}</div>`;}).join(''):'';
   g('vc-body').innerHTML=`
     <div style="background:var(--gray-light);border-radius:var(--r);padding:12px;margin-bottom:12px;font-size:13px">
       <div class="sl"><span style="color:var(--text2)">Cancha</span><span style="font-weight:600">${fmt(precioCancha)}</span></div>
@@ -2597,9 +2603,8 @@ function openVerCerrada(rid){
       <div class="sl"><span style="color:var(--text2)">Cobrado</span><span style="color:#3d6b0a;font-weight:700">${fmt(cob)}</span></div>
       <div class="sl"><span style="color:var(--text2)">Pendiente</span><span style="color:${pend>0?'#92400E':'#3d6b0a'};font-weight:700">${fmt(pend)}</span></div>
     </div>
-    <div class="card-title">Productos</div>${prodsHtml}
-    <div class="card-title" style="margin-top:12px">Pagos</div>${pagosHtml}
-    ${jugHtml?`<div class="card-title" style="margin-top:12px">Total por jugador</div>${jugHtml}`:''}`;
+    <div class="card-title">Detalle por jugador</div>${jugHtml||'<p style="font-size:12px;color:var(--text3)">Sin jugadores registrados.</p>'}
+    <div class="card-title" style="margin-top:12px">Pagos</div>${pagosHtml}`;
   g('m-ver-cerrada').classList.remove('hidden');
 }
 
