@@ -601,6 +601,22 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn p" onclick="addPromo()"><i class="ti ti-plus"></i></button>
     </div>
   </div>
+  <div class="card owner-only" id="card-usuarios" style="margin-bottom:1.25rem;display:none">
+    <div class="card-title">Usuarios del sistema <span style="font-size:11px;color:var(--text3);font-weight:400">— crea y administra las cuentas de tu equipo</span></div>
+    <div id="usuarios-list" style="margin-bottom:1rem"></div>
+    <div style="border-top:1px solid var(--border);padding-top:12px">
+      <div style="font-size:12px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:8px">Crear nuevo usuario</div>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;align-items:flex-end">
+        <div><lbl>Nombre</lbl><input id="nu-nombre" placeholder="Ej: Recepción 2" style="width:150px"></div>
+        <div><lbl>Correo</lbl><input id="nu-email" type="email" placeholder="correo@real.cl" style="width:200px"></div>
+        <div><lbl>Contraseña temporal</lbl><input id="nu-pass" placeholder="mín. 6 caracteres" style="width:160px"></div>
+        <div><lbl>Rol</lbl><select id="nu-rol" style="width:150px;height:38px"><option value="recepcion">Recepcionista</option><option value="admin">Administrador</option></select></div>
+        <button class="btn p" onclick="crearUsuario()"><i class="ti ti-user-plus"></i> Crear</button>
+      </div>
+      <div id="nu-msg" style="font-size:12px;margin-top:8px"></div>
+      <div style="font-size:11px;color:var(--text3);margin-top:8px">El usuario podrá cambiar su contraseña con "¿Olvidaste tu contraseña?" desde el login usando su correo real.</div>
+    </div>
+  </div>
 
 </div>
   </div>
@@ -1359,8 +1375,70 @@ function S(s){
   if(s==='ventas'){setTimeout(rVD,50);}
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
-  if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();}if(s==='caja')rCaja();
+  if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();rUsuarios();}if(s==='caja')rCaja();
   if(window.innerWidth<=768){const tabs=['agenda','turnos','jugadores'];if(tabs.includes(s))setMobTab(s);}
+}
+async function callGestionUsuarios(body){
+  const{data:{session}}=await sb.auth.getSession();
+  const res=await fetch(SUPABASE_URL+'/functions/v1/gestionar-usuarios',{
+    method:'POST',
+    headers:{'Content-Type':'application/json','Authorization':'Bearer '+(session?.access_token||''),'apikey':SUPABASE_KEY},
+    body:JSON.stringify(body)
+  });
+  return await res.json();
+}
+async function rUsuarios(){
+  const card=g('card-usuarios');if(!card)return;
+  if(role!=='owner'){card.style.display='none';return;}
+  card.style.display='';
+  const cont=g('usuarios-list');cont.innerHTML='<div style="font-size:12px;color:var(--text3)">Cargando...</div>';
+  const r=await callGestionUsuarios({accion:'listar'});
+  if(r.error){cont.innerHTML=`<div style="font-size:12px;color:var(--danger)">Error: ${r.error}</div>`;return;}
+  const rolLabel={owner:'Dueño',admin:'Administrador',recepcion:'Recepcionista'};
+  cont.innerHTML=(r.usuarios||[]).map(u=>{
+    const esOwner=u.rol==='owner';
+    const acciones=esOwner?'<span style="font-size:11px;color:var(--text3)">cuenta principal</span>':`
+      <button class="btn sm" onclick="cambiarRolUsuario('${u.id}','${u.rol}')" title="Cambiar rol"><i class="ti ti-repeat"></i></button>
+      <button class="btn sm" onclick="resetPassUsuario('${u.id}','${(u.email||'').replace(/'/g,"")}')" title="Nueva contraseña"><i class="ti ti-key"></i></button>
+      <button class="btn sm warn" onclick="eliminarUsuario('${u.id}','${(u.email||'').replace(/'/g,"")}')" title="Eliminar"><i class="ti ti-trash"></i></button>`;
+    return `<div class="sl" style="padding:8px 0;border-bottom:1px solid var(--border)">
+      <div><span style="font-weight:600">${u.nombre||'(sin nombre)'}</span> <span style="font-size:12px;color:var(--text3)">· ${u.email||''}</span><br><span style="font-size:11px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 8px;border-radius:10px;font-weight:600">${rolLabel[u.rol]||u.rol}</span></div>
+      <div style="display:flex;gap:4px">${acciones}</div>
+    </div>`;
+  }).join('')||'<div style="font-size:12px;color:var(--text3)">Sin usuarios.</div>';
+}
+async function crearUsuario(){
+  const nombre=g('nu-nombre').value.trim(),email=g('nu-email').value.trim().toLowerCase(),password=g('nu-pass').value,rol=g('nu-rol').value;
+  const msg=g('nu-msg');
+  if(!email||!password){msg.style.color='var(--danger)';msg.textContent='Completa correo y contraseña.';return;}
+  if(password.length<6){msg.style.color='var(--danger)';msg.textContent='La contraseña debe tener al menos 6 caracteres.';return;}
+  msg.style.color='var(--text3)';msg.textContent='Creando...';
+  const r=await callGestionUsuarios({accion:'crear',nombre,email,password,rol});
+  if(r.error){msg.style.color='var(--danger)';msg.textContent='Error: '+r.error;return;}
+  msg.style.color='#3d6b0a';msg.textContent='✅ Usuario creado.';
+  g('nu-nombre').value='';g('nu-email').value='';g('nu-pass').value='';
+  rUsuarios();
+}
+async function cambiarRolUsuario(id,rolActual){
+  const nuevo=rolActual==='admin'?'recepcion':'admin';
+  if(!confirm(`¿Cambiar el rol a ${nuevo==='admin'?'Administrador':'Recepcionista'}?`))return;
+  const r=await callGestionUsuarios({accion:'cambiar_rol',id,rol:nuevo});
+  if(r.error){alert('Error: '+r.error);return;}
+  rUsuarios();
+}
+async function resetPassUsuario(id,email){
+  const np=prompt(`Nueva contraseña para ${email} (mín. 6 caracteres):`);
+  if(!np)return;
+  if(np.length<6){alert('Muy corta.');return;}
+  const r=await callGestionUsuarios({accion:'reset_password',id,password:np});
+  if(r.error){alert('Error: '+r.error);return;}
+  alert('Contraseña actualizada ✅');
+}
+async function eliminarUsuario(id,email){
+  if(!confirm(`¿Eliminar a ${email}? Esta acción no se puede deshacer.`))return;
+  const r=await callGestionUsuarios({accion:'eliminar',id});
+  if(r.error){alert('Error: '+r.error);return;}
+  rUsuarios();
 }
 function cM(id){g(id).classList.add('hidden');}
 function rAll(){rAg();rT();rJ();rI();rCanchas();rCaja();rVD();}
