@@ -1167,7 +1167,7 @@ async function cargarDatosDesdeSupabase(){
     D.reservas=(reservasRaw||[]).map(r=>{
       const jugRows=rJugRows.filter(x=>x.reserva_id===r.id).sort((a,b)=>a.posicion-b.posicion);
       const jugadores=[0,1,2,3].map(pos=>{const jr=jugRows.find(x=>x.posicion===pos);if(!jr)return'';const j=jr.jugador_id?D.jugadores.find(jj=>jj.id===jr.jugador_id):null;return j?j.nombre:(jr.nombre_libre||'');});
-      const productos=rProdRows.filter(x=>x.reserva_id===r.id).map(rp=>{const p=D.productos.find(pp=>pp.id===rp.producto_id)||{};return{id:rp.producto_id,nombre:p.nombre||'?',precio:rp.precio_unitario,qty:rp.cantidad,cat:p.cat||'',asignados:rp.asignados||[],jugador:null,_rpId:rp.id};});
+      const productos=rProdRows.filter(x=>x.reserva_id===r.id).map(rp=>({id:rp.producto_id,nombre:rp.nombre||'?',precio:rp.precio,qty:rp.qty,cat:rp.categoria||'',asignados:rp.asignados||[],jugador:null,_rpId:rp.id}));
       const pagos=rPagoRows.filter(x=>x.reserva_id===r.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien,fecha:p.fecha,_id:p.id}));
       const cortesias=rCortRows.filter(x=>x.reserva_id===r.id).map(c=>({jugador:c.jugador,tipo:c.motivo?JSON.parse(c.motivo).tipo:'pct',valor:c.motivo?JSON.parse(c.motivo).valor:0,promoId:c.motivo?JSON.parse(c.motivo).promoId:undefined,_id:c.id}));
       return{id:r.id,canchaId:r.cancha_id,horario:r.horario?.slice(0,5),fecha:r.fecha,contacto:r.contacto,jugadores,notas:r.notas,pOv:r.precio_override!==null?r.precio_override:undefined,productos,pagos,cortesias,estado:r.estado,creadoAt:r.creado_at,aperturaAt:r.apertura_at,cierreAt:r.cierre_at};
@@ -1226,7 +1226,7 @@ async function syncReservaCompleta(rid){
 
   // Productos: borrar y reinsertar
   await sb.from('reserva_productos').delete().eq('reserva_id',rid);
-  const prodRows=(r.productos||[]).map(p=>({reserva_id:rid,producto_id:p.id,cantidad:p.qty,precio_unitario:p.precio,asignados:p.asignados||[]}));
+  const prodRows=(r.productos||[]).map(p=>({reserva_id:rid,producto_id:p.id,nombre:p.nombre,precio:p.precio,qty:p.qty,categoria:p.cat||null,asignados:p.asignados||[]}));
   if(prodRows.length)await sb.from('reserva_productos').insert(prodRows);
 
   // Pagos: borrar y reinsertar
