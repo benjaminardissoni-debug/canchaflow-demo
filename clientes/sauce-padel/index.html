@@ -275,6 +275,8 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .cfg-acc.open .cfg-body{display:block}
 .cfg-acc .card-title .chev{transition:transform .2s;font-size:18px;color:var(--text3)}
 .cfg-acc.open .card-title .chev{transform:rotate(180deg)}
+.owner-only{display:none!important}
+body[data-role="owner"] .owner-only{display:block!important}
 </style>
 </head>
 <body>
@@ -607,7 +609,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
       <button class="btn p" onclick="addPromo()"><i class="ti ti-plus"></i></button>
     </div>
   </div>
-  <div class="card owner-only" id="card-usuarios" style="margin-bottom:1.25rem;display:none">
+  <div class="card owner-only" id="card-usuarios" style="margin-bottom:1.25rem">
     <div class="card-title">Usuarios del sistema <span style="font-size:11px;color:var(--text3);font-weight:400">— crea y administra las cuentas de tu equipo</span></div>
     <div style="background:var(--gray-light);border-radius:var(--r2);padding:10px 12px;margin-bottom:12px;font-size:12px;color:var(--text2);line-height:1.6">
       <strong>Que puede hacer cada rol</strong><br>
@@ -1345,7 +1347,7 @@ async function doLogin(){
   if(errPerfil||!perfil){g('lerr').textContent='Tu cuenta no tiene un perfil asignado. Contacta al administrador.';g('lerr').classList.remove('hidden');await sb.auth.signOut();return;}
   const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
   const u=rolMap[perfil.rol]||rolMap.recepcion;
-  role=u.rol;g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
+  role=u.rol;document.body.setAttribute('data-role',u.rol);g('login-screen').style.display='none';g('main-app').classList.remove('hidden');
   g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
   _auditEmail=data.user.email;_auditNombre=perfil.nombre||email;if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
   document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
@@ -3022,7 +3024,7 @@ function loadDemoData(){
     if(perfil){
       const rolMap={owner:{rol:'owner',roleName:'Dueño',desc:'Acceso total'},admin:{rol:'admin',roleName:'Administrador',desc:'Acceso completo'},recepcion:{rol:'recep',roleName:'Recepcionista',desc:'Acceso operacional'}};
       const u=rolMap[perfil.rol]||rolMap.recepcion;
-      role=u.rol;D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
+      role=u.rol;document.body.setAttribute('data-role',u.rol);D.perfil=perfil;D.perfil.email=session.user.email;_auditEmail=session.user.email;_auditNombre=perfil.nombre||'';
       g('rbadge').textContent=u.roleName;g('rbadge').className='rbadge '+(u.rol==='recep'?'rr':'ra');
       if(g('sb-uname'))g('sb-uname').textContent=perfil.nombre||session.user.email;if(g('sb-urole'))g('sb-urole').textContent=u.desc;
       document.querySelectorAll('.ao').forEach(el=>el.style.display=(u.rol!=='admin'&&u.rol!=='owner')?'none':'');
