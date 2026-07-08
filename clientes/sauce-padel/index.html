@@ -317,6 +317,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     <div class="sb-section" style="margin-top:.5rem">Gestión</div>
     <button class="nb" onclick="S('inventario')" id="nav-inventario"><i class="ti ti-package"></i>Inventario</button>
     <button class="nb" onclick="S('ventas')" id="nav-ventas"><i class="ti ti-shopping-bag"></i>Ventas directas</button>
+    <button class="nb ao" onclick="S('torneos')" id="nav-torneos"><i class="ti ti-trophy"></i>Torneos</button>
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
@@ -390,6 +391,12 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div class="card" style="padding:0;overflow:auto">
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
+</div>
+<!-- TORNEOS / AMERICANOS -->
+<div class="sec" id="sec-torneos">
+  <div class="rb"><div></div><button class="btn p ao" onclick="nuevoTorneo()"><i class="ti ti-plus"></i> Nuevo torneo</button></div>
+  <div id="torneos-alert" class="hidden alert warning"></div>
+  <div id="torneos-list"></div>
 </div>
 <!-- VENTAS DIRECTAS -->
 <div class="sec" id="sec-ventas">
@@ -704,6 +711,10 @@ body[data-role="owner"] .owner-only{display:block!important}
       <div style="font-size:11px;color:var(--text3);margin-top:6px">Vacío = precio de tramo automático · 0 = turno gratis</div>
     </div>
     <div class="fr"><lbl>Contacto</lbl><input id="res-contacto" placeholder="Nombre o teléfono"></div>
+    <div class="fr" style="display:flex;align-items:center;gap:8px;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+      <input type="checkbox" id="res-es-torneo" onchange="updTorneoUI()" style="width:16px;height:16px;cursor:pointer">
+      <label for="res-es-torneo" style="font-size:13px;cursor:pointer;font-weight:600;color:var(--text2)"><i class="ti ti-trophy" style="font-size:15px;color:var(--blue)"></i> Este bloque es para un torneo / americano</label>
+    </div>
     <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text);font-family:'Poppins',sans-serif">Jugadores <span style="font-weight:400;color:var(--text3);font-family:'Inter',sans-serif">(puedes completar después)</span></div>
     <div id="res-jugs" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem"></div>
     <div id="res-adv" class="hidden alert warning" style="margin-bottom:.875rem"></div>
@@ -731,6 +742,20 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div class="modal">
     <div class="modal-header"><div class="modal-title" id="vc-title">Detalle del turno</div><button class="btn icon-only" onclick="cM('m-ver-cerrada')"><i class="ti ti-x"></i></button></div>
     <div id="vc-body"></div>
+  </div>
+</div>
+<div class="mbg hidden" id="m-editjug" style="z-index:1200">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><div class="modal-title"><i class="ti ti-user-edit" style="margin-right:8px;color:var(--blue)"></i>Corregir nombre del jugador</div><button class="btn icon-only" onclick="cM('m-editjug')"><i class="ti ti-x"></i></button></div>
+    <div style="font-size:12px;color:var(--text3);margin-bottom:10px">Elige un jugador registrado o escribe el nombre libremente. Solo cambia el nombre, no afecta montos ni pagos.</div>
+    <div style="position:relative;margin-bottom:1rem">
+      <input id="editjug-input" placeholder="Nombre del jugador" oninput="sugEditJug()" autocomplete="off">
+      <div id="editjug-drop" class="jdrop hidden"></div>
+    </div>
+    <div style="display:flex;gap:8px;justify-content:flex-end">
+      <button class="btn" onclick="cM('m-editjug')">Cancelar</button>
+      <button class="btn p" onclick="guardarNombreJugador()"><i class="ti ti-check"></i> Guardar nombre</button>
+    </div>
   </div>
 </div>
 <div class="mbg hidden" id="m-com">
@@ -1027,7 +1052,7 @@ body[data-role="owner"] .owner-only{display:block!important}
 </div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -1365,10 +1390,18 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+function rTorneos(){
+  const cont=g('torneos-list');if(!cont)return;
+  cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aún no hay torneos. Crea uno con Nuevo torneo.</div></div>';
+}
+function nuevoTorneo(){
+  alert('Próximamente: crear torneo. (esqueleto listo)');
+}
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
   if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
   if(s==='ventas'){setTimeout(rVD,50);}
+  if(s==='torneos')setTimeout(rTorneos,50);
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();rUsuarios();setTimeout(initConfigAcordeon,60);}if(s==='caja')rCaja();
@@ -1821,7 +1854,16 @@ function openRes(fecha,horario,cid,editR){
 
   bJI(editR?editR.jugadores:[]);g('res-contacto').value=editR?editR.contacto||'':'';g('res-notas').value=editR?editR.notas||'':'';
   const ov=g('res-pov');ov.dataset.m='';if(editR&&editR.pOv!==undefined){ov.value=editR.pOv;ov.dataset.m='1';}else ov.value='';
+  const et=g('res-es-torneo');if(et){et.checked=(editR&&editR.estado==='torneo')||false;}
+  if(typeof updTorneoUI==='function')updTorneoUI();
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
+}
+function updTorneoUI(){
+  const et=g('res-es-torneo');if(!et)return;
+  const on=et.checked;
+  const jugs=g('res-jugs');const pbox=g('res-precio-box');
+  if(jugs){jugs.style.opacity=on?'0.4':'1';jugs.style.pointerEvents=on?'none':'auto';}
+  if(pbox)pbox.style.opacity=on?'0.4':'1';
 }
 async function saveRes(){
   const cid=g('res-cancha').value;const wrap2=g('res-horario-custom-wrap');const useCustom2=wrap2&&wrap2.style.display!=='none';const horBase=useCustom2?(g('res-hora-custom')?.value||''):g('res-horario').value;const horFin=useCustom2?(g('res-hora-custom-fin')?.value||''):null;const hor=horBase;const fec=agCtx||ds(getAF());
@@ -1834,9 +1876,11 @@ async function saveRes(){
     const ok=await syncReservaCompleta(eRid);
     if(!ok){alert('No se pudo guardar la reserva. Intenta de nuevo.');return;}
   }else{
-    const{data,error}=await sb.from('reservas').insert({cancha_id:cid,fecha:fec,horario:hor,contacto:contacto||null,notas:notas||null,precio_override:pOv!==undefined?pOv:null,estado:'reservada'}).select().single();
+    const esTorneo=g('res-es-torneo')&&g('res-es-torneo').checked;
+    const estadoRes=esTorneo?'torneo':'reservada';
+    const{data,error}=await sb.from('reservas').insert({cancha_id:cid,fecha:fec,horario:hor,contacto:contacto||null,notas:notas||null,precio_override:pOv!==undefined?pOv:null,estado:estadoRes}).select().single();
     if(error){alert('No se pudo crear la reserva: '+error.message);return;}
-    const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:'reservada',creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
+    const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:estadoRes,creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
     D.reservas.push(nuevaR);
     const _cn=D.canchas.find(x=>x.id===cid)?.nombre||cid;audit("Creó reserva","reservas",`${_cn} · ${hor} · ${fec}`);
     await syncReservaCompleta(data.id);
@@ -1932,6 +1976,74 @@ function guardarCortesia(jugador){
 function quitarCortesia(jugador){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;r.cortesias=(r.cortesias||[]).filter(c=>c.jugador!==jugador);const m=document.getElementById('modal-cortesia');if(m)m.remove();updCS();rCortesias();scheduleAutosave(cRid);}
 
 // ── COMANDA ──────────────────────────────────────────────
+let _editJugPos=null;
+function abrirEditarJugador(pos){
+  if(role!=='admin'&&role!=='owner')return;
+  const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
+  _editJugPos=pos;
+  const actual=(r.jugadores||[])[pos]||'';
+  const inp=g('editjug-input');if(inp){inp.value=actual;}
+  const drop=g('editjug-drop');if(drop)drop.classList.add('hidden');
+  g('m-editjug').classList.remove('hidden');
+  setTimeout(()=>{if(inp)inp.focus();},50);
+}
+function sugEditJug(){
+  const val=(g('editjug-input').value||'').toLowerCase();const drop=g('editjug-drop');if(!drop)return;
+  if(!val){drop.classList.add('hidden');return;}
+  const m=D.jugadores.filter(j=>j.nombre.toLowerCase().includes(val)).slice(0,6);
+  if(!m.length){drop.classList.add('hidden');return;}
+  drop.innerHTML=m.map(j=>{const nc=getNColor(j.nivel);return`<div class="jdi" onclick="pickEditJug('${j.nombre.replace(/'/g,"\\'")}')"><span style="background:${nc.b};color:${nc.t};font-size:10px;padding:1px 7px;border-radius:10px;font-weight:600">${j.nivel||'—'}</span><span>${j.nombre}</span></div>`;}).join('');
+  drop.classList.remove('hidden');
+}
+function pickEditJug(n){g('editjug-input').value=n;g('editjug-drop').classList.add('hidden');}
+async function guardarNombreJugador(){
+  const r=D.reservas.find(x=>x.id===cRid);if(!r||_editJugPos===null)return;
+  const nuevo=(g('editjug-input').value||'').trim();
+  if(!nuevo){alert('Escribe un nombre.');return;}
+  const viejo=(r.jugadores||[])[_editJugPos]||'';
+  if(nuevo===viejo){cM('m-editjug');return;}
+  if(!r.jugadores)r.jugadores=['','','',''];
+  r.jugadores[_editJugPos]=nuevo;
+  Object.keys(cAsig).forEach(pid=>{if(Array.isArray(cAsig[pid]))cAsig[pid]=cAsig[pid].map(x=>x===viejo?nuevo:x);});
+  (r.productos||[]).forEach(p=>{if(Array.isArray(p.asignados))p.asignados=p.asignados.map(x=>x===viejo?nuevo:x);if(p.jugador===viejo)p.jugador=nuevo;});
+  (r.pagos||[]).forEach(p=>{if(p.quien===viejo)p.quien=nuevo;});
+  (r.cortesias||[]).forEach(c=>{if(c.jugador===viejo)c.jugador=nuevo;});
+  const ok=await syncReservaCompleta(cRid);
+  if(!ok){alert('No se pudo guardar el nombre. Revisa tu conexión.');return;}
+  audit('Corrigió nombre de jugador','reserva',`${viejo} → ${nuevo} · ${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario}`);
+  if(r.estado==='cerrado'&&viejo){
+    const cancha=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
+    const conceptoTurno='Turno '+r.horario+' - '+cancha.nombre;
+    const candidatas=(D.deudas||[]).filter(d=>
+      d.concepto===conceptoTurno &&
+      d.fecha===r.fecha &&
+      d.jugador===viejo &&
+      !d.bloqueado &&
+      (d.pagado||0) < (d.monto||0)
+    );
+    if(candidatas.length===1){
+      const dObj=candidatas[0];
+      const jugNuevo=D.jugadores.find(x=>x.nombre===nuevo);
+      const telNuevo=jugNuevo?(jugNuevo.telefono||jugNuevo.tel||null):null;
+      const{error:errD}=await sb.from('deudas').update({
+        jugador_nombre:nuevo,
+        jugador_id:jugNuevo?jugNuevo.id:null,
+        telefono:telNuevo
+      }).eq('id',dObj.id);
+      if(errD){
+        alert('El nombre se cambió, pero no se pudo actualizar la deuda asociada. Revísala en el módulo Deudas.');
+      }else{
+        dObj.jugador=nuevo;dObj.telefono=telNuevo;
+        audit('Reasignó deuda por corrección de nombre','deuda',`${viejo} → ${nuevo} · ${conceptoTurno} · ${fmt(dObj.monto)}`);
+      }
+    }else if(candidatas.length>1){
+      alert('⚠ Hay '+candidatas.length+' deudas con el nombre "'+viejo+'" en este turno. El nombre del jugador se cambió, pero por seguridad las deudas NO se reasignaron automáticamente. Corrígelas manualmente en el módulo Deudas para no asignar a la persona equivocada.');
+    }
+  }
+  cM('m-editjug');
+  rCPtags();rCortesias();updCS();rPagos();
+  if(typeof rDeudas==='function')rDeudas();
+}
 function openCom(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;cRid=rid;cQty={};cAsig={};cSJ=null;cSC=null;
   (r.productos||[]).forEach(p=>{cQty[p.id]=p.qty;if(p.asignados)cAsig[p.id]=p.asignados;else if(p.jugador)cAsig[p.id]=[p.jugador];});
@@ -2018,7 +2130,8 @@ function updCS(){
   let jugHtml='';
   if(jugs.length){jugHtml='<div style="border-top:.5px solid var(--border);margin-top:8px;padding-top:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Total por jugador</div>'+
     jugs.map(j=>{const t=totales[j];const descTag=t.descLabel?`<span style="font-size:9px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 5px;border-radius:8px;font-weight:600;margin-left:4px">${t.descLabel}</span>`:'';const prodDesc=t.productos.length?t.productos.map(p=>p.nombre+' '+fmt(p.monto)).join(' + '):'';const desc='Cancha '+fmt(t.cancha)+(prodDesc?' + '+prodDesc:'');
-    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:var(--gray-light);margin-bottom:3px"><div><span style="font-size:12px;font-weight:700">${j}</span>${descTag}<span style="font-size:10px;color:var(--text3);margin-left:6px">${desc}</span></div><span style="font-size:14px;font-weight:700;font-family:Poppins,sans-serif">${fmt(t.total)}</span></div>`;
+    const lapiz=(role==='admin'||role==='owner')?`<button onclick="abrirEditarJugador(${jugs.indexOf(j)})" title="Corregir nombre" style="background:none;border:none;cursor:pointer;color:var(--blue);padding:2px 4px;margin-left:4px"><i class="ti ti-pencil" style="font-size:13px"></i></button>`:'';
+    return`<div style="display:flex;justify-content:space-between;align-items:center;padding:5px 8px;border-radius:8px;background:var(--gray-light);margin-bottom:3px"><div style="display:flex;align-items:center"><span style="font-size:12px;font-weight:700">${j}</span>${lapiz}${descTag}<span style="font-size:10px;color:var(--text3);margin-left:6px">${desc}</span></div><span style="font-size:14px;font-weight:700;font-family:Poppins,sans-serif">${fmt(t.total)}</span></div>`;
     }).join('')+'</div>';}
   g('com-added').innerHTML=itemsHtml+jugHtml;rPB();
 }
