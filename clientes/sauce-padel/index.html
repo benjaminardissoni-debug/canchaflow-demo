@@ -2011,8 +2011,38 @@ async function guardarNombreJugador(){
   const ok=await syncReservaCompleta(cRid);
   if(!ok){alert('No se pudo guardar el nombre. Revisa tu conexión.');return;}
   audit('Corrigió nombre de jugador','reserva',`${viejo} → ${nuevo} · ${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario}`);
+  if(r.estado==='cerrado'&&viejo){
+    const cancha=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
+    const conceptoTurno='Turno '+r.horario+' - '+cancha.nombre;
+    const candidatas=(D.deudas||[]).filter(d=>
+      d.concepto===conceptoTurno &&
+      d.fecha===r.fecha &&
+      d.jugador===viejo &&
+      !d.bloqueado &&
+      (d.pagado||0) < (d.monto||0)
+    );
+    if(candidatas.length===1){
+      const dObj=candidatas[0];
+      const jugNuevo=D.jugadores.find(x=>x.nombre===nuevo);
+      const telNuevo=jugNuevo?(jugNuevo.telefono||jugNuevo.tel||null):null;
+      const{error:errD}=await sb.from('deudas').update({
+        jugador_nombre:nuevo,
+        jugador_id:jugNuevo?jugNuevo.id:null,
+        telefono:telNuevo
+      }).eq('id',dObj.id);
+      if(errD){
+        alert('El nombre se cambió, pero no se pudo actualizar la deuda asociada. Revísala en el módulo Deudas.');
+      }else{
+        dObj.jugador=nuevo;dObj.telefono=telNuevo;
+        audit('Reasignó deuda por corrección de nombre','deuda',`${viejo} → ${nuevo} · ${conceptoTurno} · ${fmt(dObj.monto)}`);
+      }
+    }else if(candidatas.length>1){
+      alert('⚠ Hay '+candidatas.length+' deudas con el nombre "'+viejo+'" en este turno. El nombre del jugador se cambió, pero por seguridad las deudas NO se reasignaron automáticamente. Corrígelas manualmente en el módulo Deudas para no asignar a la persona equivocada.');
+    }
+  }
   cM('m-editjug');
   rCPtags();rCortesias();updCS();rPagos();
+  if(typeof rDeudas==='function')rDeudas();
 }
 function openCom(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;cRid=rid;cQty={};cAsig={};cSJ=null;cSC=null;
