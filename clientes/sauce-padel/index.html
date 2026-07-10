@@ -3165,9 +3165,9 @@ async function mostrarBannerSuscripcion(){
   const configs={
     marcha_blanca:{bg:'#e8f4fd',color:'#1a6fa3',txt:'🚀 Bienvenido a CanchaFlow. Estás en período de prueba gratuita. Tu primera mensualidad comienza el 1 de julio.',closeable:true},
     por_vencer:{bg:'#dbeafe',color:'#1e40af',txt:'⏰ Tu suscripción vence pronto. Recuerda regularizar el pago para mantener activo el servicio.',closeable:true},
-    vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Suscripción pendiente de pago. Puedes regularizar en los próximos días para mantener el servicio activo.',closeable:true},
-    limitado:{bg:'#fee2e2',color:'#991b1b',txt:'🔒 Servicio temporalmente limitado por pago pendiente. Regulariza la mensualidad para continuar usando CanchaFlow.',closeable:false},
-    suspendido:{bg:'#fca5a5',color:'#7f1d1d',txt:'❌ Servicio suspendido por pago pendiente. Tu información está resguardada. Regulariza para reactivar el acceso.',closeable:false},
+    vencido_gracia:{bg:'#fef3c7',color:'#92400e',txt:'⚠️ Tienes pendiente el pago de la mensualidad. Regulariza para mantener el servicio activo.',closeable:true},
+    limitado:{bg:'#fee2e2',color:'#991b1b',txt:'⚠️ La mensualidad sigue pendiente. Te pedimos regularizar el pago para continuar con el servicio.',closeable:true},
+    suspendido:{bg:'#fca5a5',color:'#7f1d1d',txt:'⚠️ Mensualidad pendiente hace varios días. Tu información está resguardada. Regulariza para continuar.',closeable:true},
   };
   const cfg=configs[estado];
   if(!cfg||estado==='activo'){banner.style.display='none';return;}
