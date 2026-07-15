@@ -2041,9 +2041,11 @@ async function guardarNombreJugador(){
   rCPtags();rCortesias();updCS();rPagos();
   if(typeof rDeudas==='function')rDeudas();
 }
+let _ecStockSnap={};
 function openCom(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;cRid=rid;cQty={};cAsig={};cSJ=null;cSC=null;
   (r.productos||[]).forEach(p=>{cQty[p.id]=p.qty;if(p.asignados)cAsig[p.id]=p.asignados;else if(p.jugador)cAsig[p.id]=[p.jugador];});
+  _ecStockSnap={};if(r.estado==='cerrado'){(r.productos||[]).forEach(p=>{_ecStockSnap[p.id]=p.qty||0;});}
   const c=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'?'};
   const esCerrada=r.estado==='cerrado';
   if(esCerrada&&role!=='owner'){cRid=null;return;}
@@ -2142,10 +2144,25 @@ function addPago(){const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const m=
 function delPago(i){const r=D.reservas.find(x=>x.id===cRid);if(r){r.pagos.splice(i,1);rPagos();scheduleAutosave(cRid);}}
 async function saveCom(){
   document.querySelectorAll('.pelota-panel').forEach(p=>p.classList.remove('open'));const r=D.reservas.find(x=>x.id===cRid);if(!r)return;
+  const eraCerrada=r.estado==='cerrado';
   r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));
   const ok=await syncReservaCompleta(cRid);
   if(!ok){alert('No se pudieron guardar los cambios. Revisa tu conexión.');return;}
-  if(r.estado==='cerrado')audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  if(eraCerrada){
+    const ids=new Set([...Object.keys(_ecStockSnap),...r.productos.map(p=>p.id)]);
+    for(const pid of ids){
+      const antes=_ecStockSnap[pid]||0;
+      const ahora=(r.productos.find(p=>p.id===pid)||{}).qty||0;
+      const diff=ahora-antes;
+      if(diff===0)continue;
+      const prod=D.productos.find(x=>x.id===pid);if(!prod)continue;
+      const nuevo=Math.max(0,prod.stock-diff);
+      const{error:eS}=await sb.from('productos').update({stock:nuevo}).eq('id',pid);
+      if(!eS){prod.stock=nuevo;audit(diff>0?'Descontó stock por edición':'Devolvió stock por edición','inventario',`${prod.nombre}: ${diff>0?'-':'+'}${Math.abs(diff)} → ${nuevo}`);}
+    }
+    _ecStockSnap={};r.productos.forEach(p=>{_ecStockSnap[p.id]=p.qty||0;});
+    audit('Editó comanda cerrada','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
+  }
   rAll();cM('m-com');
 }
 // ── NUEVO CIERRE REDISEÑADO ──────────────────────────────
@@ -2207,7 +2224,7 @@ async function confCierre(){
   const{totales,jugs}=calcTotalesPorJugador(r,cQty,cAsig);
   volcarProductosARserva(r);
   const stockUpdates=[];
-  r.productos.forEach(rp=>{const p=D.productos.find(x=>x.id===rp.id);if(p){p.stock=Math.max(0,p.stock-rp.qty);stockUpdates.push({id:p.id,stock:p.stock});}});
+  r.productos.forEach(rp=>{const p=D.productos.find(x=>x.id===rp.id);if(p){stockUpdates.push({id:p.id,stock:Math.max(0,p.stock-(rp.qty||0))});}});
   if(!r.pagos)r.pagos=[];if(!D.deudas)D.deudas=[];
   const cancha=D.canchas.find(x=>x.id===r.canchaId)||{nombre:'Cancha'};
   const deudasNuevas=[];
@@ -2224,7 +2241,7 @@ async function confCierre(){
   const{error:errCierre}=await sb.from('reservas').update({estado:'cerrado',cierre_at:r.cierreAt}).eq('id',cRid);
   if(errCierre){r.estado='abierto';r.cierreAt=null;alert('No se pudo cerrar el turno: '+errCierre.message);return;}
   audit('Cerró turno','reserva',`${D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha'} · ${r.horario} · ${r.fecha}`);
-  for(const upd of stockUpdates){await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);}
+  for(const upd of stockUpdates){const{error:eStk}=await sb.from('productos').update({stock:upd.stock}).eq('id',upd.id);if(!eStk){const _p=D.productos.find(x=>x.id===upd.id);if(_p)_p.stock=upd.stock;}}
   if(deudasNuevas.length){
     const{data,error}=await sb.from('deudas').insert(deudasNuevas).select();
     if(!error&&data)D.deudas.push(...data.map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado})));
@@ -2660,10 +2677,20 @@ function rVD(){
   }).join(''):'<tr><td colspan="7" style="text-align:center;color:var(--text3);padding:14px">Sin ventas hoy.</td></tr>';
 }
 async function delVD(id){
-  if(!confirm('¿Eliminar esta venta?'))return;
+  const v=(D.ventasDirectas||[]).find(x=>x.id===id);
+  if(!confirm('¿Eliminar esta venta? El stock de los productos volverá al inventario.'))return;
   const{error}=await sb.from('ventas_directas').delete().eq('id',id);
   if(error){alert('No se pudo eliminar: '+error.message);return;}
-  D.ventasDirectas=(D.ventasDirectas||[]).filter(v=>v.id!==id);rVD();rCaja();
+  if(v&&Array.isArray(v.productos)){
+    for(const item of v.productos){
+      const prod=D.productos.find(x=>x.id===item.id);if(!prod)continue;
+      const nuevo=prod.stock+(item.qty||0);
+      const{error:eS}=await sb.from('productos').update({stock:nuevo}).eq('id',item.id);
+      if(!eS)prod.stock=nuevo;
+    }
+    audit('Devolvió stock por venta eliminada','inventario',v.productos.map(p=>`${p.qty}× ${p.nombre}`).join(', '));
+  }
+  D.ventasDirectas=(D.ventasDirectas||[]).filter(x=>x.id!==id);rVD();rCaja();rAll();
 }
 
 // ── EDITAR COMANDA CERRADA (admin) ────────────────────────
