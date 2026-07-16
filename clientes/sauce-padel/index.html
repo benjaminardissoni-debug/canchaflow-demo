@@ -275,6 +275,8 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .cfg-acc.open .cfg-body{display:block}
 .cfg-acc .card-title .chev{transition:transform .2s;font-size:18px;color:var(--text3)}
 .cfg-acc.open .card-title .chev{transform:rotate(180deg)}
+.cf-spin{width:11px;height:11px;border:2px solid var(--border);border-top-color:var(--cyan-dark);border-radius:50%;display:inline-block;animation:cfspin .6s linear infinite}
+@keyframes cfspin{to{transform:rotate(360deg)}}
 .owner-only{display:none!important}
 body[data-role="owner"] .owner-only{display:block!important}
 </style>
@@ -330,7 +332,7 @@ body[data-role="owner"] .owner-only{display:block!important}
 <div class="main">
   <div class="topbar">
     <div class="topbar-title" id="topbar-title">Agenda</div>
-    <div class="topbar-right"><span id="rbadge" class="rbadge"></span></div>
+    <div class="topbar-right"><span id="cf-loading" style="display:none;align-items:center;gap:6px;font-size:11px;color:var(--text3);margin-right:10px"><span class="cf-spin"></span>Actualizando</span><span id="rbadge" class="rbadge"></span></div>
   </div>
   <div class="content">
 <!-- AGENDA -->
@@ -1148,6 +1150,104 @@ function ld(){
   if(!D.cfg)D.cfg={ini:'07:00',fin:'23:30',dur:90,tramos:[],membs:[],niveles:[],clubNombre:'Club Pádel',precioFeriado:24000,precioFinSemana:24000};
 }
 
+async function refetchProductos(){
+  const{data,error}=await sb.from('productos').select('*');
+  if(error){console.error('Error cargando productos:',error);return false;}
+  D.productos=(data||[]).map(p=>({id:p.id,nombre:p.nombre,cat:p.categoria,cod:p.codigo,precio:p.precio,costo:p.costo,stock:p.stock,smin:p.stock_minimo,und:p.unidad}));
+  return true;
+}
+async function refetchJugadores(){
+  const{data,error}=await sb.from('jugadores').select('*');
+  if(error){console.error('Error cargando jugadores:',error);return false;}
+  D.jugadores=(data||[]).map(j=>({id:j.id,nombre:j.nombre,telefono:j.telefono,nivel:j.nivel,disponibilidad:j.disponibilidad,lado:j.lado,memb:j.membresia_id,precioOv:j.precio_override!==null?j.precio_override:undefined,notas:j.notas}));
+  return true;
+}
+async function refetchDeudas(){
+  const{data,error}=await sb.from('deudas').select('*');
+  if(error){console.error('Error cargando deudas:',error);return false;}
+  D.deudas=(data||[]).map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado}));
+  return true;
+}
+async function refetchReservas(){
+  const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
+  if(errRes){console.error('Error cargando reservas:',errRes);return false;}
+  const resIds=(reservasRaw||[]).map(r=>r.id);
+  let rJugRows=[],rProdRows=[],rPagoRows=[],rCortRows=[];
+  if(resIds.length){
+    const[rj,rp,rpg,rc]=await Promise.all([
+      sb.from('reserva_jugadores').select('*').in('reserva_id',resIds),
+      sb.from('reserva_productos').select('*').in('reserva_id',resIds),
+      sb.from('reserva_pagos').select('*').in('reserva_id',resIds),
+      sb.from('reserva_cortesias').select('*').in('reserva_id',resIds)
+    ]);
+    rJugRows=rj.data||[];rProdRows=rp.data||[];rPagoRows=rpg.data||[];rCortRows=rc.data||[];
+  }
+  D.reservas=(reservasRaw||[]).map(r=>{
+    const jugRows=rJugRows.filter(x=>x.reserva_id===r.id).sort((a,b)=>a.posicion-b.posicion);
+    const jugadores=[0,1,2,3].map(pos=>{const jr=jugRows.find(x=>x.posicion===pos);if(!jr)return'';const j=jr.jugador_id?D.jugadores.find(jj=>jj.id===jr.jugador_id):null;return j?j.nombre:(jr.nombre_libre||'');});
+    const productos=rProdRows.filter(x=>x.reserva_id===r.id).map(rp=>({id:rp.producto_id,nombre:rp.nombre||'?',precio:rp.precio,qty:rp.qty,cat:rp.categoria||'',asignados:rp.asignados||[],jugador:null,_rpId:rp.id}));
+    const pagos=rPagoRows.filter(x=>x.reserva_id===r.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien,fecha:p.fecha,_id:p.id}));
+    const cortesias=rCortRows.filter(x=>x.reserva_id===r.id).map(c=>({jugador:c.jugador,tipo:c.motivo?JSON.parse(c.motivo).tipo:'pct',valor:c.motivo?JSON.parse(c.motivo).valor:0,promoId:c.motivo?JSON.parse(c.motivo).promoId:undefined,_id:c.id}));
+    return{id:r.id,canchaId:r.cancha_id,horario:r.horario?.slice(0,5),fecha:r.fecha,contacto:r.contacto,jugadores,notas:r.notas,pOv:r.precio_override!==null?r.precio_override:undefined,productos,pagos,cortesias,estado:r.estado,creadoAt:r.creado_at,aperturaAt:r.apertura_at,cierreAt:r.cierre_at};
+  });
+  return true;
+}
+async function refetchBloqueos(){
+  const{data:bloqueosRaw,error:errBloq}=await sb.from('bloqueos').select('*');
+  if(errBloq){console.error('Error cargando bloqueos:',errBloq);return false;}
+  const bloqIds=(bloqueosRaw||[]).map(b=>b.id);
+  let alumnoRows=[],clasePagoRows=[];
+  if(bloqIds.length){
+    const[ba,cp]=await Promise.all([
+      sb.from('bloqueo_alumnos').select('*').in('bloqueo_id',bloqIds),
+      sb.from('clase_pagos').select('*').in('bloqueo_id',bloqIds)
+    ]);
+    alumnoRows=ba.data||[];clasePagoRows=cp.data||[];
+  }
+  D.bloqueos=(bloqueosRaw||[]).map(b=>{
+    const alumnos=alumnoRows.filter(a=>a.bloqueo_id===b.id).map(a=>{const j=a.jugador_id?D.jugadores.find(jj=>jj.id===a.jugador_id):null;return j?j.nombre:(a.nombre_libre||'');}).filter(Boolean);
+    const pagosClase=b.tipo==='clase'?clasePagoRows.filter(p=>p.bloqueo_id===b.id).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||p.alumno||'Todos'})):undefined;
+    return{id:b.id,tipo:b.tipo,titulo:b.titulo,canchaId:b.cancha_id||'todas',fecha:b.fecha,horaInicio:b.hora_inicio?.slice(0,5),horaFin:b.hora_fin?.slice(0,5),genIngreso:b.gen_ingreso,valor:b.valor,profesor:b.profesor||undefined,alumnos:b.tipo==='clase'?alumnos:undefined,pagos:pagosClase};
+  });
+  return true;
+}
+const REFETCH_MAP={
+  agenda:['jugadores','reservas','bloqueos'],
+  turnos:['jugadores','reservas'],
+  jugadores:['jugadores','deudas'],
+  inventario:['productos'],
+  ventas:['productos','ventas'],
+  clases:['jugadores','bloqueos'],
+  caja:['jugadores','reservas','ventas','bloqueos'],
+  deudas:['deudas']
+};
+let _refetching=false;
+function hayModalAbierto(){return !!document.querySelector('.mbg:not(.hidden)');}
+async function refrescarModulo(s){
+  const lista=REFETCH_MAP[s];
+  if(!lista||_refetching||hayModalAbierto())return;
+  _refetching=true;
+  const ld=g('cf-loading');if(ld)ld.style.display='flex';
+  try{
+    for(const t of lista){
+      if(t==='productos')await refetchProductos();
+      else if(t==='jugadores')await refetchJugadores();
+      else if(t==='reservas')await refetchReservas();
+      else if(t==='bloqueos')await refetchBloqueos();
+      else if(t==='deudas')await refetchDeudas();
+      else if(t==='ventas')await cargarVentasDirectas();
+    }
+    if(typeof rAll==='function')rAll();
+    if(s==='caja'&&typeof rCaja==='function')rCaja();
+    if(s==='deudas'&&typeof rDeudas==='function')rDeudas();
+    if(s==='ventas'&&typeof rVD==='function')rVD();
+    if(s==='clases'&&typeof rClases==='function')rClases();
+  }catch(e){console.error('Error refrescando modulo:',e);}
+  finally{
+    _refetching=false;
+    const ld2=g('cf-loading');if(ld2)ld2.style.display='none';
+  }
+}
 async function cargarDatosDesdeSupabase(){
   // Canchas: mapeo precio_normal->pN, precio_alto->pA (nombres cortos que ya usa el resto del código)
   const{data:canchas,error:errCanchas}=await sb.from('canchas').select('*').order('orden');
@@ -1155,9 +1255,7 @@ async function cargarDatosDesdeSupabase(){
   else D.canchas=(canchas||[]).map(c=>({id:c.id,nombre:c.nombre,pN:c.precio_normal,pA:c.precio_alto}));
 
   // Productos: mapeo categoria->cat, codigo->cod, stock_minimo->smin, unidad->und
-  const{data:productos,error:errProductos}=await sb.from('productos').select('*');
-  if(errProductos){console.error('Error cargando productos:',errProductos);D.productos=[];}
-  else D.productos=(productos||[]).map(p=>({id:p.id,nombre:p.nombre,cat:p.categoria,cod:p.codigo,precio:p.precio,costo:p.costo,stock:p.stock,smin:p.stock_minimo,und:p.unidad}));
+  await refetchProductos();
 
   // Membresías -> D.cfg.membs
   const{data:membs,error:errMembs}=await sb.from('membresias').select('*');
@@ -1196,9 +1294,7 @@ async function cargarDatosDesdeSupabase(){
 
   // Estos módulos todavía no están migrados (próximos pasos) — quedan vacíos por ahora
   // Jugadores: mapeo membresia_id->memb, precio_override->precioOv
-  const{data:jugadores,error:errJugadores}=await sb.from('jugadores').select('*');
-  if(errJugadores){console.error('Error cargando jugadores:',errJugadores);D.jugadores=[];}
-  else D.jugadores=(jugadores||[]).map(j=>({id:j.id,nombre:j.nombre,telefono:j.telefono,nivel:j.nivel,disponibilidad:j.disponibilidad,lado:j.lado,memb:j.membresia_id,precioOv:j.precio_override!==null?j.precio_override:undefined,notas:j.notas}));
+  await refetchJugadores();
 
   // Reservas + tablas relacionadas (jugadores, productos, pagos, cortesías)
   const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
@@ -1226,9 +1322,7 @@ async function cargarDatosDesdeSupabase(){
   }
 
   // Deudas
-  const{data:deudas,error:errDeudas}=await sb.from('deudas').select('*');
-  if(errDeudas){console.error('Error cargando deudas:',errDeudas);D.deudas=[];}
-  else D.deudas=(deudas||[]).map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado}));
+  await refetchDeudas();
 
   D.promos=[];
 
@@ -1402,6 +1496,7 @@ function S(s){
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();rUsuarios();setTimeout(initConfigAcordeon,60);}if(s==='caja')rCaja();
+  refrescarModulo(s);
   if(window.innerWidth<=768){const tabs=['agenda','turnos','jugadores'];if(tabs.includes(s))setMobTab(s);}
 }
 async function callGestionUsuarios(body){
