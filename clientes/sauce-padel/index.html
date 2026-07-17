@@ -1991,6 +1991,10 @@ function openMPin(){
 }
 
 // ── CÁLCULO TOTALES POR JUGADOR (FIX: suma cuotas reales con descuento) ──
+function asigTags(arr){
+  const c={};(arr||[]).forEach(x=>{c[x]=(c[x]||0)+1;});
+  return Object.keys(c).map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}${c[jj]>1?' ×'+c[jj]:''}</span>`).join('');
+}
 function calcTotalesPorJugador(reserva,qty,asig){
   const precioCanchaBruto=reserva.pOv!==undefined?reserva.pOv:pcP(reserva.canchaId,reserva.horario,reserva.fecha);
   const jugs=(reserva.jugadores||[]).filter(j=>j);const nJug=Math.max(jugs.length,1);
@@ -2006,7 +2010,11 @@ function calcTotalesPorJugador(reserva,qty,asig){
   });
   D.productos.forEach(p=>{const q=qty[p.id]||0;if(!q)return;const esPelota=p.cat==='Pelotas';const asignados=asig[p.id];
     if(esPelota&&(!asignados||asignados.length===0)){const cpj=Math.ceil((p.precio*q)/nJug);jugs.forEach(j=>{if(!totales[j])return;totales[j].productos.push({nombre:p.nombre,monto:cpj,compartido:true});totales[j].total+=cpj;});}
-    else if(asignados&&asignados.length>0){const cpj=Math.ceil((p.precio*q)/asignados.length);asignados.forEach(j=>{if(!totales[j])return;totales[j].productos.push({nombre:p.nombre,monto:cpj,compartido:asignados.length>1});totales[j].total+=cpj;});}
+    else if(esPelota&&asignados&&asignados.length>0){const cpj=Math.ceil((p.precio*q)/asignados.length);asignados.forEach(j=>{if(!totales[j])return;totales[j].productos.push({nombre:p.nombre,monto:cpj,compartido:asignados.length>1});totales[j].total+=cpj;});}
+    else if(asignados&&asignados.length>0){
+      if(asignados.length!==q){const cpj=Math.ceil((p.precio*q)/asignados.length);[...new Set(asignados)].forEach(j=>{if(!totales[j])return;totales[j].productos.push({nombre:p.nombre,monto:cpj,compartido:asignados.length>1});totales[j].total+=cpj;});}
+      else{const cnt={};asignados.forEach(j=>{cnt[j]=(cnt[j]||0)+1;});Object.keys(cnt).forEach(j=>{if(!totales[j])return;const monto=p.precio*cnt[j];totales[j].productos.push({nombre:p.nombre+(cnt[j]>1?' ×'+cnt[j]:''),monto,compartido:false});totales[j].total+=monto;});}
+    }
   });
   return{totales,precioCancha:sumaCanchaReal,precioCanchaBruto,cuotaBase,jugs};
 }
@@ -2052,7 +2060,7 @@ function openCortesia(jugador){
   box.appendChild(btnRow);overlay.appendChild(box);overlay.onclick=function(e){if(e.target===overlay)overlay.remove();};document.body.appendChild(overlay);
 }
 function volcarProductosARserva(r){
-  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:(p.cat!=='Pelotas'&&cSJ)?[cSJ]:cAsig[p.id]||[],jugador:null}));
+  r.productos=D.productos.filter(p=>(cQty[p.id]||0)>0).map(p=>({id:p.id,nombre:p.nombre,precio:p.precio,qty:cQty[p.id],cat:p.cat,asignados:cAsig[p.id]||[],jugador:null}));
 }
 function aplicarPromo(jugador,promoId){
   const r=D.reservas.find(x=>x.id===cRid);if(!r)return;const promo=D.promos.find(p=>p.id===promoId);if(!promo)return;
@@ -2169,7 +2177,7 @@ function rCP(){
       let asigLabel='';
       if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const lbl=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${p.id}')">${lbl} ✎ ${fmt(costoPU)}/c</span>`;}
         else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-        else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
+        else asigLabel=asigTags(asigArr);}
       const pelPH=esPelota?`<div class="pelota-panel" id="pelota-panel-${p.id}"><div style="font-size:11px;font-weight:600;color:#3B6D11;margin-bottom:7px">¿Quién paga las pelotas?</div><div style="display:flex;gap:5px;flex-wrap:wrap" id="pelota-jugs-${p.id}"></div><div id="pelota-calc-${p.id}" style="font-size:11px;color:var(--cyan-dark);margin-top:6px;background:var(--cyan-light);padding:4px 8px;border-radius:6px;display:none"></div></div>`:'';
       return`<div class="pr" id="prod-row-${p.id}" style="flex-direction:column;align-items:stretch;padding:8px 12px">
         <div style="display:flex;align-items:center;gap:8px">
@@ -2202,7 +2210,15 @@ function chQ(pid,d){
   if(d>0&&!esPelota&&!cSJ){const tags=g('com-ptags');if(tags){tags.style.outline='2px solid #F59E0B';tags.style.borderRadius='8px';setTimeout(()=>{tags.style.outline='';},1200);}return;}
   cQty[pid]=Math.max(0,(cQty[pid]||0)+d);
   if(cQty[pid]===0)delete cAsig[pid];
-  else if(d>0){if(esPelota&&!cSJ)cAsig[pid]=[];else if(cSJ){if(!cAsig[pid])cAsig[pid]=[];if(!cAsig[pid].includes(cSJ))cAsig[pid]=[...cAsig[pid],cSJ];}}
+  else if(esPelota){if(d>0&&!cSJ)cAsig[pid]=[];else if(d>0&&cSJ){if(!cAsig[pid])cAsig[pid]=[];if(!cAsig[pid].includes(cSJ))cAsig[pid]=[...cAsig[pid],cSJ];}}
+  else{
+    if(!Array.isArray(cAsig[pid]))cAsig[pid]=[];
+    const arr=cAsig[pid];
+    if(d>0){if(cSJ)arr.push(cSJ);}
+    else{let i=cSJ?arr.lastIndexOf(cSJ):-1;if(i<0)i=arr.length-1;if(i>=0)arr.splice(i,1);}
+    while(arr.length>cQty[pid])arr.pop();
+    cAsig[pid]=arr;
+  }
   const el=g('qty-'+pid);if(el)el.textContent=cQty[pid];refreshProdRow(pid);updCS();
   const r=D.reservas.find(x=>x.id===cRid);if(r){if(d>0){const _p=D.productos.find(x=>x.id===pid);const _cn=D.canchas.find(x=>x.id===r.canchaId)?.nombre||'Cancha';audit("Agregó producto","comanda",`${_p?.nombre||pid} · ${_cn} · ${r.horario}`);}volcarProductosARserva(r);scheduleAutosave(cRid);}
 }
@@ -2210,7 +2226,7 @@ function refreshProdRow(pid){
   const p=D.productos.find(x=>x.id===pid);if(!p)return;const q=cQty[pid]||0;const esPelota=p.cat==='Pelotas';const asigArr=cAsig[pid]||[];let asigLabel='';
   if(q>0){if(esPelota){const r2=D.reservas.find(x=>x.id===cRid);const quienes=asigArr.length?asigArr:(r2&&r2.jugadores||[]).filter(j=>j);const costoPU=quienes.length?Math.ceil((p.precio*q)/quienes.length):0;const label=asigArr.length===0?'÷ todos':asigArr.map(j=>j.split(' ')[0]).join('+');asigLabel=`<span style="cursor:pointer;font-size:10px;background:#EAF3DE;color:#3B6D11;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px" onclick="togglePelotaPanel('${pid}')">${label} ✎ ${fmt(costoPU)}/c</span>`;}
     else if(!asigArr.length)asigLabel='<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:2px 8px;border-radius:10px;font-weight:600;margin-left:4px">⚠ sin asignar</span>';
-    else asigLabel=asigArr.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:2px 7px;border-radius:10px;font-weight:600;margin-left:3px">${jj.split(' ')[0]}</span>`).join('');}
+    else asigLabel=asigTags(asigArr);}
   const row=document.getElementById('prod-row-'+pid);if(!row)return;const nameDiv=row.querySelector('[data-name]');if(nameDiv)nameDiv.innerHTML=p.nombre+asigLabel;
 }
 function updCS(){
@@ -2219,7 +2235,7 @@ function updCS(){
   g('cs-c').textContent=fmt(precioCancha);g('cs-p').textContent=fmt(tp);g('cs-t').textContent=fmt(tot);
   const added=D.productos.filter(p=>(cQty[p.id]||0)>0);let itemsHtml='';
   if(added.length){itemsHtml='<div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:5px">En comanda</div>'+
-    added.map(p=>{const q=cQty[p.id];const asig=cAsig[p.id];let al='';if(!asig||!asig.length)al=p.cat==='Pelotas'?'<span style="font-size:10px;background:#EAF3DE;color:#3B6D11;padding:1px 6px;border-radius:10px;font-weight:600">÷ todos</span>':'<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:1px 6px;border-radius:10px;font-weight:600">⚠ sin asignar</span>';else al=asig.map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 6px;border-radius:10px;font-weight:600">${jj.split(' ')[0]}</span>`).join(' ');
+    added.map(p=>{const q=cQty[p.id];const asig=cAsig[p.id];let al='';if(!asig||!asig.length)al=p.cat==='Pelotas'?'<span style="font-size:10px;background:#EAF3DE;color:#3B6D11;padding:1px 6px;border-radius:10px;font-weight:600">÷ todos</span>':'<span style="font-size:10px;background:#FAEEDA;color:#854F0B;padding:1px 6px;border-radius:10px;font-weight:600">⚠ sin asignar</span>';else {const _c={};asig.forEach(x=>{_c[x]=(_c[x]||0)+1;});al=Object.keys(_c).map(jj=>`<span style="font-size:10px;background:var(--cyan-light);color:var(--cyan-dark);padding:1px 6px;border-radius:10px;font-weight:600">${jj.split(' ')[0]}${_c[jj]>1?' ×'+_c[jj]:''}</span>`).join(' ');};
     return`<div style="display:flex;justify-content:space-between;align-items:center;font-size:12px;padding:2px 0"><span>${q}× ${p.nombre} ${al}</span><span style="font-weight:600">${fmt(q*p.precio)}</span></div>`;}).join('');}
   let jugHtml='';
   if(jugs.length){jugHtml='<div style="border-top:.5px solid var(--border);margin-top:8px;padding-top:8px"><div style="font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--text3);margin-bottom:6px">Total por jugador</div>'+
