@@ -1184,7 +1184,9 @@ async function refetchReservas(){
     ]);
     rJugRows=rj.data||[];rProdRows=rp.data||[];rPagoRows=rpg.data||[];rCortRows=rc.data||[];
   }
+  const _abierta=(typeof cRid!=='undefined'&&cRid)?D.reservas.find(x=>x.id===cRid):null;
   D.reservas=(reservasRaw||[]).map(r=>{
+    if(_abierta&&r.id===cRid)return _abierta;
     const jugRows=rJugRows.filter(x=>x.reserva_id===r.id).sort((a,b)=>a.posicion-b.posicion);
     const jugadores=[0,1,2,3].map(pos=>{const jr=jugRows.find(x=>x.posicion===pos);if(!jr)return'';const j=jr.jugador_id?D.jugadores.find(jj=>jj.id===jr.jugador_id):null;return j?j.nombre:(jr.nombre_libre||'');});
     const productos=rProdRows.filter(x=>x.reserva_id===r.id).map(rp=>({id:rp.producto_id,nombre:rp.nombre||'?',precio:rp.precio,qty:rp.qty,cat:rp.categoria||'',asignados:rp.asignados||[],jugador:null,_rpId:rp.id}));
@@ -1227,7 +1229,7 @@ let _refetching=false;
 function hayModalAbierto(){return !!document.querySelector('.mbg:not(.hidden)');}
 async function refrescarModulo(s){
   const lista=REFETCH_MAP[s];
-  if(!lista||_refetching||hayModalAbierto())return;
+  if(!lista||_refetching||_guardando||hayModalAbierto())return;
   _refetching=true;
   const ld=g('cf-loading');if(ld)ld.style.display='flex';
   try{
@@ -1356,20 +1358,31 @@ async function cargarDatosDesdeSupabase(){
 // relacionadas. Se llama: al crear/editar la reserva, al iniciar turno, en el
 // autosave periódico mientras la comanda está abierta, y siempre al cerrar el turno.
 let autosaveTimer=null;
+let _guardando=false;
 function scheduleAutosave(rid){
   if(autosaveTimer)clearTimeout(autosaveTimer);
   autosaveTimer=setTimeout(()=>{syncReservaCompleta(rid).catch(e=>console.error('Autosave falló:',e));},2500);
 }
 async function syncReservaCompleta(rid){
   const r=D.reservas.find(x=>x.id===rid);if(!r)return;
-  const reserva={cancha_id:r.canchaId,fecha:r.fecha,horario:r.horario,contacto:r.contacto||null,estado:r.estado,precio_override:r.pOv!==undefined?r.pOv:null,notas:r.notas||null,apertura_at:r.aperturaAt||null,cierre_at:r.cierreAt||null};
   const jugadores=(r.jugadores||[]).map((nombre,pos)=>{if(!nombre)return null;const j=D.jugadores.find(jj=>jj.nombre===nombre);return{jugador_id:j?j.id:null,nombre_libre:j?null:nombre,posicion:pos};}).filter(Boolean);
+  // RED DE SEGURIDAD: no guardar un estado corrupto que borraria los jugadores.
+  // Si hay actividad (productos/pagos/cortesias) o el turno esta cerrado, pero cero jugadores -> abortar.
+  const tieneActividad=(r.productos&&r.productos.length)||(r.pagos&&r.pagos.length)||(r.cortesias&&r.cortesias.length);
+  if(jugadores.length===0&&(tieneActividad||r.estado==='cerrado'||r.estado==='abierto')){
+    console.error('ABORTADO: intento de guardar reserva',rid,'con 0 jugadores y actividad/estado activo. Se preserva la data existente.');
+    return false;
+  }
+  const reserva={cancha_id:r.canchaId,fecha:r.fecha,horario:r.horario,contacto:r.contacto||null,estado:r.estado,precio_override:r.pOv!==undefined?r.pOv:null,notas:r.notas||null,apertura_at:r.aperturaAt||null,cierre_at:r.cierreAt||null};
   const productos=(r.productos||[]).map(p=>({producto_id:p.id,nombre:p.nombre,precio:p.precio,qty:p.qty,categoria:p.cat||null,asignados:p.asignados||[]}));
   const pagos=(r.pagos||[]).map(p=>({monto:p.monto,metodo:p.metodo,quien:p.quien||null,fecha:p.fecha}));
   const cortesias=(r.cortesias||[]).map(c=>({jugador:c.jugador,motivo:JSON.stringify({tipo:c.tipo,valor:c.valor,promoId:c.promoId})}));
-  const{error}=await sb.rpc('guardar_reserva_completa',{p_rid:rid,p_reserva:reserva,p_jugadores:jugadores,p_productos:productos,p_pagos:pagos,p_cortesias:cortesias});
-  if(error){console.error('Error sincronizando reserva:',error);return false;}
-  return true;
+  _guardando=true;
+  try{
+    const{error}=await sb.rpc('guardar_reserva_completa',{p_rid:rid,p_reserva:reserva,p_jugadores:jugadores,p_productos:productos,p_pagos:pagos,p_cortesias:cortesias});
+    if(error){console.error('Error sincronizando reserva:',error);return false;}
+    return true;
+  }finally{_guardando=false;}
 }
 
 function openSidebar(){document.querySelector('.sidebar').classList.add('open');document.getElementById('sb-overlay').classList.add('open');}
