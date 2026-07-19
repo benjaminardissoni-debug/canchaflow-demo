@@ -1170,6 +1170,15 @@ async function refetchDeudas(){
   D.deudas=(data||[]).map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado}));
   return true;
 }
+async function fetchAllIn(table, col, ids){
+  const out=[];const chunk=500;
+  for(let i=0;i<ids.length;i+=chunk){
+    const{data,error}=await sb.from(table).select('*').in(col,ids.slice(i,i+chunk));
+    if(error){console.error('fetchAllIn error',table,error);continue;}
+    if(data)out.push(...data);
+  }
+  return out;
+}
 async function refetchReservas(){
   const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
   if(errRes){console.error('Error cargando reservas:',errRes);return false;}
@@ -1177,12 +1186,12 @@ async function refetchReservas(){
   let rJugRows=[],rProdRows=[],rPagoRows=[],rCortRows=[];
   if(resIds.length){
     const[rj,rp,rpg,rc]=await Promise.all([
-      sb.from('reserva_jugadores').select('*').in('reserva_id',resIds),
-      sb.from('reserva_productos').select('*').in('reserva_id',resIds),
-      sb.from('reserva_pagos').select('*').in('reserva_id',resIds),
-      sb.from('reserva_cortesias').select('*').in('reserva_id',resIds)
+      fetchAllIn('reserva_jugadores','reserva_id',resIds),
+      fetchAllIn('reserva_productos','reserva_id',resIds),
+      fetchAllIn('reserva_pagos','reserva_id',resIds),
+      fetchAllIn('reserva_cortesias','reserva_id',resIds)
     ]);
-    rJugRows=rj.data||[];rProdRows=rp.data||[];rPagoRows=rpg.data||[];rCortRows=rc.data||[];
+    rJugRows=rj;rProdRows=rp;rPagoRows=rpg;rCortRows=rc;
   }
   const _abierta=(typeof cRid!=='undefined'&&cRid)?D.reservas.find(x=>x.id===cRid):null;
   D.reservas=(reservasRaw||[]).map(r=>{
@@ -1308,12 +1317,12 @@ async function cargarDatosDesdeSupabase(){
     let rJugRows=[],rProdRows=[],rPagoRows=[],rCortRows=[];
     if(resIds.length){
       const[rj,rp,rpg,rc]=await Promise.all([
-        sb.from('reserva_jugadores').select('*').in('reserva_id',resIds),
-        sb.from('reserva_productos').select('*').in('reserva_id',resIds),
-        sb.from('reserva_pagos').select('*').in('reserva_id',resIds),
-        sb.from('reserva_cortesias').select('*').in('reserva_id',resIds)
+        fetchAllIn('reserva_jugadores','reserva_id',resIds),
+        fetchAllIn('reserva_productos','reserva_id',resIds),
+        fetchAllIn('reserva_pagos','reserva_id',resIds),
+        fetchAllIn('reserva_cortesias','reserva_id',resIds)
       ]);
-      rJugRows=rj.data||[];rProdRows=rp.data||[];rPagoRows=rpg.data||[];rCortRows=rc.data||[];
+      rJugRows=rj;rProdRows=rp;rPagoRows=rpg;rCortRows=rc;
     }
     D.reservas=(reservasRaw||[]).map(r=>{
       const jugRows=rJugRows.filter(x=>x.reserva_id===r.id).sort((a,b)=>a.posicion-b.posicion);
