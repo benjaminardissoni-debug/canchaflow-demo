@@ -1380,7 +1380,7 @@ async function syncReservaCompleta(rid){
   _guardando=true;
   try{
     const{error}=await sb.rpc('guardar_reserva_completa',{p_rid:rid,p_reserva:reserva,p_jugadores:jugadores,p_productos:productos,p_pagos:pagos,p_cortesias:cortesias});
-    if(error){console.error('Error sincronizando reserva:',error);return false;}
+    if(error){console.error('Error sincronizando reserva:',error);if(error.code==='23505'&&(error.message||'').includes('idx_reserva_slot_unico')){alert('⚠️ Esa cancha ya está reservada a esa hora. Los cambios no se guardaron.');}return false;}
     return true;
   }finally{_guardando=false;}
 }
@@ -1986,7 +1986,7 @@ async function saveRes(){
     const esTorneo=g('res-es-torneo')&&g('res-es-torneo').checked;
     const estadoRes=esTorneo?'torneo':'reservada';
     const{data,error}=await sb.from('reservas').insert({cancha_id:cid,fecha:fec,horario:hor,contacto:contacto||null,notas:notas||null,precio_override:pOv!==undefined?pOv:null,estado:estadoRes}).select().single();
-    if(error){alert('No se pudo crear la reserva: '+error.message);return;}
+    if(error){if(error.code==='23505'&&(error.message||'').includes('idx_reserva_slot_unico')){alert('⚠️ Esa cancha ya está reservada a esa hora. Revisa la agenda.');}else{alert('No se pudo crear la reserva: '+error.message);}return;}
     const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:estadoRes,creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
     D.reservas.push(nuevaR);
     const _cn=D.canchas.find(x=>x.id===cid)?.nombre||cid;audit("Creó reserva","reservas",`${_cn} · ${hor} · ${fec}`);
