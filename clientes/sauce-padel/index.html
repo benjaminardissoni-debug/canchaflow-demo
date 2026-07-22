@@ -948,7 +948,10 @@ body[data-role="owner"] .owner-only{display:block!important}
         <input type="checkbox" id="tor-sm" style="width:auto" checked>Sumar tambien los games al puntaje</label>
       <div style="font-size:11px;color:var(--text3);margin-top:4px">Si esta activo, cada jugador suma los games que hizo ademas de los puntos por ganar.</div>
     </div>
-    <div class="fr"><lbl>Valor inscripcion $</lbl><input type="number" id="tor-valor" value="0"></div>
+    <div class="fr c2">
+      <div><lbl>Canchas a usar</lbl><select id="tor-canchas"></select></div>
+      <div><lbl>Valor inscripcion $</lbl><input type="number" id="tor-valor" value="0"></div>
+    </div>
     <div id="tor-err" class="hidden alert warning" style="margin-bottom:.875rem"></div>
     <div class="modal-actions"><button class="btn" onclick="cM('m-torneo')">Cancelar</button><button class="btn p" onclick="guardarTorneo()"><i class="ti ti-check"></i> Crear torneo</button></div>
   </div>
@@ -1577,7 +1580,7 @@ async function refetchTorneos(){
   if(error){console.error('Error cargando torneos:',error);D.torneos=[];return false;}
   D.torneos=(data||[]).map(t=>({id:t.id,bloqueoId:t.bloqueo_id,nombre:t.nombre,fecha:t.fecha,estado:t.estado,
     puntosGanador:t.puntos_ganador,puntosPerdedor:t.puntos_perdedor,sumarMarcador:t.sumar_marcador,
-    valorInscripcion:t.valor_inscripcion,notas:t.notas,formato:t.formato||'rotativo'}));
+    valorInscripcion:t.valor_inscripcion,notas:t.notas,formato:t.formato||'rotativo',canchasUsadas:t.canchas_usadas}));
   return true;
 }
 async function rTorneos(){
@@ -1607,6 +1610,8 @@ function nuevoTorneo(){
   if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
   sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
   g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=true;g('tor-valor').value=0;g('tor-formato').value='rotativo';
+  const nc=(D.canchas||[]).length||1;const sc=g('tor-canchas');
+  sc.innerHTML=Array.from({length:nc},(_,i)=>`<option value="${i+1}"${i+1===nc?' selected':''}>${i+1} cancha${i>0?'s':''}</option>`).join('');
   g('tor-err').classList.add('hidden');
   syncTorNombre();
   g('m-torneo').classList.remove('hidden');
@@ -1622,7 +1627,7 @@ async function guardarTorneo(){
   const b=(D.bloqueos||[]).find(x=>x.id===bid);if(!b){err.textContent='Selecciona un bloque valido.';err.classList.remove('hidden');return;}
   const{data,error}=await sb.from('torneos').insert({bloqueo_id:bid,nombre,fecha:b.fecha,estado:'inscripcion',
     puntos_ganador:parseInt(g('tor-pg').value)||0,puntos_perdedor:parseInt(g('tor-pp').value)||0,
-    sumar_marcador:g('tor-sm').checked,valor_inscripcion:parseInt(g('tor-valor').value)||0,formato:g('tor-formato').value}).select().single();
+    sumar_marcador:g('tor-sm').checked,valor_inscripcion:parseInt(g('tor-valor').value)||0,formato:g('tor-formato').value,canchas_usadas:parseInt(g('tor-canchas').value)||null}).select().single();
   if(error){err.textContent='No se pudo crear: '+error.message;err.classList.remove('hidden');return;}
   audit('Creo torneo','torneos',nombre);
   await refetchTorneos();cM('m-torneo');rTorneos();
@@ -1670,6 +1675,11 @@ function rTorneoDetalle(){if(!torAct)return;
   g('tor-form-indiv').classList.toggle('hidden',pf);
   g('tor-form-pareja').classList.toggle('hidden',!pf);
   rTorTabs();torTab(torTabAct);rTorCupos();rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+function canchasTorneo(){
+  const all=D.canchas||[];
+  const n=torAct&&torAct.torneo.canchasUsadas;
+  return n?all.slice(0,n):all;
+}
 function cruzesJugados(){
   const set=new Set();
   torAct.partidos.forEach(p=>{
@@ -1681,7 +1691,7 @@ function cruzesJugados(){
 }
 function rTorCupos(){
   const el=g('tor-cupos');if(!el)return;
-  const nc=(D.canchas||[]).length;
+  const nc=canchasTorneo().length;
   if(esParejas()){
     const comp=gruposParejas().filter(gr=>gr.ins.length===2).length;
     const cupos=Math.min(nc*2,Math.floor(comp/2)*2);
@@ -1708,7 +1718,7 @@ function rTorHead(){
   const rec=pag*(t.valorInscripcion||0);const pend=Math.max(0,(act.length-pag))*(t.valorInscripcion||0);
   g('tor-det-head').innerHTML=`<div class="card" style="padding:14px">
     <div style="font-weight:700;font-size:17px"><i class="ti ti-trophy" style="color:#3B82F6"></i> ${t.nombre}</div>
-    <div style="font-size:12px;color:var(--text2);margin-top:4px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo'} · ${t.puntosGanador} pts al ganador · ${t.puntosPerdedor} al perdedor${t.sumarMarcador?' · suma games':''}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo'} · ${canchasTorneo().length} cancha${canchasTorneo().length>1?'s':''} · ${t.puntosGanador} pts al ganador · ${t.puntosPerdedor} al perdedor${t.sumarMarcador?' · suma games':''}</div>
     <div class="g4" style="margin-top:12px">
       <div class="met"><div class="ml">${t.formato==='parejas_fijas'?'Parejas':'Inscritos'}</div><div class="mv">${t.formato==='parejas_fijas'?Math.floor(act.length/2):act.length}</div></div>
       <div class="met"><div class="ml">Pagados</div><div class="mv">${pag} / ${act.length}</div></div>
@@ -1726,20 +1736,21 @@ function rTorInscritos(){
   const cont=g('tor-ins-list');const ins=torAct.inscritos;
   if(!ins.length){cont.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">Aun no hay inscritos.</div>';return;}
   if(esParejas()){
-    cont.innerHTML=gruposParejas().map(gr=>{
+    cont.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">'+gruposParejas().map(gr=>{
       const completa=gr.ins.length===2;
-      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
-        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
-          <span style="font-size:11px;font-weight:700;color:var(--text3);min-width:66px">Pareja ${gr.num}</span>
-          <span style="flex:1;font-size:12px;color:var(--text3)">${completa?'':'<span style="color:#92400E">falta 1 jugador</span>'}</span>
-          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})"><i class="ti ti-x"></i></button>
+      const todosPag=gr.ins.every(i=>i.estado_pago==='pagado');
+      return `<div style="border:1px solid ${todosPag?'#BBF7D0':'var(--border)'};border-radius:var(--r);padding:10px 12px;background:${todosPag?'#F0FDF4':'#fff'}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px">PAREJA ${gr.num}</span>
+          ${completa?'':'<span style="font-size:10px;color:#92400E;font-weight:600">falta 1</span>'}
+          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})" style="margin-left:auto;padding:2px 6px"><i class="ti ti-x" style="font-size:12px"></i></button>
         </div>
         ${gr.ins.map(i=>{const pag=i.estado_pago==='pagado';
-          return `<div style="display:flex;align-items:center;gap:8px;padding:3px 0 3px 66px">
-            <span style="flex:1;font-size:13px">${nomIns(i)}</span>
-            <button class="btn sm ${pag?'p':''}" onclick="togTorPago('${i.id}')" style="font-size:11px">${pag?'Pagado':'Pendiente'}</button>
+          return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0">
+            <span style="flex:1;font-size:13px;font-weight:600">${nomIns(i)}</span>
+            <span onclick="togTorPago('${i.id}')" style="cursor:pointer;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${pag?'#DCFCE7':'#FEF3C7'};color:${pag?'#166534':'#92400E'}">${pag?'PAGADO':'PENDIENTE'}</span>
           </div>`;}).join('')}
-      </div>`;}).join('');
+      </div>`;}).join('')+'</div>';
     return;
   }
   cont.innerHTML=ins.map(i=>{const pag=i.estado_pago==='pagado';
@@ -1865,7 +1876,7 @@ function generarRondaParejas(nums,canchas,historial){
 async function generarRonda(){
   const act=torAct.inscritos.filter(i=>i.activo);
   if(act.length<4){alert('Necesitas al menos 4 inscritos.');return;}
-  const canchas=D.canchas||[];if(!canchas.length){alert('No hay canchas configuradas.');return;}
+  const canchas=canchasTorneo();if(!canchas.length){alert('No hay canchas configuradas.');return;}
   let res,rows0;
   if(esParejas()){
     const grs=gruposParejas().filter(gr=>gr.ins.length===2);
@@ -1926,15 +1937,21 @@ function rTorRondas(){
     const desc=torAct.inscritos.filter(i=>i.activo&&!jug.has(i.id)).map(nomIns);
     return `<div class="card" style="padding:14px;margin-bottom:10px">
       <div class="card-title">Ronda ${r.numero}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
       ${ps.map(p=>{const cn=(D.canchas||[]).find(c=>c.id===p.cancha_id)?.nombre||'Cancha';
-        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
-          <span style="font-size:11px;font-weight:700;color:var(--text3);min-width:66px">${cn}</span>
-          <span style="flex:1;font-size:13px;min-width:120px">${nomIns(insById(p.a1))} / ${nomIns(insById(p.a2))}</span>
-          <input type="number" value="${p.marcador_a==null?'':p.marcador_a}" onchange="setMarcador('${p.id}','a',this.value)" style="width:54px;text-align:center;padding:4px">
-          <span style="color:var(--text3)">-</span>
-          <input type="number" value="${p.marcador_b==null?'':p.marcador_b}" onchange="setMarcador('${p.id}','b',this.value)" style="width:54px;text-align:center;padding:4px">
-          <span style="flex:1;font-size:13px;text-align:right;min-width:120px">${nomIns(insById(p.b1))} / ${nomIns(insById(p.b2))}</span>
+        const hay=p.marcador_a!=null&&p.marcador_b!=null;
+        const gA=hay&&p.marcador_a>p.marcador_b,gB=hay&&p.marcador_b>p.marcador_a;
+        const fila=(nom,val,lado,gana)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0">
+            <span style="flex:1;font-size:13px;font-weight:${gana?'700':'500'};color:${gana?'var(--text)':'var(--text2)'}">${nom}</span>
+            <input type="number" value="${val==null?'':val}" onchange="setMarcador('${p.id}','${lado}',this.value)" style="width:48px;text-align:center;padding:4px;font-weight:700">
+          </div>`;
+        return `<div style="border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin-bottom:4px">${cn.toUpperCase()}</div>
+          ${fila(nomIns(insById(p.a1))+' / '+nomIns(insById(p.a2)),p.marcador_a,'a',gA)}
+          <div style="border-top:1px solid var(--border)"></div>
+          ${fila(nomIns(insById(p.b1))+' / '+nomIns(insById(p.b2)),p.marcador_b,'b',gB)}
         </div>`;}).join('')}
+      </div>
       ${desc.length?`<div style="font-size:11px;color:var(--text3);margin-top:8px">Descansan: ${desc.join(', ')}</div>`:''}
     </div>`;}).join('');
 }
