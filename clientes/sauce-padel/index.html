@@ -887,6 +887,27 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
   </div>
 </div>
+<div class="mbg hidden" id="m-torneo">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header"><div class="modal-title">Nuevo torneo / americano</div><button class="btn icon-only" onclick="cM('m-torneo')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="tor-id">
+    <div class="fr"><lbl>Bloque de agenda</lbl><select id="tor-bloqueo" onchange="syncTorNombre()"></select>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Primero crea el bloque en la Agenda como "Torneo / Americano".</div></div>
+    <div class="fr"><lbl>Nombre del torneo</lbl><input id="tor-nombre" placeholder="Ej: Americano 4ta"></div>
+    <div class="fr c2">
+      <div><lbl>Puntos al ganador</lbl><input type="number" id="tor-pg" value="2"></div>
+      <div><lbl>Puntos al perdedor</lbl><input type="number" id="tor-pp" value="0"></div>
+    </div>
+    <div class="fr">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
+        <input type="checkbox" id="tor-sm" style="width:auto" checked>Sumar tambien los games al puntaje</label>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Si esta activo, cada jugador suma los games que hizo ademas de los puntos por ganar.</div>
+    </div>
+    <div class="fr"><lbl>Valor inscripcion $</lbl><input type="number" id="tor-valor" value="0"></div>
+    <div id="tor-err" class="hidden alert warning" style="margin-bottom:.875rem"></div>
+    <div class="modal-actions"><button class="btn" onclick="cM('m-torneo')">Cancelar</button><button class="btn p" onclick="guardarTorneo()"><i class="ti ti-check"></i> Crear torneo</button></div>
+  </div>
+</div>
 <div class="mbg hidden" id="m-bloqueo">
   <div class="modal" style="max-width:460px">
     <div class="modal-header"><div class="modal-title" id="m-bloqueo-title">Nuevo bloqueo / evento</div><button class="btn icon-only" onclick="cM('m-bloqueo')"><i class="ti ti-x"></i></button></div>
@@ -1506,12 +1527,64 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
-function rTorneos(){
+async function refetchTorneos(){
+  const{data,error}=await sb.from('torneos').select('*').order('fecha',{ascending:false});
+  if(error){console.error('Error cargando torneos:',error);D.torneos=[];return false;}
+  D.torneos=(data||[]).map(t=>({id:t.id,bloqueoId:t.bloqueo_id,nombre:t.nombre,fecha:t.fecha,estado:t.estado,
+    puntosGanador:t.puntos_ganador,puntosPerdedor:t.puntos_perdedor,sumarMarcador:t.sumar_marcador,
+    valorInscripcion:t.valor_inscripcion,notas:t.notas}));
+  return true;
+}
+async function rTorneos(){
   const cont=g('torneos-list');if(!cont)return;
-  cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aún no hay torneos. Crea uno con Nuevo torneo.</div></div>';
+  if(!D.torneos)await refetchTorneos();
+  const ts=D.torneos||[];
+  if(!ts.length){
+    cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aun no hay torneos. Crea uno con Nuevo torneo.</div></div>';
+    return;
+  }
+  cont.innerHTML=ts.map(t=>{
+    const b=(D.bloqueos||[]).find(x=>x.id===t.bloqueoId);
+    const hor=b?`${b.horaInicio}-${b.horaFin}`:'sin bloque';
+    const est={inscripcion:'Inscripcion abierta',en_curso:'En curso',finalizado:'Finalizado'}[t.estado]||t.estado;
+    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer" onclick="abrirTorneo('${t.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-trophy" style="color:#3B82F6"></i> ${t.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${hor}</div></div>
+        <span class="badge bg">${est}</span>
+      </div></div>`;
+  }).join('');
 }
 function nuevoTorneo(){
-  alert('Próximamente: crear torneo. (esqueleto listo)');
+  const sel=g('tor-bloqueo');if(!sel)return;
+  const usados=new Set((D.torneos||[]).map(t=>t.bloqueoId));
+  const libres=(D.bloqueos||[]).filter(b=>b.tipo==='torneo'&&!usados.has(b.id));
+  if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
+  sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
+  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=true;g('tor-valor').value=0;
+  g('tor-err').classList.add('hidden');
+  syncTorNombre();
+  g('m-torneo').classList.remove('hidden');
+}
+function syncTorNombre(){
+  const b=(D.bloqueos||[]).find(x=>x.id===g('tor-bloqueo').value);
+  g('tor-nombre').value=b&&b.titulo?b.titulo:'';
+}
+async function guardarTorneo(){
+  const bid=g('tor-bloqueo').value;const nombre=g('tor-nombre').value.trim();
+  const err=g('tor-err');
+  if(!nombre){err.textContent='Ponle un nombre al torneo.';err.classList.remove('hidden');return;}
+  const b=(D.bloqueos||[]).find(x=>x.id===bid);if(!b){err.textContent='Selecciona un bloque valido.';err.classList.remove('hidden');return;}
+  const{data,error}=await sb.from('torneos').insert({bloqueo_id:bid,nombre,fecha:b.fecha,estado:'inscripcion',
+    puntos_ganador:parseInt(g('tor-pg').value)||0,puntos_perdedor:parseInt(g('tor-pp').value)||0,
+    sumar_marcador:g('tor-sm').checked,valor_inscripcion:parseInt(g('tor-valor').value)||0}).select().single();
+  if(error){err.textContent='No se pudo crear: '+error.message;err.classList.remove('hidden');return;}
+  audit('Creo torneo','torneos',nombre);
+  await refetchTorneos();cM('m-torneo');rTorneos();
+}
+function abrirTorneo(id){
+  const t=(D.torneos||[]).find(x=>x.id===id);if(!t)return;
+  alert('Detalle del torneo: '+t.nombre+'\n\nProximo paso: inscripciones y rondas.');
 }
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
