@@ -396,9 +396,34 @@ body[data-role="owner"] .owner-only{display:block!important}
 </div>
 <!-- TORNEOS / AMERICANOS -->
 <div class="sec" id="sec-torneos">
-  <div class="rb"><div></div><button class="btn p ao" onclick="nuevoTorneo()"><i class="ti ti-plus"></i> Nuevo torneo</button></div>
-  <div id="torneos-alert" class="hidden alert warning"></div>
-  <div id="torneos-list"></div>
+  <div id="tor-vista-lista">
+    <div class="rb"><div></div><button class="btn p ao" onclick="nuevoTorneo()"><i class="ti ti-plus"></i> Nuevo torneo</button></div>
+    <div id="torneos-alert" class="hidden alert warning"></div>
+    <div id="torneos-list"></div>
+  </div>
+  <div id="tor-vista-detalle" class="hidden">
+    <div class="rb">
+      <button class="btn" onclick="volverTorneos()"><i class="ti ti-arrow-left"></i> Volver</button>
+      <div style="display:flex;gap:8px">
+        <button class="btn ao" onclick="borrarUltimaRonda()"><i class="ti ti-trash"></i> Borrar ultima ronda</button>
+        <button class="btn p ao" onclick="generarRonda()"><i class="ti ti-plus"></i> Generar ronda</button>
+      </div>
+    </div>
+    <div id="tor-det-head" style="margin-bottom:1rem"></div>
+    <div class="card" style="padding:14px;margin-bottom:1rem">
+      <div class="card-title">Inscritos</div>
+      <div style="position:relative;margin-bottom:10px">
+        <div style="display:flex;gap:6px">
+          <input id="tor-jug-input" placeholder="Buscar jugador o escribir nombre libre" oninput="sugTorJug()" onkeydown="if(event.key==='Enter'){event.preventDefault();addTorInscrito();}" autocomplete="off">
+          <button class="btn sm" onclick="addTorInscrito()" type="button"><i class="ti ti-plus"></i></button>
+        </div>
+        <div id="tor-jug-drop" class="hidden" style="position:absolute;top:100%;left:0;right:44px;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:200px;overflow:auto"></div>
+      </div>
+      <div id="tor-ins-list"></div>
+    </div>
+    <div id="tor-rondas" style="margin-bottom:1rem"></div>
+    <div id="tor-tabla"></div>
+  </div>
 </div>
 <!-- VENTAS DIRECTAS -->
 <div class="sec" id="sec-ventas">
@@ -1582,9 +1607,152 @@ async function guardarTorneo(){
   audit('Creo torneo','torneos',nombre);
   await refetchTorneos();cM('m-torneo');rTorneos();
 }
-function abrirTorneo(id){
+let torAct=null;
+function volverTorneos(){torAct=null;g('tor-vista-detalle').classList.add('hidden');g('tor-vista-lista').classList.remove('hidden');rTorneos();}
+function nomIns(i){if(!i)return'?';if(i.jugador_id){const j=(D.jugadores||[]).find(x=>x.id===i.jugador_id);if(j)return j.nombre;}return i.nombre_libre||'?';}
+function insById(id){return(torAct.inscritos||[]).find(x=>x.id===id);}
+async function abrirTorneo(id){
   const t=(D.torneos||[]).find(x=>x.id===id);if(!t)return;
-  alert('Detalle del torneo: '+t.nombre+'\n\nProximo paso: inscripciones y rondas.');
+  const[ins,ron]=await Promise.all([
+    sb.from('torneo_inscritos').select('*').eq('torneo_id',id),
+    sb.from('torneo_rondas').select('*').eq('torneo_id',id).order('numero')
+  ]);
+  const rondas=ron.data||[];let partidos=[];
+  if(rondas.length){const rp=await sb.from('torneo_partidos').select('*').in('ronda_id',rondas.map(r=>r.id));partidos=rp.data||[];}
+  torAct={torneo:t,inscritos:ins.data||[],rondas,partidos};
+  g('tor-vista-lista').classList.add('hidden');g('tor-vista-detalle').classList.remove('hidden');
+  rTorneoDetalle();
+}
+function rTorneoDetalle(){if(!torAct)return;rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+function rTorHead(){
+  const t=torAct.torneo;const act=torAct.inscritos.filter(i=>i.activo);
+  const pag=torAct.inscritos.filter(i=>i.estado_pago==='pagado').length;
+  const rec=pag*(t.valorInscripcion||0);const pend=Math.max(0,(act.length-pag))*(t.valorInscripcion||0);
+  g('tor-det-head').innerHTML=`<div class="card" style="padding:14px">
+    <div style="font-weight:700;font-size:17px"><i class="ti ti-trophy" style="color:#3B82F6"></i> ${t.nombre}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${t.puntosGanador} pts al ganador · ${t.puntosPerdedor} al perdedor${t.sumarMarcador?' · suma games':''}</div>
+    <div class="g4" style="margin-top:12px">
+      <div class="met"><div class="ml">Inscritos</div><div class="mv">${act.length}</div></div>
+      <div class="met"><div class="ml">Pagados</div><div class="mv">${pag}</div></div>
+      <div class="met"><div class="ml">Recaudado</div><div class="mv">${fmt(rec)}</div></div>
+      <div class="met"><div class="ml">Por cobrar</div><div class="mv">${fmt(pend)}</div></div>
+    </div></div>`;
+}
+function rTorInscritos(){
+  const cont=g('tor-ins-list');const ins=torAct.inscritos;
+  if(!ins.length){cont.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">Aun no hay inscritos.</div>';return;}
+  cont.innerHTML=ins.map(i=>{const pag=i.estado_pago==='pagado';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${nomIns(i)}</span>
+      <button class="btn sm ${pag?'p':''}" onclick="togTorPago('${i.id}')" style="font-size:11px">${pag?'Pagado':'Pendiente'}</button>
+      <button class="btn sm d icon-only ao" onclick="quitarTorInscrito('${i.id}')"><i class="ti ti-x"></i></button>
+    </div>`;}).join('');
+}
+function sugTorJug(){
+  const q=(g('tor-jug-input').value||'').toLowerCase().trim();const d=g('tor-jug-drop');
+  if(!q){d.classList.add('hidden');return;}
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="addTorInscrito('${j.id}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+async function addTorInscrito(jid){
+  const inp=g('tor-jug-input');const payload={torneo_id:torAct.torneo.id};
+  if(jid)payload.jugador_id=jid;
+  else{const nom=(inp.value||'').trim();if(!nom)return;
+    const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===nom.toLowerCase());
+    if(j)payload.jugador_id=j.id;else payload.nombre_libre=nom;}
+  const{data,error}=await sb.from('torneo_inscritos').insert(payload).select().single();
+  if(error){alert('No se pudo inscribir: '+error.message);return;}
+  torAct.inscritos.push(data);inp.value='';g('tor-jug-drop').classList.add('hidden');
+  rTorHead();rTorInscritos();rTorTabla();
+}
+async function togTorPago(id){
+  const i=insById(id);if(!i)return;
+  const nuevo=i.estado_pago==='pagado'?'pendiente':'pagado';
+  const{error}=await sb.from('torneo_inscritos').update({estado_pago:nuevo}).eq('id',id);
+  if(error){alert(error.message);return;}
+  i.estado_pago=nuevo;rTorHead();rTorInscritos();
+}
+async function quitarTorInscrito(id){
+  if(!confirm('Quitar a este jugador del torneo?'))return;
+  const{error}=await sb.from('torneo_inscritos').delete().eq('id',id);
+  if(error){alert('No se pudo quitar (puede tener partidos): '+error.message);return;}
+  torAct.inscritos=torAct.inscritos.filter(x=>x.id!==id);
+  rTorHead();rTorInscritos();rTorTabla();
+}
+async function generarRonda(){
+  const act=torAct.inscritos.filter(i=>i.activo);
+  if(act.length<4){alert('Necesitas al menos 4 inscritos.');return;}
+  const canchas=D.canchas||[];if(!canchas.length){alert('No hay canchas configuradas.');return;}
+  const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>({a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2}))}));
+  const res=generarRondaAmericano(act.map(i=>({id:i.id})),canchas,hist);
+  if(res.error){alert(res.error);return;}
+  const num=(torAct.rondas.length?Math.max(...torAct.rondas.map(r=>r.numero)):0)+1;
+  const{data:ron,error:e1}=await sb.from('torneo_rondas').insert({torneo_id:torAct.torneo.id,numero:num}).select().single();
+  if(e1){alert('No se pudo crear la ronda: '+e1.message);return;}
+  const rows=res.partidos.map(p=>({ronda_id:ron.id,cancha_id:p.cancha.id,a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2}));
+  const{data:pts,error:e2}=await sb.from('torneo_partidos').insert(rows).select();
+  if(e2){alert('No se pudieron crear los partidos: '+e2.message);return;}
+  torAct.rondas.push(ron);torAct.partidos.push(...(pts||[]));
+  if(torAct.torneo.estado==='inscripcion'){await sb.from('torneos').update({estado:'en_curso'}).eq('id',torAct.torneo.id);torAct.torneo.estado='en_curso';await refetchTorneos();}
+  rTorneoDetalle();
+}
+async function borrarUltimaRonda(){
+  if(!torAct.rondas.length){alert('No hay rondas.');return;}
+  const ult=torAct.rondas[torAct.rondas.length-1];
+  if(!confirm('Borrar la ronda '+ult.numero+'? Se pierden sus marcadores.'))return;
+  const{error}=await sb.from('torneo_rondas').delete().eq('id',ult.id);
+  if(error){alert(error.message);return;}
+  torAct.rondas=torAct.rondas.filter(r=>r.id!==ult.id);
+  torAct.partidos=torAct.partidos.filter(p=>p.ronda_id!==ult.id);
+  rTorneoDetalle();
+}
+async function setMarcador(pid,lado,val){
+  const p=torAct.partidos.find(x=>x.id===pid);if(!p)return;
+  const v=val===''?null:parseInt(val);const campo=lado==='a'?'marcador_a':'marcador_b';
+  p[campo]=v;
+  const upd={};upd[campo]=v;
+  const{error}=await sb.from('torneo_partidos').update(upd).eq('id',pid);
+  if(error){console.error('Error guardando marcador:',error);return;}
+  rTorTabla();
+}
+function rTorRondas(){
+  const cont=g('tor-rondas');
+  if(!torAct.rondas.length){cont.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Aun no hay rondas. Usa "Generar ronda".</div>';return;}
+  cont.innerHTML=torAct.rondas.map(r=>{
+    const ps=torAct.partidos.filter(p=>p.ronda_id===r.id);
+    const jug=new Set();ps.forEach(p=>[p.a1,p.a2,p.b1,p.b2].forEach(x=>jug.add(x)));
+    const desc=torAct.inscritos.filter(i=>i.activo&&!jug.has(i.id)).map(nomIns);
+    return `<div class="card" style="padding:14px;margin-bottom:10px">
+      <div class="card-title">Ronda ${r.numero}</div>
+      ${ps.map(p=>{const cn=(D.canchas||[]).find(c=>c.id===p.cancha_id)?.nombre||'Cancha';
+        return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border);flex-wrap:wrap">
+          <span style="font-size:11px;font-weight:700;color:var(--text3);min-width:66px">${cn}</span>
+          <span style="flex:1;font-size:13px;min-width:120px">${nomIns(insById(p.a1))} / ${nomIns(insById(p.a2))}</span>
+          <input type="number" value="${p.marcador_a==null?'':p.marcador_a}" onchange="setMarcador('${p.id}','a',this.value)" style="width:54px;text-align:center;padding:4px">
+          <span style="color:var(--text3)">-</span>
+          <input type="number" value="${p.marcador_b==null?'':p.marcador_b}" onchange="setMarcador('${p.id}','b',this.value)" style="width:54px;text-align:center;padding:4px">
+          <span style="flex:1;font-size:13px;text-align:right;min-width:120px">${nomIns(insById(p.b1))} / ${nomIns(insById(p.b2))}</span>
+        </div>`;}).join('')}
+      ${desc.length?`<div style="font-size:11px;color:var(--text3);margin-top:8px">Descansan: ${desc.join(', ')}</div>`:''}
+    </div>`;}).join('');
+}
+function rTorTabla(){
+  const cont=g('tor-tabla');const act=torAct.inscritos.filter(i=>i.activo);
+  if(!act.length||!torAct.rondas.length){cont.innerHTML='';return;}
+  const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>({a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2,marcadorA:p.marcador_a,marcadorB:p.marcador_b}))}));
+  const t=torAct.torneo;
+  const tabla=calcularTablaAmericano(act.map(i=>({id:i.id,nombre:nomIns(i)})),hist,{puntosGanador:t.puntosGanador,puntosPerdedor:t.puntosPerdedor,sumarMarcador:t.sumarMarcador});
+  cont.innerHTML=`<div class="card" style="padding:0;overflow:auto">
+    <div class="card-title" style="padding:14px 14px 0">Tabla de posiciones</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
+        <th style="padding:8px 14px">#</th><th>Jugador</th><th>PJ</th><th>PG</th><th>PP</th><th>GF</th><th>GC</th><th style="padding-right:14px">Pts</th></tr></thead>
+      <tbody>${tabla.map((x,i)=>`<tr style="border-top:1px solid var(--border)">
+        <td style="padding:8px 14px;font-weight:700">${i+1}</td><td>${x.nombre}</td><td>${x.pj}</td><td>${x.pg}</td><td>${x.pp}</td><td>${x.gf}</td><td>${x.gc}</td><td style="padding-right:14px;font-weight:700">${x.pts}</td></tr>`).join('')}</tbody>
+    </table></div>`;
 }
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
