@@ -413,13 +413,28 @@ body[data-role="owner"] .owner-only{display:block!important}
     <div id="tor-det-head" style="margin-bottom:1rem"></div>
     <div class="card" style="padding:14px;margin-bottom:1rem">
       <div class="card-title">Inscritos</div>
-      <div style="position:relative;margin-bottom:10px">
+      <div id="tor-form-indiv" style="position:relative;margin-bottom:10px">
         <div style="display:flex;gap:6px">
           <input id="tor-jug-input" placeholder="Buscar jugador o escribir nombre libre" oninput="sugTorJug()" onkeydown="if(event.key==='Enter'){event.preventDefault();addTorInscrito();}" autocomplete="off">
           <button class="btn sm" onclick="addTorInscrito()" type="button"><i class="ti ti-plus"></i></button>
         </div>
         <div id="tor-jug-drop" class="hidden" style="position:absolute;top:100%;left:0;right:44px;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:200px;overflow:auto"></div>
       </div>
+      <div id="tor-form-pareja" class="hidden" style="margin-bottom:12px;background:var(--gray-light);border-radius:var(--r);padding:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">ARMAR PAREJA</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:180px">
+            <input id="tor-p1" placeholder="Jugador 1" oninput="sugTorP(1)" autocomplete="off">
+            <div id="tor-p1-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+          </div>
+          <div style="position:relative;flex:1;min-width:180px">
+            <input id="tor-p2" placeholder="Jugador 2" oninput="sugTorP(2)" autocomplete="off">
+            <div id="tor-p2-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+          </div>
+          <button class="btn p sm" onclick="addParejaCompleta()" type="button"><i class="ti ti-plus"></i> Agregar pareja</button>
+        </div>
+      </div>
+      <div id="tor-cupos" style="font-size:11px;color:var(--text3);margin-bottom:8px"></div>
       <div id="tor-ins-list"></div>
     </div>
     <div id="tor-rondas" style="margin-bottom:1rem"></div>
@@ -1629,9 +1644,25 @@ async function abrirTorneo(id){
   rTorneoDetalle();
 }
 function rTorneoDetalle(){if(!torAct)return;
-  const inp=g('tor-jug-input');
-  if(inp)inp.placeholder=esParejas()?'Agregar jugador (se agrupan de a 2 por orden)':'Buscar jugador o escribir nombre libre';
-  rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+  const pf=esParejas();
+  g('tor-form-indiv').classList.toggle('hidden',pf);
+  g('tor-form-pareja').classList.toggle('hidden',!pf);
+  rTorCupos();rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+function rTorCupos(){
+  const el=g('tor-cupos');if(!el)return;
+  const nc=(D.canchas||[]).length;
+  if(esParejas()){
+    const comp=gruposParejas().filter(gr=>gr.ins.length===2).length;
+    const cupos=Math.min(nc*2,Math.floor(comp/2)*2);
+    const desc=Math.max(0,comp-cupos);
+    el.textContent=nc+' canchas · caben '+(nc*2)+' parejas por ronda'+(comp?' · '+comp+' inscritas'+(desc?' · descansan '+desc+' por ronda':''):'');
+  }else{
+    const n=torAct.inscritos.filter(i=>i.activo).length;
+    const cupos=Math.min(nc*4,Math.floor(n/4)*4);
+    const desc=Math.max(0,n-cupos);
+    el.textContent=nc+' canchas · caben '+(nc*4)+' jugadores por ronda'+(n?' · '+n+' inscritos'+(desc?' · descansan '+desc+' por ronda':''):'');
+  }
+}
 function rTorHead(){
   const t=torAct.torneo;const act=torAct.inscritos.filter(i=>i.activo);
   const pag=torAct.inscritos.filter(i=>i.estado_pago==='pagado').length;
@@ -1674,6 +1705,42 @@ function rTorInscritos(){
       <button class="btn sm d icon-only ao" onclick="quitarTorInscrito('${i.id}')"><i class="ti ti-x"></i></button>
     </div>`;}).join('');
 }
+function sugTorP(n){
+  const inp=g('tor-p'+n);const d=g('tor-p'+n+'-drop');
+  const q=(inp.value||'').toLowerCase().trim();
+  inp.dataset.jid='';
+  if(!q){d.classList.add('hidden');return;}
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  const otro=g('tor-p'+(n===1?2:1));
+  if(otro&&otro.dataset.jid)ya.add(otro.dataset.jid);
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="pickTorP(${n},'${j.id}','${j.nombre.replace(/'/g,"\\'")}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+function pickTorP(n,jid,nombre){
+  const inp=g('tor-p'+n);inp.value=nombre;inp.dataset.jid=jid;
+  g('tor-p'+n+'-drop').classList.add('hidden');
+}
+async function addParejaCompleta(){
+  const i1=g('tor-p1'),i2=g('tor-p2');
+  const n1=(i1.value||'').trim(),n2=(i2.value||'').trim();
+  if(!n1||!n2){alert('Completa los dos jugadores de la pareja.');return;}
+  const nums=torAct.inscritos.map(i=>i.pareja_num||0);
+  const num=(nums.length?Math.max(...nums):0)+1;
+  const arma=(nom,jid)=>{const p={torneo_id:torAct.torneo.id,pareja_num:num};
+    if(jid)p.jugador_id=jid;
+    else{const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===nom.toLowerCase());
+      if(j)p.jugador_id=j.id;else p.nombre_libre=nom;}
+    return p;};
+  const rows=[arma(n1,i1.dataset.jid),arma(n2,i2.dataset.jid)];
+  const{data,error}=await sb.from('torneo_inscritos').insert(rows).select();
+  if(error){alert('No se pudo agregar la pareja: '+error.message);return;}
+  torAct.inscritos.push(...(data||[]));
+  i1.value='';i2.value='';i1.dataset.jid='';i2.dataset.jid='';
+  g('tor-p1-drop').classList.add('hidden');g('tor-p2-drop').classList.add('hidden');
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
+}
 async function togParejaPago(num){
   const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
   const pag=gr.ins.every(i=>i.estado_pago==='pagado');const nuevo=pag?'pendiente':'pagado';
@@ -1688,7 +1755,7 @@ async function quitarPareja(num){
     if(error){alert('No se pudo quitar (puede tener partidos): '+error.message);return;}
   }
   torAct.inscritos=torAct.inscritos.filter(x=>(x.pareja_num||0)!==num);
-  rTorHead();rTorInscritos();rTorTabla();
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
 }
 async function eliminarTorneo(){
   const t=torAct.torneo;
@@ -1709,7 +1776,6 @@ function sugTorJug(){
 }
 async function addTorInscrito(jid){
   const inp=g('tor-jug-input');const payload={torneo_id:torAct.torneo.id};
-  if(esParejas())payload.pareja_num=Math.floor(torAct.inscritos.length/2)+1;
   if(jid)payload.jugador_id=jid;
   else{const nom=(inp.value||'').trim();if(!nom)return;
     const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===nom.toLowerCase());
@@ -1717,7 +1783,7 @@ async function addTorInscrito(jid){
   const{data,error}=await sb.from('torneo_inscritos').insert(payload).select().single();
   if(error){alert('No se pudo inscribir: '+error.message);return;}
   torAct.inscritos.push(data);inp.value='';g('tor-jug-drop').classList.add('hidden');
-  rTorHead();rTorInscritos();rTorTabla();
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
 }
 async function togTorPago(id){
   const i=insById(id);if(!i)return;
