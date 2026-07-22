@@ -151,6 +151,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-block.mantenimiento{background:#F1F5F9;border-color:#64748B;color:#475569}
 .ag-block.clase{background:#EEEDFE;border-color:#7C6FE8;color:#534AB7}
 .ag-block.cumpleanos{background:#FCE7F3;border-color:#EC4899;color:#BE185D}
+.ag-block.torneo{background:#DBEAFE;border-color:#3B82F6;color:#1D4ED8}
 .ag-block.evento{background:#FEF3C7;border-color:#F59E0B;color:#92400E}
 .ag-block-time{font-size:10px;font-weight:700;opacity:.75;margin-bottom:2px}
 .ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -1788,9 +1789,9 @@ function openBloqueo(id,fecha,horario,cid){
 function selBloqTipo(tipo){
   g('bl-tipos').dataset.sel=tipo;
   document.querySelectorAll('.bl-tipo-opt').forEach(el=>{const on=el.dataset.tipo===tipo;el.style.borderColor=on?BLOQ_TIPOS[el.dataset.tipo].border:'var(--border)';el.style.background=on?BLOQ_TIPOS[el.dataset.tipo].bg:'';el.style.color=on?BLOQ_TIPOS[el.dataset.tipo].text:'';});
-  const lb={mantenimiento:'Motivo / descripción',clase:'Detalle (opcional)',cumpleanos:'Nombre del cumpleañero',evento:'Descripción del evento'};g('bl-desc-lbl').textContent=lb[tipo]||'Motivo / descripción';
-  const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
-  const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
+  const lb={mantenimiento:'Motivo / descripción',clase:'Detalle (opcional)',cumpleanos:'Nombre del cumpleañero',evento:'Descripción del evento',torneo:'Nombre del torneo'};g('bl-desc-lbl').textContent=lb[tipo]||'Motivo / descripción';
+  const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno',torneo:'Ej: Americano Femenino Julio'};g('bl-desc').placeholder=pl[tipo]||'';
+  const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $',torneo:'Valor total del torneo $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
   var chkWrap=document.getElementById('bl-genIngreso-wrap');
   if(tipo==='clase'){g('bl-genIngreso').checked=true;g('bl-ingreso-wrap').classList.remove('hidden');chkWrap.style.display='none';}else{chkWrap.style.display='';tgBloqIngreso();}
