@@ -1648,6 +1648,15 @@ function rTorneoDetalle(){if(!torAct)return;
   g('tor-form-indiv').classList.toggle('hidden',pf);
   g('tor-form-pareja').classList.toggle('hidden',!pf);
   rTorCupos();rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+function cruzesJugados(){
+  const set=new Set();
+  torAct.partidos.forEach(p=>{
+    const ia=insById(p.a1),ib=insById(p.b1);
+    if(!ia||!ib)return;
+    set.add([ia.pareja_num,ib.pareja_num].sort((a,b)=>a-b).join('|'));
+  });
+  return set.size;
+}
 function rTorCupos(){
   const el=g('tor-cupos');if(!el)return;
   const nc=(D.canchas||[]).length;
@@ -1655,7 +1664,15 @@ function rTorCupos(){
     const comp=gruposParejas().filter(gr=>gr.ins.length===2).length;
     const cupos=Math.min(nc*2,Math.floor(comp/2)*2);
     const desc=Math.max(0,comp-cupos);
-    el.textContent=nc+' canchas · caben '+(nc*2)+' parejas por ronda'+(comp?' · '+comp+' inscritas'+(desc?' · descansan '+desc+' por ronda':''):'');
+    let txt=nc+' canchas · caben '+(nc*2)+' parejas por ronda'+(comp?' · '+comp+' inscritas'+(desc?' · descansan '+desc+' por ronda':''):'');
+    if(comp>=2){
+      const tot=comp*(comp-1)/2;
+      const porRonda=Math.max(1,Math.floor(cupos/2));
+      const rondasTot=Math.ceil(tot/porRonda);
+      const jugados=cruzesJugados();
+      txt+=' · ronda '+torAct.rondas.length+' de '+rondasTot+' · '+jugados+'/'+tot+' cruces';
+    }
+    el.textContent=txt;
   }else{
     const n=torAct.inscritos.filter(i=>i.activo).length;
     const cupos=Math.min(nc*4,Math.floor(n/4)*4);
@@ -1672,7 +1689,7 @@ function rTorHead(){
     <div style="font-size:12px;color:var(--text2);margin-top:4px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo'} · ${t.puntosGanador} pts al ganador · ${t.puntosPerdedor} al perdedor${t.sumarMarcador?' · suma games':''}</div>
     <div class="g4" style="margin-top:12px">
       <div class="met"><div class="ml">${t.formato==='parejas_fijas'?'Parejas':'Inscritos'}</div><div class="mv">${t.formato==='parejas_fijas'?Math.floor(act.length/2):act.length}</div></div>
-      <div class="met"><div class="ml">Pagados</div><div class="mv">${pag}</div></div>
+      <div class="met"><div class="ml">Pagados</div><div class="mv">${pag} / ${act.length}</div></div>
       <div class="met"><div class="ml">Recaudado</div><div class="mv">${fmt(rec)}</div></div>
       <div class="met"><div class="ml">Por cobrar</div><div class="mv">${fmt(pend)}</div></div>
     </div></div>`;
@@ -1689,12 +1706,17 @@ function rTorInscritos(){
   if(esParejas()){
     cont.innerHTML=gruposParejas().map(gr=>{
       const completa=gr.ins.length===2;
-      const pag=gr.ins.every(i=>i.estado_pago==='pagado');
-      return `<div style="display:flex;align-items:center;gap:8px;padding:8px 0;border-bottom:1px solid var(--border)">
-        <span style="font-size:11px;font-weight:700;color:var(--text3);min-width:66px">Pareja ${gr.num}</span>
-        <span style="flex:1;font-size:13px">${nomPareja(gr)}${completa?'':' <span style="color:#92400E;font-size:11px">(falta 1)</span>'}</span>
-        <button class="btn sm ${pag?'p':''}" onclick="togParejaPago(${gr.num})" style="font-size:11px">${pag?'Pagado':'Pendiente'}</button>
-        <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})"><i class="ti ti-x"></i></button>
+      return `<div style="padding:10px 0;border-bottom:1px solid var(--border)">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px">
+          <span style="font-size:11px;font-weight:700;color:var(--text3);min-width:66px">Pareja ${gr.num}</span>
+          <span style="flex:1;font-size:12px;color:var(--text3)">${completa?'':'<span style="color:#92400E">falta 1 jugador</span>'}</span>
+          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})"><i class="ti ti-x"></i></button>
+        </div>
+        ${gr.ins.map(i=>{const pag=i.estado_pago==='pagado';
+          return `<div style="display:flex;align-items:center;gap:8px;padding:3px 0 3px 66px">
+            <span style="flex:1;font-size:13px">${nomIns(i)}</span>
+            <button class="btn sm ${pag?'p':''}" onclick="togTorPago('${i.id}')" style="font-size:11px">${pag?'Pagado':'Pendiente'}</button>
+          </div>`;}).join('')}
       </div>`;}).join('');
     return;
   }
@@ -1826,6 +1848,10 @@ async function generarRonda(){
   if(esParejas()){
     const grs=gruposParejas().filter(gr=>gr.ins.length===2);
     if(grs.length<2){alert('Necesitas al menos 2 parejas completas.');return;}
+    const totCruces=grs.length*(grs.length-1)/2;
+    if(cruzesJugados()>=totCruces){
+      if(!confirm('Todas las parejas ya se enfrentaron entre si ('+totCruces+' cruces). Generar otra ronda va a repetir enfrentamientos. Continuar?'))return;
+    }
     const pnum={};grs.forEach(gr=>{pnum[gr.num]=gr.ins;});
     const histP=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>{
       const ia=insById(p.a1),ib=insById(p.b1);
