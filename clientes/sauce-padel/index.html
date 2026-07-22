@@ -712,10 +712,6 @@ body[data-role="owner"] .owner-only{display:block!important}
       <div style="font-size:11px;color:var(--text3);margin-top:6px">Vacío = precio de tramo automático · 0 = turno gratis</div>
     </div>
     <div class="fr"><lbl>Contacto</lbl><input id="res-contacto" placeholder="Nombre o teléfono"></div>
-    <div class="fr" style="display:flex;align-items:center;gap:8px;background:var(--gray-light);border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
-      <input type="checkbox" id="res-es-torneo" onchange="updTorneoUI()" style="width:16px;height:16px;cursor:pointer">
-      <label for="res-es-torneo" style="font-size:13px;cursor:pointer;font-weight:600;color:var(--text2)"><i class="ti ti-trophy" style="font-size:15px;color:var(--blue)"></i> Este bloque es para un torneo / americano</label>
-    </div>
     <div style="font-size:12px;font-weight:700;margin-bottom:6px;color:var(--text);font-family:'Poppins',sans-serif">Jugadores <span style="font-weight:400;color:var(--text3);font-family:'Inter',sans-serif">(puedes completar después)</span></div>
     <div id="res-jugs" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:1rem"></div>
     <div id="res-adv" class="hidden alert warning" style="margin-bottom:.875rem"></div>
@@ -1974,16 +1970,7 @@ function openRes(fecha,horario,cid,editR){
 
   bJI(editR?editR.jugadores:[]);g('res-contacto').value=editR?editR.contacto||'':'';g('res-notas').value=editR?editR.notas||'':'';
   const ov=g('res-pov');ov.dataset.m='';if(editR&&editR.pOv!==undefined){ov.value=editR.pOv;ov.dataset.m='1';}else ov.value='';
-  const et=g('res-es-torneo');if(et){et.checked=(editR&&editR.estado==='torneo')||false;}
-  if(typeof updTorneoUI==='function')updTorneoUI();
   g('res-adv').classList.add('hidden');updRP();g('m-res').classList.remove('hidden');
-}
-function updTorneoUI(){
-  const et=g('res-es-torneo');if(!et)return;
-  const on=et.checked;
-  const jugs=g('res-jugs');const pbox=g('res-precio-box');
-  if(jugs){jugs.style.opacity=on?'0.4':'1';jugs.style.pointerEvents=on?'none':'auto';}
-  if(pbox)pbox.style.opacity=on?'0.4':'1';
 }
 async function saveRes(){
   const cid=g('res-cancha').value;const wrap2=g('res-horario-custom-wrap');const useCustom2=wrap2&&wrap2.style.display!=='none';const horBase=useCustom2?(g('res-hora-custom')?.value||''):g('res-horario').value;const horFin=useCustom2?(g('res-hora-custom-fin')?.value||''):null;const hor=horBase;const fec=agCtx||ds(getAF());
@@ -1996,8 +1983,7 @@ async function saveRes(){
     const ok=await syncReservaCompleta(eRid);
     if(!ok){alert('No se pudo guardar la reserva. Intenta de nuevo.');return;}
   }else{
-    const esTorneo=g('res-es-torneo')&&g('res-es-torneo').checked;
-    const estadoRes=esTorneo?'torneo':'reservada';
+    const estadoRes='reservada';
     const{data,error}=await sb.from('reservas').insert({cancha_id:cid,fecha:fec,horario:hor,contacto:contacto||null,notas:notas||null,precio_override:pOv!==undefined?pOv:null,estado:estadoRes}).select().single();
     if(error){if(error.code==='23505'&&(error.message||'').includes('idx_reserva_slot_unico')){alert('⚠️ Esa cancha ya está reservada a esa hora. Revisa la agenda.');}else{alert('No se pudo crear la reserva: '+error.message);}return;}
     const nuevaR={id:data.id,canchaId:cid,horario:hor,fecha:fec,contacto,jugadores:jugs,notas,pOv,productos:[],pagos:[],cortesias:[],estado:estadoRes,creadoAt:data.creado_at,aperturaAt:null,cierreAt:null};
