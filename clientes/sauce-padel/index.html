@@ -2960,6 +2960,54 @@ function openVerCerrada(rid){
   g('m-ver-cerrada').classList.remove('hidden');
 }
 
+// ── MOTOR AMERICANO ──────────────────────────────────────
+function generarRondaAmericano(inscritos,canchas,historial){
+  const ids=inscritos.map(i=>i.id);const k=(x,y)=>[x,y].sort().join('|');
+  const jugados={},descansos={},juntos={},rivales={};
+  ids.forEach(i=>{jugados[i]=0;descansos[i]=0;});
+  (historial||[]).forEach(r=>{
+    const en=new Set();
+    (r.partidos||[]).forEach(p=>{
+      [p.a1,p.a2,p.b1,p.b2].forEach(j=>{en.add(j);if(jugados[j]!==undefined)jugados[j]++;});
+      juntos[k(p.a1,p.a2)]=(juntos[k(p.a1,p.a2)]||0)+1;
+      juntos[k(p.b1,p.b2)]=(juntos[k(p.b1,p.b2)]||0)+1;
+      [[p.a1,p.b1],[p.a1,p.b2],[p.a2,p.b1],[p.a2,p.b2]].forEach(([x,y])=>{rivales[k(x,y)]=(rivales[k(x,y)]||0)+1;});
+    });
+    ids.forEach(i=>{if(!en.has(i))descansos[i]++;});
+  });
+  const cupos=Math.min(canchas.length*4,Math.floor(ids.length/4)*4);
+  if(cupos<4)return{error:'Se necesitan al menos 4 jugadores activos.'};
+  const orden=[...ids].sort((a,b)=>jugados[a]-jugados[b]||descansos[b]-descansos[a]||Math.random()-0.5);
+  const juegan=orden.slice(0,cupos);const descansan=orden.slice(cupos);
+  const pool=[...juegan];const parejas=[];
+  while(pool.length>=2){
+    const p1=pool.shift();let mejor=pool[0],mc=Infinity;
+    pool.forEach(p2=>{const c=(juntos[k(p1,p2)]||0)*100+(rivales[k(p1,p2)]||0);if(c<mc){mc=c;mejor=p2;}});
+    pool.splice(pool.indexOf(mejor),1);parejas.push([p1,mejor]);
+  }
+  const partidos=[];const pp=[...parejas];let ci=0;
+  while(pp.length>=2){
+    const A=pp.shift();let mi=0,mc=Infinity;
+    pp.forEach((B,i)=>{let c=0;A.forEach(x=>B.forEach(y=>{c+=(rivales[k(x,y)]||0);}));if(c<mc){mc=c;mi=i;}});
+    const B=pp.splice(mi,1)[0];
+    partidos.push({cancha:canchas[ci%canchas.length],a1:A[0],a2:A[1],b1:B[0],b2:B[1]});ci++;
+  }
+  return{partidos,descansan};
+}
+function calcularTablaAmericano(inscritos,historial,cfg){
+  const pg=cfg?.puntosGanador??2,pperd=cfg?.puntosPerdedor??0,sm=cfg?.sumarMarcador??true;
+  const t={};inscritos.forEach(i=>{t[i.id]={id:i.id,nombre:i.nombre,pj:0,pg:0,pp:0,gf:0,gc:0,pts:0};});
+  (historial||[]).forEach(r=>{(r.partidos||[]).forEach(p=>{
+    if(p.marcadorA==null||p.marcadorB==null)return;
+    const gA=p.marcadorA>p.marcadorB,emp=p.marcadorA===p.marcadorB;
+    const ap=(eq,gf,gc,gano)=>{eq.forEach(j=>{const x=t[j];if(!x)return;
+      x.pj++;x.gf+=gf;x.gc+=gc;if(!emp){gano?x.pg++:x.pp++;}
+      x.pts+=(emp?(pg+pperd)/2:gano?pg:pperd);if(sm)x.pts+=gf;});};
+    ap([p.a1,p.a2],p.marcadorA,p.marcadorB,gA);
+    ap([p.b1,p.b2],p.marcadorB,p.marcadorA,!gA);
+  });});
+  return Object.values(t).sort((a,b)=>b.pts-a.pts||b.pg-a.pg||(b.gf-b.gc)-(a.gf-a.gc)||a.gc-b.gc);
+}
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
   const cr=g('caja-custom-range');
