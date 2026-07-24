@@ -395,6 +395,25 @@ body[data-role="owner"] .owner-only{display:block!important}
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
 </div>
+<div class="modal hidden" id="m-esc-part">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Inscribir en la escalerilla</b><button class="x" onclick="cM('m-esc-part')">&times;</button></div>
+    <div class="mbody">
+      <label>Jugador 1</label>
+      <select id="ep-j1"></select>
+      <label style="margin-top:10px">Jugador 2</label>
+      <select id="ep-j2"></select>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px">Si el jugador no esta registrado, dejalo en "-" y escribe el nombre abajo.</div>
+      <label style="margin-top:10px">O nombre libre</label>
+      <input id="ep-libre" placeholder="Perez / Soto">
+      <div id="ep-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-part')">Cancelar</button>
+      <button class="btn p" onclick="guardarParticipante()">Inscribir</button>
+    </div>
+  </div>
+</div>
 <div class="modal hidden" id="m-escalerilla">
   <div class="mbox" style="max-width:420px">
     <div class="mhead"><b>Nueva escalerilla</b><button class="x" onclick="cM('m-escalerilla')">&times;</button></div>
@@ -420,6 +439,14 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div id="esc-vista-lista">
     <div class="rb"><div></div><button class="btn p ao" onclick="nuevaEscalerilla()"><i class="ti ti-plus"></i> Nueva escalerilla</button></div>
     <div id="escalerillas-list"></div>
+  </div>
+  <div id="esc-vista-detalle" class="hidden">
+    <div class="rb">
+      <button class="btn" onclick="volverEscalerillas()"><i class="ti ti-arrow-left"></i> Volver</button>
+      <button class="btn p" onclick="nuevoParticipante()"><i class="ti ti-plus"></i> Inscribir</button>
+    </div>
+    <div id="esc-det-head"></div>
+    <div id="esc-det-tabla"></div>
   </div>
 </div>
 <!-- TORNEOS / AMERICANOS -->
@@ -1674,7 +1701,87 @@ async function rEscalerillas(){
     +(lista.length?lista.map(card).join('')
       :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin escalerillas '+(escFiltro==='fin'?'finalizadas':'activas')+'.</div>');
 }
-function abrirEscalerilla(id){alert('Detalle: proximo paso');}
+let escAct=null;
+function volverEscalerillas(){escAct=null;g('esc-vista-detalle').classList.add('hidden');g('esc-vista-lista').classList.remove('hidden');rEscalerillas();}
+function nomPart(p){
+  if(!p)return'?';
+  const n1=p.jugador1_id?((D.jugadores||[]).find(x=>x.id===p.jugador1_id)||{}).nombre:null;
+  const n2=p.jugador2_id?((D.jugadores||[]).find(x=>x.id===p.jugador2_id)||{}).nombre:null;
+  if(n1&&n2)return n1+' / '+n2;
+  if(n1)return n1;
+  return p.nombre_libre||'?';
+}
+async function abrirEscalerilla(id){
+  const e=(D.escalerillas||[]).find(x=>x.id===id);if(!e)return;
+  const[pa,re]=await Promise.all([
+    sb.from('escalerilla_participantes').select('*').eq('escalerilla_id',id).order('posicion'),
+    sb.from('escalerilla_retos').select('*').eq('escalerilla_id',id).order('created_at',{ascending:false})
+  ]);
+  escAct={esc:e,parts:(pa.data||[]),retos:(re.data||[])};
+  g('esc-vista-lista').classList.add('hidden');
+  g('esc-vista-detalle').classList.remove('hidden');
+  rEscDetalle();
+}
+async function recargarEscAct(){if(escAct)await abrirEscalerilla(escAct.esc.id);}
+function rEscDetalle(){
+  if(!escAct)return;
+  const e=escAct.esc;
+  const act=escAct.parts.filter(p=>p.activo);
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  g('esc-det-head').innerHTML=`<div class="card" style="padding:14px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:17px"><i class="ti ti-stairs-up" style="color:#3B82F6"></i> ${e.nombre}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px">${e.categoria?e.categoria+' · ':''}${act.length} inscritos · reta hasta ${e.rangoReto} puestos · ${pend.length} retos pendientes</div>
+  </div>`;
+  if(!act.length){
+    g('esc-det-tabla').innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Aun no hay inscritos. Usa el boton Inscribir.</div>';
+    return;
+  }
+  const flecha=p=>{
+    if(p.posicion_anterior==null)return'<span style="color:var(--text3)">—</span>';
+    if(p.posicion<p.posicion_anterior)return'<span style="color:#16A34A;font-weight:700">↑ '+(p.posicion_anterior-p.posicion)+'</span>';
+    if(p.posicion>p.posicion_anterior)return'<span style="color:#DC2626;font-weight:700">↓ '+(p.posicion-p.posicion_anterior)+'</span>';
+    return'<span style="color:var(--text3)">—</span>';
+  };
+  g('esc-det-tabla').innerHTML=`<div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
+      <th style="padding:8px 14px">#</th><th>Pareja</th><th></th><th>PJ</th><th>PG</th><th>PP</th><th style="padding-right:14px"></th></tr></thead>
+    <tbody>${act.map(p=>`<tr style="border-top:1px solid var(--border)">
+      <td style="padding:9px 14px;font-weight:700">${p.posicion}</td>
+      <td style="font-weight:600">${nomPart(p)}</td>
+      <td>${flecha(p)}</td>
+      <td>${p.jugados}</td><td>${p.ganados}</td><td>${p.perdidos}</td>
+      <td style="padding-right:14px;text-align:right"><button class="btn" style="padding:3px 9px;font-size:12px" onclick="borrarParticipante('${p.id}')"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+}
+function optsJug(sel){
+  const js=(D.jugadores||[]).slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  g(sel).innerHTML='<option value="">-</option>'+js.map(j=>`<option value="${j.id}">${j.nombre}</option>`).join('');
+}
+function nuevoParticipante(){
+  if(!escAct)return;
+  optsJug('ep-j1');optsJug('ep-j2');
+  g('ep-libre').value='';g('ep-err').classList.add('hidden');
+  g('m-esc-part').classList.remove('hidden');
+}
+async function guardarParticipante(){
+  const err=g('ep-err');
+  const j1=g('ep-j1').value||null,j2=g('ep-j2').value||null,libre=g('ep-libre').value.trim();
+  if(!j1&&!libre){err.textContent='Elige un jugador o escribe un nombre libre.';err.classList.remove('hidden');return;}
+  if(j1&&j2&&j1===j2){err.textContent='No puede ser el mismo jugador dos veces.';err.classList.remove('hidden');return;}
+  const max=escAct.parts.reduce((m,p)=>Math.max(m,p.posicion),0);
+  const{error}=await sb.from('escalerilla_participantes').insert({escalerilla_id:escAct.esc.id,
+    jugador1_id:j1,jugador2_id:j2,nombre_libre:(!j1?libre:null),posicion:max+1});
+  if(error){err.textContent='No se pudo inscribir: '+error.message;err.classList.remove('hidden');return;}
+  audit('Inscribio en escalerilla','escalerillas',escAct.esc.nombre);
+  cM('m-esc-part');await recargarEscAct();
+}
+async function borrarParticipante(pid){
+  if(!confirm('Sacar a este participante de la escalerilla?'))return;
+  const{error}=await sb.from('escalerilla_participantes').delete().eq('id',pid);
+  if(error){alert('No se pudo: '+error.message);return;}
+  await recargarEscAct();
+}
 let torFiltro='curso';
 function torFiltrar(k){torFiltro=k;rTorneos();}
 async function refetchTorneos(){
