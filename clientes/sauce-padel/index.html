@@ -395,10 +395,30 @@ body[data-role="owner"] .owner-only{display:block!important}
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
 </div>
+<div class="modal hidden" id="m-escalerilla">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Nueva escalerilla</b><button class="x" onclick="cM('m-escalerilla')">&times;</button></div>
+    <div class="mbody">
+      <label>Nombre</label>
+      <input id="esc-nombre" placeholder="Escalerilla 4ta">
+      <label style="margin-top:10px">Categoria</label>
+      <input id="esc-cat" placeholder="4ta">
+      <label style="margin-top:10px">Puede retar hasta (puestos arriba)</label>
+      <input id="esc-rango" type="number" value="3" min="1" max="10">
+      <label style="margin-top:10px">Dias de plazo para jugar el reto</label>
+      <input id="esc-plazo" type="number" value="7" min="1" max="60">
+      <div id="esc-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-escalerilla')">Cancelar</button>
+      <button class="btn p" onclick="guardarEscalerilla()">Crear</button>
+    </div>
+  </div>
+</div>
 <!-- ESCALERILLAS -->
 <div class="sec" id="sec-escalerillas">
   <div id="esc-vista-lista">
-    <div class="rb"><div></div><button class="btn p ao" onclick="alert('proximamente')"><i class="ti ti-plus"></i> Nueva escalerilla</button></div>
+    <div class="rb"><div></div><button class="btn p ao" onclick="nuevaEscalerilla()"><i class="ti ti-plus"></i> Nueva escalerilla</button></div>
     <div id="escalerillas-list"></div>
   </div>
 </div>
@@ -1600,10 +1620,61 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
-async function rEscalerillas(){
-  const c=g('escalerillas-list');if(!c)return;
-  c.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-stairs-up" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Modulo en construccion.</div></div>';
+let escFiltro='activa';
+function escFiltrar(k){escFiltro=k;rEscalerillas();}
+async function refetchEscalerillas(){
+  const{data,error}=await sb.from('escalerillas').select('*').order('fecha_inicio',{ascending:false});
+  if(error){console.error('Error cargando escalerillas:',error);D.escalerillas=[];return false;}
+  D.escalerillas=(data||[]).map(e=>({id:e.id,nombre:e.nombre,categoria:e.categoria,tipo:e.tipo,
+    estado:e.estado,fechaInicio:e.fecha_inicio,fechaFin:e.fecha_fin,rangoReto:e.rango_reto,diasPlazo:e.dias_plazo}));
+  return true;
 }
+function nuevaEscalerilla(){
+  g('esc-nombre').value='';g('esc-cat').value='';g('esc-rango').value=3;g('esc-plazo').value=7;
+  g('esc-err').classList.add('hidden');
+  g('m-escalerilla').classList.remove('hidden');
+}
+async function guardarEscalerilla(){
+  const nombre=g('esc-nombre').value.trim();const err=g('esc-err');
+  if(!nombre){err.textContent='Ponle un nombre a la escalerilla.';err.classList.remove('hidden');return;}
+  const{error}=await sb.from('escalerillas').insert({nombre,categoria:g('esc-cat').value.trim()||null,
+    rango_reto:parseInt(g('esc-rango').value)||3,dias_plazo:parseInt(g('esc-plazo').value)||7});
+  if(error){err.textContent='No se pudo crear: '+error.message;err.classList.remove('hidden');return;}
+  audit('Creo escalerilla','escalerillas',nombre);
+  await refetchEscalerillas();cM('m-escalerilla');rEscalerillas();
+}
+async function rEscalerillas(){
+  const cont=g('escalerillas-list');if(!cont)return;
+  if(!D.escalerillas)await refetchEscalerillas();
+  const es=D.escalerillas||[];
+  if(!es.length){
+    cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-stairs-up" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aun no hay escalerillas. Crea una con Nueva escalerilla.</div></div>';
+    return;
+  }
+  const card=e=>{
+    const fin=e.estado==='finalizada';
+    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer;${fin?'opacity:.75':''}" onclick="abrirEscalerilla('${e.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-stairs-up" style="color:${fin?'var(--text3)':'#3B82F6'}"></i> ${e.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${e.categoria?e.categoria+' · ':''}reta hasta ${e.rangoReto} puestos · ${e.diasPlazo} dias de plazo</div></div>
+        <span class="badge ${fin?'':'bg'}" style="${fin?'background:#DCFCE7;color:#166534':''}">${fin?'✅ Finalizada':'Activa'}</span>
+      </div></div>`;
+  };
+  const act=es.filter(e=>e.estado!=='finalizada');
+  const fins=es.filter(e=>e.estado==='finalizada');
+  if(escFiltro==='activa'&&!act.length&&fins.length)escFiltro='fin';
+  const lista=escFiltro==='fin'?fins:act;
+  const link=(k,txt,n)=>{const on=escFiltro===k;
+    return `<span onclick="escFiltrar('${k}')" style="cursor:pointer;font-size:13px;font-weight:${on?'700':'500'};color:${on?'var(--blue)':'var(--text2)'}">${txt} (${n})</span>`;};
+  cont.innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+      ${link('activa','Activas',act.length)}
+      <span style="color:var(--border)">|</span>
+      ${link('fin','Finalizadas',fins.length)}
+    </div>`
+    +(lista.length?lista.map(card).join('')
+      :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin escalerillas '+(escFiltro==='fin'?'finalizadas':'activas')+'.</div>');
+}
+function abrirEscalerilla(id){alert('Detalle: proximo paso');}
 let torFiltro='curso';
 function torFiltrar(k){torFiltro=k;rTorneos();}
 async function refetchTorneos(){
