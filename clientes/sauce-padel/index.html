@@ -475,7 +475,11 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div id="esc-vista-detalle" class="hidden">
     <div class="rb">
       <button class="btn" onclick="volverEscalerillas()"><i class="ti ti-arrow-left"></i> Volver</button>
-      <button class="btn p" onclick="nuevoParticipante()"><i class="ti ti-plus"></i> Inscribir</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" onclick="compartirEscalerilla()"><i class="ti ti-share"></i> Compartir</button>
+        <button class="btn p" onclick="nuevoParticipante()"><i class="ti ti-plus"></i> Inscribir</button>
+        <button class="btn ao" id="esc-btn-fin" onclick="finalizarEscalerilla()"><i class="ti ti-flag"></i> Finalizar</button>
+      </div>
     </div>
     <div id="esc-det-head"></div>
     <div id="esc-det-tabla"></div>
@@ -1735,6 +1739,49 @@ async function rEscalerillas(){
       :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin escalerillas '+(escFiltro==='fin'?'finalizadas':'activas')+'.</div>');
 }
 let escAct=null;
+function telParticipante(pid){
+  const p=(escAct.parts||[]).find(x=>x.id===pid);if(!p)return null;
+  const j=(D.jugadores||[]).find(x=>x.id===p.jugador1_id);
+  return j&&j.telefono?j.telefono.replace(/[^0-9]/g,''):null;
+}
+function avisarReto(rid){
+  const r=escAct.retos.find(x=>x.id===rid);if(!r)return;
+  const a=nomPart(escAct.parts.find(x=>x.id===r.retador_id));
+  const b=nomPart(escAct.parts.find(x=>x.id===r.retado_id));
+  const tel=telParticipante(r.retado_id)||telParticipante(r.retador_id);
+  const msg=`Hola! Tienes un reto pendiente en la ${escAct.esc.nombre}: ${a} vs ${b}. Tienen hasta el ${r.fecha_limite} para jugarlo. Coordinen la cancha en el club!`;
+  const url=tel?`https://wa.me/${tel.startsWith('56')?tel:'56'+tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+async function finalizarEscalerilla(){
+  if(!escAct)return;
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  if(pend.length&&!confirm('Hay '+pend.length+' reto(s) pendientes sin jugar. Finalizar igual?'))return;
+  if(!confirm('Finalizar la temporada? Se congela la tabla y no se pueden crear retos nuevos.'))return;
+  const{error}=await sb.from('escalerillas').update({estado:'finalizada',fecha_fin:new Date().toISOString().slice(0,10)}).eq('id',escAct.esc.id);
+  if(error){alert('No se pudo: '+error.message);return;}
+  audit('Finalizo escalerilla','escalerillas',escAct.esc.nombre);
+  await refetchEscalerillas();await recargarEscAct();
+}
+async function reabrirEscalerilla(){
+  if(!escAct)return;
+  if(!confirm('Reabrir la temporada?'))return;
+  const{error}=await sb.from('escalerillas').update({estado:'activa',fecha_fin:null}).eq('id',escAct.esc.id);
+  if(error){alert('No se pudo: '+error.message);return;}
+  audit('Reabrio escalerilla','escalerillas',escAct.esc.nombre);
+  await refetchEscalerillas();await recargarEscAct();
+}
+function compartirEscalerilla(){
+  if(!escAct)return;
+  const e=escAct.esc;const act=escAct.parts.filter(p=>p.activo);
+  let txt='🪜 '+e.nombre+(e.categoria?' · '+e.categoria:'')+'\n\n';
+  act.forEach(p=>{
+    const fl=p.posicion_anterior==null?'':(p.posicion<p.posicion_anterior?' ↑':(p.posicion>p.posicion_anterior?' ↓':''));
+    txt+=p.posicion+'. '+nomPart(p)+' ('+p.ganados+'G '+p.perdidos+'P)'+fl+'\n';
+  });
+  txt+=e.estado==='finalizada'?'\nTemporada finalizada ✅':'\nRetos abiertos: quien quiera subir, a retar! ⚔';
+  navigator.clipboard.writeText(txt).then(()=>alert('Tabla copiada. Pegala en el grupo de WhatsApp.'),()=>alert('No se pudo copiar.'));
+}
 function volverEscalerillas(){escAct=null;g('esc-vista-detalle').classList.add('hidden');g('esc-vista-lista').classList.remove('hidden');rEscalerillas();}
 function nomPart(p){
   if(!p)return'?';
@@ -1761,6 +1808,7 @@ function rEscDetalle(){
   const e=escAct.esc;
   const act=escAct.parts.filter(p=>p.activo);
   const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  const bf=g('esc-btn-fin');if(bf)bf.style.display=e.estado==='finalizada'?'none':'';
   g('esc-det-head').innerHTML=`<div class="card" style="padding:14px;margin-bottom:12px">
     <div style="font-weight:700;font-size:17px"><i class="ti ti-stairs-up" style="color:#3B82F6"></i> ${e.nombre}</div>
     <div style="font-size:12px;color:var(--text2);margin-top:4px">${e.categoria?e.categoria+' · ':''}${act.length} inscritos · reta hasta ${e.rangoReto} puestos · ${pend.length} retos pendientes</div>
@@ -1777,7 +1825,16 @@ function rEscDetalle(){
     if(p.posicion>p.posicion_anterior)return'<span style="color:#DC2626;font-weight:700">↓ '+(p.posicion-p.posicion_anterior)+'</span>';
     return'<span style="color:var(--text3)">—</span>';
   };
-  g('esc-det-tabla').innerHTML=`<div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+  let podio='';
+  if(e.estado==='finalizada'){
+    const top=act.slice(0,3);const med=['🥇','🥈','🥉'];
+    podio=`<div class="card" style="padding:16px;margin-bottom:12px;text-align:center">
+      <div style="font-weight:700;font-size:15px;margin-bottom:10px">Temporada finalizada</div>
+      ${top.map((x,i)=>`<div style="font-size:15px;margin:4px 0">${med[i]} <b>${nomPart(x)}</b> <span style="color:var(--text3);font-size:13px">· ${x.ganados}G ${x.perdidos}P</span></div>`).join('')}
+      <button class="btn ao" style="margin-top:12px" onclick="reabrirEscalerilla()"><i class="ti ti-rotate"></i> Reabrir</button>
+    </div>`;
+  }
+  g('esc-det-tabla').innerHTML=podio+`<div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
     <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
       <th style="padding:8px 14px">#</th><th>Pareja</th><th></th><th>PJ</th><th>PG</th><th>PP</th><th style="padding-right:14px"></th></tr></thead>
     <tbody>${act.map(p=>`<tr style="border-top:1px solid var(--border)">
@@ -1804,6 +1861,7 @@ function rEscRetos(){
         <div><div style="font-size:13px;font-weight:600">${pid(r.retador_id)} <span style="color:var(--text3)">reta a</span> ${pid(r.retado_id)}</div>
         <div style="font-size:11px;color:${venc?'#DC2626':'var(--text3)'};margin-top:3px">${venc?'⚠ Vencio el ':'Hasta el '}${r.fecha_limite}</div></div>
         <div style="display:flex;gap:6px">
+          <button class="btn" style="padding:4px 10px;font-size:12px" onclick="avisarReto('${r.id}')" title="Avisar por WhatsApp">💬</button>
           <button class="btn p" style="padding:4px 10px;font-size:12px" onclick="cargarResultado('${r.id}')">Cargar resultado</button>
           <button class="btn" style="padding:4px 10px;font-size:12px" onclick="cancelarReto('${r.id}')">Anular</button>
         </div></div>`;}).join('');
