@@ -936,8 +936,8 @@ body[data-role="owner"] .owner-only{display:block!important}
       <div style="font-size:11px;color:var(--text3);margin-top:4px">Primero crea el bloque en la Agenda como "Torneo / Americano".</div></div>
     <div class="fr"><lbl>Nombre del torneo</lbl><input id="tor-nombre" placeholder="Ej: Americano 4ta"></div>
     <div class="fr"><lbl>Formato</lbl><select id="tor-formato">
-      <option value="rotativo">Rotativo — el sistema arma las parejas, ranking individual</option>
       <option value="parejas_fijas">Parejas fijas — tu armas las parejas, ranking por pareja</option>
+      <option value="rotativo">Rotativo — el sistema arma las parejas, ranking individual</option>
     </select></div>
     <div class="fr c2">
       <div><lbl>Puntos al ganador</lbl><input type="number" id="tor-pg" value="2"></div>
@@ -1609,7 +1609,7 @@ function nuevoTorneo(){
   const libres=(D.bloqueos||[]).filter(b=>b.tipo==='torneo'&&!usados.has(b.id));
   if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
   sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
-  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=true;g('tor-valor').value=0;g('tor-formato').value='rotativo';
+  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=true;g('tor-valor').value=0;g('tor-formato').value='parejas_fijas';
   const nc=(D.canchas||[]).length||1;const sc=g('tor-canchas');
   sc.innerHTML=Array.from({length:nc},(_,i)=>`<option value="${i+1}"${i+1===nc?' selected':''}>${i+1} cancha${i>0?'s':''}</option>`).join('');
   g('tor-err').classList.add('hidden');
