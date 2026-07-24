@@ -395,6 +395,38 @@ body[data-role="owner"] .owner-only{display:block!important}
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
 </div>
+<div class="modal hidden" id="m-esc-reto">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Nuevo reto</b><button class="x" onclick="cM('m-esc-reto')">&times;</button></div>
+    <div class="mbody">
+      <div id="er-retador" style="font-size:13px;font-weight:600;margin-bottom:10px"></div>
+      <label>Puede retar a</label>
+      <select id="er-retado"></select>
+      <div id="er-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-reto')">Cancelar</button>
+      <button class="btn p" onclick="guardarReto()">Crear reto</button>
+    </div>
+  </div>
+</div>
+<div class="modal hidden" id="m-esc-res">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Cargar resultado</b><button class="x" onclick="cM('m-esc-res')">&times;</button></div>
+    <div class="mbody">
+      <div id="es-info" style="font-size:13px;margin-bottom:10px"></div>
+      <label>Gano</label>
+      <select id="es-ganador"></select>
+      <label style="margin-top:10px">Marcador (opcional)</label>
+      <input id="es-marcador" placeholder="6-4 6-3">
+      <div id="es-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-res')">Cancelar</button>
+      <button class="btn p" onclick="guardarResultado()">Guardar</button>
+    </div>
+  </div>
+</div>
 <div class="modal hidden" id="m-esc-part">
   <div class="mbox" style="max-width:420px">
     <div class="mhead"><b>Inscribir en la escalerilla</b><button class="x" onclick="cM('m-esc-part')">&times;</button></div>
@@ -447,6 +479,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
     <div id="esc-det-head"></div>
     <div id="esc-det-tabla"></div>
+    <div id="esc-det-retos"></div>
   </div>
 </div>
 <!-- TORNEOS / AMERICANOS -->
@@ -1734,8 +1767,10 @@ function rEscDetalle(){
   </div>`;
   if(!act.length){
     g('esc-det-tabla').innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Aun no hay inscritos. Usa el boton Inscribir.</div>';
+    g('esc-det-retos').innerHTML='';
     return;
   }
+  const ocup=new Set();pend.forEach(r=>{ocup.add(r.retador_id);ocup.add(r.retado_id);});
   const flecha=p=>{
     if(p.posicion_anterior==null)return'<span style="color:var(--text3)">—</span>';
     if(p.posicion<p.posicion_anterior)return'<span style="color:#16A34A;font-weight:700">↑ '+(p.posicion_anterior-p.posicion)+'</span>';
@@ -1750,9 +1785,84 @@ function rEscDetalle(){
       <td style="font-weight:600">${nomPart(p)}</td>
       <td>${flecha(p)}</td>
       <td>${p.jugados}</td><td>${p.ganados}</td><td>${p.perdidos}</td>
-      <td style="padding-right:14px;text-align:right"><button class="btn" style="padding:3px 9px;font-size:12px" onclick="borrarParticipante('${p.id}')"><i class="ti ti-trash"></i></button></td>
+      <td style="padding-right:14px;text-align:right;white-space:nowrap">${p.posicion>1&&!ocup.has(p.id)&&e.estado!=='finalizada'?`<button class="btn" style="padding:3px 9px;font-size:12px" onclick="nuevoReto('${p.id}')" title="Retar">⚔</button> `:''}<button class="btn ao" style="padding:3px 9px;font-size:12px" onclick="borrarParticipante('${p.id}')"><i class="ti ti-trash"></i></button></td>
     </tr>`).join('')}</tbody>
   </table></div>`;
+  rEscRetos();
+}
+function rEscRetos(){
+  const c=g('esc-det-retos');if(!c||!escAct)return;
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  const jug=escAct.retos.filter(r=>r.estado==='jugado').slice(0,10);
+  const pid=id=>nomPart(escAct.parts.find(x=>x.id===id));
+  let h='';
+  if(pend.length){
+    h+='<div style="font-weight:700;font-size:14px;margin:18px 0 8px">Retos pendientes</div>';
+    h+=pend.map(r=>{
+      const venc=r.fecha_limite<new Date().toISOString().slice(0,10);
+      return `<div class="card" style="padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><div style="font-size:13px;font-weight:600">${pid(r.retador_id)} <span style="color:var(--text3)">reta a</span> ${pid(r.retado_id)}</div>
+        <div style="font-size:11px;color:${venc?'#DC2626':'var(--text3)'};margin-top:3px">${venc?'⚠ Vencio el ':'Hasta el '}${r.fecha_limite}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn p" style="padding:4px 10px;font-size:12px" onclick="cargarResultado('${r.id}')">Cargar resultado</button>
+          <button class="btn" style="padding:4px 10px;font-size:12px" onclick="cancelarReto('${r.id}')">Anular</button>
+        </div></div>`;}).join('');
+  }
+  if(jug.length){
+    h+='<div style="font-weight:700;font-size:14px;margin:18px 0 8px">Ultimos resultados</div>';
+    h+='<div class="card" style="padding:0">'+jug.map(r=>{
+      const gano=r.ganador_id===r.retador_id;
+      return `<div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-weight:${gano?'700':'400'}">${pid(r.retador_id)}</span>
+        <span style="color:var(--text3)"> vs </span>
+        <span style="font-weight:${gano?'400':'700'}">${pid(r.retado_id)}</span>
+        <span style="color:var(--text3);font-size:12px"> · ${r.marcador||''} · ${r.fecha_jugado||''}</span>
+      </div>`;}).join('')+'</div>';
+  }
+  c.innerHTML=h;
+}
+function nuevoReto(pid){
+  const p=escAct.parts.find(x=>x.id===pid);if(!p)return;
+  const e=escAct.esc;
+  const ocup=new Set();escAct.retos.filter(r=>r.estado==='pendiente').forEach(r=>{ocup.add(r.retador_id);ocup.add(r.retado_id);});
+  const cand=escAct.parts.filter(x=>x.activo&&x.posicion<p.posicion&&(p.posicion-x.posicion)<=e.rangoReto&&!ocup.has(x.id));
+  if(!cand.length){alert('No hay a quien retar ahora mismo (o ya tienen retos abiertos).');return;}
+  g('er-retador').innerHTML=`#${p.posicion} ${nomPart(p)} reta a:`;
+  g('er-retado').innerHTML=cand.map(x=>`<option value="${x.id}">#${x.posicion} ${nomPart(x)}</option>`).join('');
+  g('er-retado').dataset.retador=pid;
+  g('er-err').classList.add('hidden');
+  g('m-esc-reto').classList.remove('hidden');
+}
+async function guardarReto(){
+  const err=g('er-err');
+  const retador=g('er-retado').dataset.retador,retado=g('er-retado').value;
+  const{error}=await sb.rpc('crear_reto_escalerilla',{p_retador:retador,p_retado:retado});
+  if(error){err.textContent=error.message;err.classList.remove('hidden');return;}
+  audit('Creo reto','escalerillas',escAct.esc.nombre);
+  cM('m-esc-reto');await recargarEscAct();
+}
+function cargarResultado(rid){
+  const r=escAct.retos.find(x=>x.id===rid);if(!r)return;
+  const a=escAct.parts.find(x=>x.id===r.retador_id),b=escAct.parts.find(x=>x.id===r.retado_id);
+  g('es-info').innerHTML=`<b>${nomPart(a)}</b> vs <b>${nomPart(b)}</b>`;
+  g('es-ganador').innerHTML=`<option value="${a.id}">${nomPart(a)}</option><option value="${b.id}">${nomPart(b)}</option>`;
+  g('es-ganador').dataset.reto=rid;
+  g('es-marcador').value='';g('es-err').classList.add('hidden');
+  g('m-esc-res').classList.remove('hidden');
+}
+async function guardarResultado(){
+  const err=g('es-err');
+  const{error}=await sb.rpc('resolver_reto_escalerilla',{p_reto:g('es-ganador').dataset.reto,
+    p_ganador:g('es-ganador').value,p_marcador:g('es-marcador').value.trim()||null});
+  if(error){err.textContent=error.message;err.classList.remove('hidden');return;}
+  audit('Cargo resultado escalerilla','escalerillas',escAct.esc.nombre);
+  cM('m-esc-res');await recargarEscAct();
+}
+async function cancelarReto(rid){
+  if(!confirm('Anular este reto?'))return;
+  const{error}=await sb.from('escalerilla_retos').update({estado:'cancelado'}).eq('id',rid);
+  if(error){alert('No se pudo: '+error.message);return;}
+  await recargarEscAct();
 }
 function optsJug(sel){
   const js=(D.jugadores||[]).slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
