@@ -928,6 +928,25 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
   </div>
 </div>
+<div class="mbg hidden" id="m-tor-pareja">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><div class="modal-title" id="m-tor-pareja-title">Editar pareja</div><button class="btn icon-only" onclick="cM('m-tor-pareja')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="edp-num">
+    <div class="fr" style="position:relative">
+      <lbl>Jugador 1</lbl>
+      <input id="edp-1" oninput="sugEdp(1)" autocomplete="off">
+      <div id="edp-1-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+    </div>
+    <div class="fr" style="position:relative">
+      <lbl>Jugador 2</lbl>
+      <input id="edp-2" oninput="sugEdp(2)" autocomplete="off">
+      <div id="edp-2-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Los partidos y puntos de la pareja se mantienen.</div>
+    <div id="edp-err" class="hidden alert warning" style="margin-bottom:.875rem"></div>
+    <div class="modal-actions"><button class="btn" onclick="cM('m-tor-pareja')">Cancelar</button><button class="btn p" onclick="guardarEdpPareja()"><i class="ti ti-check"></i> Guardar</button></div>
+  </div>
+</div>
 <div class="mbg hidden" id="m-torneo">
   <div class="modal" style="max-width:460px">
     <div class="modal-header"><div class="modal-title">Nuevo torneo / americano</div><button class="btn icon-only" onclick="cM('m-torneo')"><i class="ti ti-x"></i></button></div>
@@ -1752,7 +1771,8 @@ function rTorInscritos(){
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
           <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px">PAREJA ${gr.num}</span>
           ${completa?'':'<span style="font-size:10px;color:#92400E;font-weight:600">falta 1</span>'}
-          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})" style="margin-left:auto;padding:2px 6px"><i class="ti ti-x" style="font-size:12px"></i></button>
+          <button class="btn sm icon-only ao" onclick="editarPareja(${gr.num})" style="margin-left:auto;padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})" style="padding:2px 6px"><i class="ti ti-x" style="font-size:12px"></i></button>
         </div>
         ${gr.ins.map(i=>{const pag=i.estado_pago==='pagado';
           return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0">
@@ -1804,6 +1824,60 @@ async function addParejaCompleta(){
   i1.value='';i2.value='';i1.dataset.jid='';i2.dataset.jid='';
   g('tor-p1-drop').classList.add('hidden');g('tor-p2-drop').classList.add('hidden');
   rTorCupos();rTorHead();rTorInscritos();rTorTabla();
+}
+function editarPareja(num){
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  g('edp-num').value=num;
+  g('m-tor-pareja-title').textContent='Editar pareja '+num;
+  [1,2].forEach(n=>{
+    const ins=gr.ins[n-1];const inp=g('edp-'+n);
+    inp.value=ins?nomIns(ins):'';
+    inp.dataset.insId=ins?ins.id:'';
+    inp.dataset.jid=ins&&ins.jugador_id?ins.jugador_id:'';
+    g('edp-'+n+'-drop').classList.add('hidden');
+  });
+  g('edp-err').classList.add('hidden');
+  g('m-tor-pareja').classList.remove('hidden');
+}
+function sugEdp(n){
+  const inp=g('edp-'+n);const d=g('edp-'+n+'-drop');
+  const q=(inp.value||'').toLowerCase().trim();
+  inp.dataset.jid='';
+  if(!q){d.classList.add('hidden');return;}
+  const num=parseInt(g('edp-num').value);
+  const propios=new Set((gruposParejas().find(x=>x.num===num)?.ins||[]).map(i=>i.jugador_id).filter(Boolean));
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  propios.forEach(p=>ya.delete(p));
+  const otro=g('edp-'+(n===1?2:1));
+  if(otro&&otro.dataset.jid)ya.add(otro.dataset.jid);
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="pickEdp(${n},'${j.id}','${j.nombre.replace(/'/g,"\\'")}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+function pickEdp(n,jid,nombre){
+  const inp=g('edp-'+n);inp.value=nombre;inp.dataset.jid=jid;
+  g('edp-'+n+'-drop').classList.add('hidden');
+}
+async function guardarEdpPareja(){
+  const num=parseInt(g('edp-num').value);
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  const err=g('edp-err');
+  const vals=[1,2].map(n=>{const inp=g('edp-'+n);return{nom:(inp.value||'').trim(),jid:inp.dataset.jid||'',insId:inp.dataset.insId||''};});
+  if(vals.some(v=>!v.nom)){err.textContent='Completa los dos jugadores.';err.classList.remove('hidden');return;}
+  for(const v of vals){
+    if(!v.insId)continue;
+    const upd={jugador_id:null,nombre_libre:null};
+    if(v.jid)upd.jugador_id=v.jid;
+    else{const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===v.nom.toLowerCase());
+      if(j)upd.jugador_id=j.id;else upd.nombre_libre=v.nom;}
+    const{error}=await sb.from('torneo_inscritos').update(upd).eq('id',v.insId);
+    if(error){err.textContent='No se pudo guardar: '+error.message;err.classList.remove('hidden');return;}
+    const ins=torAct.inscritos.find(x=>x.id===v.insId);
+    if(ins){ins.jugador_id=upd.jugador_id;ins.nombre_libre=upd.nombre_libre;}
+  }
+  audit('Edito pareja','torneos',torAct.torneo.nombre+' · pareja '+num);
+  cM('m-tor-pareja');rTorneoDetalle();
 }
 async function togParejaPago(num){
   const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
