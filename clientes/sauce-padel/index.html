@@ -1681,19 +1681,13 @@ function canchasTorneo(){
   return n?all.slice(0,n):all;
 }
 function rondasRecomendadas(nParejas,nCanchas){
-  // Partidos por ronda (limitado por canchas y por parejas disponibles)
   const porRonda=Math.min(nCanchas,Math.floor(nParejas/2));
   if(porRonda<1)return{rondas:0,porRonda:0,partidosPorPareja:0,cruces:0};
   const cruces=nParejas*(nParejas-1)/2;
-  const jugadoresPorRonda=porRonda*2;
-  // Para que el reparto sea parejo, las rondas deben ser multiplo de este ciclo
-  const g=(a,b)=>b?g(b,a%b):a;
-  const ciclo=nParejas/g(nParejas,jugadoresPorRonda);
-  // Maximo de rondas sin repetir cruces
-  const maxSinRepetir=Math.floor(cruces/porRonda);
-  // Bajamos al multiplo de ciclo mas cercano
-  const rondas=Math.floor(maxSinRepetir/ciclo)*ciclo;
-  return{rondas,porRonda,partidosPorPareja:rondas*jugadoresPorRonda/nParejas,cruces};
+  // Todas las parejas se enfrentan entre si: se cubren TODOS los cruces.
+  // La ultima ronda puede quedar con canchas libres, no importa.
+  const rondas=Math.ceil(cruces/porRonda);
+  return{rondas,porRonda,partidosPorPareja:nParejas-1,cruces};
 }
 function cruzesJugados(){
   const set=new Set();
@@ -1716,8 +1710,8 @@ function rTorCupos(){
       const rec=rondasRecomendadas(comp,nc);
       const hechas=torAct.rondas.length;
       const jugados=cruzesJugados();
-      txt+=' · ronda '+hechas+' de '+rec.rondas+' recomendadas ('+rec.partidosPorPareja+' partidos c/u) · '+jugados+'/'+rec.cruces+' cruces';
-      if(hechas>rec.rondas)txt+=' ⚠️ pasado del ideal';
+      txt+=' · ronda '+hechas+' de '+rec.rondas+' ('+rec.partidosPorPareja+' partidos por pareja) · '+jugados+'/'+rec.cruces+' cruces';
+      if(jugados>=rec.cruces)txt+=' ✅ torneo completo';
     }
     el.textContent=txt;
   }else{
@@ -1871,21 +1865,29 @@ async function quitarTorInscrito(id){
 }
 function generarRondaParejas(nums,canchas,historial){
   const k=(x,y)=>[x,y].sort((a,b)=>a-b).join('|');
-  const jug={},riv={};nums.forEach(n=>{jug[n]=0;});
+  // Cruces ya jugados y partidos por pareja
+  const jugado=new Set(),jug={};nums.forEach(n=>{jug[n]=0;});
   (historial||[]).forEach(r=>{(r.partidos||[]).forEach(p=>{
-    jug[p.pa]=(jug[p.pa]||0)+1;jug[p.pb]=(jug[p.pb]||0)+1;
-    riv[k(p.pa,p.pb)]=(riv[k(p.pa,p.pb)]||0)+1;});});
-  const cupos=Math.min(canchas.length*2,Math.floor(nums.length/2)*2);
-  if(cupos<2)return{error:'Se necesitan al menos 2 parejas completas.'};
-  const orden=[...nums].sort((a,b)=>jug[a]-jug[b]||Math.random()-0.5);
-  const juegan=orden.slice(0,cupos);const descansan=orden.slice(cupos);
-  const partidos=[];const pool=[...juegan];let ci=0;
-  while(pool.length>=2){
-    const A=pool.shift();let mejor=pool[0],mc=Infinity;
-    pool.forEach(B=>{const c=riv[k(A,B)]||0;if(c<mc){mc=c;mejor=B;}});
-    pool.splice(pool.indexOf(mejor),1);
-    partidos.push({cancha:canchas[ci%canchas.length],pa:A,pb:mejor});ci++;
+    jugado.add(k(p.pa,p.pb));
+    jug[p.pa]=(jug[p.pa]||0)+1;jug[p.pb]=(jug[p.pb]||0)+1;});});
+  if(nums.length<2)return{error:'Se necesitan al menos 2 parejas completas.'};
+  // Todos los cruces pendientes
+  const pend=[];
+  for(let i=0;i<nums.length;i++)for(let j=i+1;j<nums.length;j++){
+    if(!jugado.has(k(nums[i],nums[j])))pend.push([nums[i],nums[j]]);
   }
+  if(!pend.length)return{error:'Ya se jugaron todos los cruces posibles ('+(nums.length*(nums.length-1)/2)+' partidos). El torneo esta completo.'};
+  // Priorizar cruces de las parejas que menos han jugado
+  pend.sort((x,y)=>(jug[x[0]]+jug[x[1]])-(jug[y[0]]+jug[y[1]])||Math.random()-0.5);
+  // Armar la ronda: ninguna pareja puede jugar dos veces
+  const usadas=new Set();const partidos=[];let ci=0;
+  for(const[a,b]of pend){
+    if(partidos.length>=canchas.length)break;
+    if(usadas.has(a)||usadas.has(b))continue;
+    usadas.add(a);usadas.add(b);
+    partidos.push({cancha:canchas[ci%canchas.length],pa:a,pb:b});ci++;
+  }
+  const descansan=nums.filter(n=>!usadas.has(n));
   return{partidos,descansan};
 }
 async function generarRonda(){
@@ -1896,10 +1898,6 @@ async function generarRonda(){
   if(esParejas()){
     const grs=gruposParejas().filter(gr=>gr.ins.length===2);
     if(grs.length<2){alert('Necesitas al menos 2 parejas completas.');return;}
-    const rec=rondasRecomendadas(grs.length,canchasTorneo().length);
-    if(rec.rondas>0&&torAct.rondas.length>=rec.rondas){
-      if(!confirm('Ya se jugaron las '+rec.rondas+' rondas recomendadas ('+rec.partidosPorPareja+' partidos por pareja, reparto parejo). Generar otra va a repetir enfrentamientos y desbalancear la tabla. Continuar?'))return;
-    }
     const pnum={};grs.forEach(gr=>{pnum[gr.num]=gr.ins;});
     const histP=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>{
       const ia=insById(p.a1),ib=insById(p.b1);
