@@ -1606,17 +1606,26 @@ async function rTorneos(){
     cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aun no hay torneos. Crea uno con Nuevo torneo.</div></div>';
     return;
   }
-  cont.innerHTML=ts.map(t=>{
+  const card=t=>{
     const b=(D.bloqueos||[]).find(x=>x.id===t.bloqueoId);
     const hor=b?`${b.horaInicio}-${b.horaFin}`:'sin bloque';
-    const est={inscripcion:'Inscripcion abierta',en_curso:'En curso',finalizado:'✅ Finalizado'}[t.estado]||t.estado;
-    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer" onclick="abrirTorneo('${t.id}')">
+    const fin=t.estado==='finalizado';
+    const est={inscripcion:'Inscripcion abierta',en_curso:'En curso',finalizado:'Finalizado'}[t.estado]||t.estado;
+    const fmt2=t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo';
+    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer;${fin?'opacity:.75':''}" onclick="abrirTorneo('${t.id}')">
       <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
-        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-trophy" style="color:#3B82F6"></i> ${t.nombre}</div>
-        <div style="font-size:12px;color:var(--text2);margin-top:3px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${hor}</div></div>
-        <span class="badge bg">${est}</span>
+        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-trophy" style="color:${fin?'var(--text3)':'#3B82F6'}"></i> ${t.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${hor} · ${fmt2}</div></div>
+        <span class="badge ${fin?'':'bg'}" style="${fin?'background:#DCFCE7;color:#166534':''}">${fin?'✅ ':''}${est}</span>
       </div></div>`;
-  }).join('');
+  };
+  const activos=ts.filter(t=>t.estado!=='finalizado');
+  const fins=ts.filter(t=>t.estado==='finalizado');
+  const titulo=(txt,n)=>`<div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin:4px 0 10px">${txt} (${n})</div>`;
+  let html='';
+  if(activos.length)html+=titulo('EN CURSO',activos.length)+activos.map(card).join('');
+  if(fins.length)html+=(activos.length?'<div style="height:14px"></div>':'')+titulo('FINALIZADOS',fins.length)+fins.map(card).join('');
+  cont.innerHTML=html;
 }
 function nuevoTorneo(){
   const sel=g('tor-bloqueo');if(!sel)return;
