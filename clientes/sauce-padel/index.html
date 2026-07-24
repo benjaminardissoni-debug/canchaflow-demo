@@ -2429,7 +2429,7 @@ function openBloqueo(id,fecha,horario,cid){
   g('bl-id').value='';blAlumnos=[];window._blPagos=[];
   const th=Object.entries(BLOQ_TIPOS).map(([k,t])=>`<label class="bl-tipo-opt" data-tipo="${k}" style="display:flex;align-items:center;gap:6px;padding:8px 12px;border:1.5px solid var(--border);border-radius:var(--r);cursor:pointer;font-size:12px;font-weight:600;flex:1;min-width:120px;justify-content:center" onclick="selBloqTipo('${k}')"><i class="ti ${t.icon}"></i>${t.label}</label>`).join('');
   g('bl-tipos').innerHTML=th;
-  const csel=g('bl-cancha');csel.innerHTML=D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
+  const csel=g('bl-cancha');csel.innerHTML='<option value="todas">Todas las canchas</option>'+D.canchas.map(c=>`<option value="${c.id}">${c.nombre}</option>`).join('');
   if(id){
     const b=(D.bloqueos||[]).find(x=>x.id===id);if(!b)return;
     g('m-bloqueo-title').textContent='Editar bloqueo / evento';g('bl-id').value=b.id;selBloqTipo(b.tipo);
