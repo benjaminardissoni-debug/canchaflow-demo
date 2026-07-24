@@ -320,6 +320,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     <button class="nb" onclick="S('inventario')" id="nav-inventario"><i class="ti ti-package"></i>Inventario</button>
     <button class="nb" onclick="S('ventas')" id="nav-ventas"><i class="ti ti-shopping-bag"></i>Ventas directas</button>
     <button class="nb ao" onclick="S('torneos')" id="nav-torneos"><i class="ti ti-trophy"></i>Torneos</button>
+    <button class="nb" onclick="S('escalerillas')" id="nav-escalerillas"><i class="ti ti-stairs-up"></i>Escalerillas</button>
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
@@ -393,6 +394,13 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div class="card" style="padding:0;overflow:auto">
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
+</div>
+<!-- ESCALERILLAS -->
+<div class="sec" id="sec-escalerillas">
+  <div id="esc-vista-lista">
+    <div class="rb"><div></div><button class="btn p ao" onclick="alert('proximamente')"><i class="ti ti-plus"></i> Nueva escalerilla</button></div>
+    <div id="escalerillas-list"></div>
+  </div>
 </div>
 <!-- TORNEOS / AMERICANOS -->
 <div class="sec" id="sec-torneos">
@@ -703,6 +711,7 @@ body[data-role="owner"] .owner-only{display:block!important}
   <button class="mob-mas-item" onclick="S('inventario');closeMobMas()"><i class="ti ti-box"></i> Inventario</button>
   <button class="mob-mas-item" onclick="S('ventas');closeMobMas()"><i class="ti ti-shopping-bag"></i> Ventas directas</button>
   <button class="mob-mas-item ao" onclick="S('torneos');closeMobMas()"><i class="ti ti-trophy"></i> Torneos</button>
+  <button class="mob-mas-item" onclick="S('escalerillas');closeMobMas()"><i class="ti ti-stairs-up"></i> Escalerillas</button>
   <button class="mob-mas-item ao" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
   <button class="mob-mas-item ao" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
   <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
@@ -1135,7 +1144,7 @@ body[data-role="owner"] .owner-only{display:block!important}
 </div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'},torneo:{label:'Torneo / Americano',icon:'ti-trophy',bg:'#DBEAFE',border:'#3B82F6',text:'#1D4ED8'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',escalerillas:'Escalerillas',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -1591,6 +1600,10 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+async function rEscalerillas(){
+  const c=g('escalerillas-list');if(!c)return;
+  c.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-stairs-up" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Modulo en construccion.</div></div>';
+}
 let torFiltro='curso';
 function torFiltrar(k){torFiltro=k;rTorneos();}
 async function refetchTorneos(){
@@ -2178,6 +2191,7 @@ function S(s){
   if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
   if(s==='ventas'){setTimeout(rVD,50);}
   if(s==='torneos')setTimeout(rTorneos,50);
+  if(s==='escalerillas')setTimeout(rEscalerillas,50);
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();rUsuarios();setTimeout(initConfigAcordeon,60);}if(s==='caja')rCaja();
