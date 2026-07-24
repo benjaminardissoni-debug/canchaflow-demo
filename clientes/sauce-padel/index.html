@@ -151,6 +151,7 @@ tr:hover td{background:rgba(242,244,247,.7)}
 .ag-block.mantenimiento{background:#F1F5F9;border-color:#64748B;color:#475569}
 .ag-block.clase{background:#EEEDFE;border-color:#7C6FE8;color:#534AB7}
 .ag-block.cumpleanos{background:#FCE7F3;border-color:#EC4899;color:#BE185D}
+.ag-block.torneo{background:#DBEAFE;border-color:#3B82F6;color:#1D4ED8}
 .ag-block.evento{background:#FEF3C7;border-color:#F59E0B;color:#92400E}
 .ag-block-time{font-size:10px;font-weight:700;opacity:.75;margin-bottom:2px}
 .ag-block-title{font-family:'Poppins',sans-serif;font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -395,9 +396,46 @@ body[data-role="owner"] .owner-only{display:block!important}
 </div>
 <!-- TORNEOS / AMERICANOS -->
 <div class="sec" id="sec-torneos">
-  <div class="rb"><div></div><button class="btn p ao" onclick="nuevoTorneo()"><i class="ti ti-plus"></i> Nuevo torneo</button></div>
-  <div id="torneos-alert" class="hidden alert warning"></div>
-  <div id="torneos-list"></div>
+  <div id="tor-vista-lista">
+    <div class="rb"><div></div><button class="btn p ao" onclick="nuevoTorneo()"><i class="ti ti-plus"></i> Nuevo torneo</button></div>
+    <div id="torneos-alert" class="hidden alert warning"></div>
+    <div id="torneos-list"></div>
+  </div>
+  <div id="tor-vista-detalle" class="hidden">
+    <div class="rb">
+      <button class="btn" onclick="volverTorneos()"><i class="ti ti-arrow-left"></i> Volver</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap" id="tor-acciones"></div>
+    </div>
+    <div id="tor-det-head" style="margin-bottom:1rem"></div>
+    <div id="tor-tabs" style="display:flex;gap:4px;margin-bottom:1rem;border-bottom:2px solid var(--border);flex-wrap:wrap"></div>
+    <div id="tor-pane-inscritos" class="card" style="padding:14px;margin-bottom:1rem">
+      <div id="tor-form-indiv" style="position:relative;margin-bottom:10px">
+        <div style="display:flex;gap:6px">
+          <input id="tor-jug-input" placeholder="Buscar jugador o escribir nombre libre" oninput="sugTorJug()" onkeydown="if(event.key==='Enter'){event.preventDefault();addTorInscrito();}" autocomplete="off">
+          <button class="btn sm" onclick="addTorInscrito()" type="button"><i class="ti ti-plus"></i></button>
+        </div>
+        <div id="tor-jug-drop" class="hidden" style="position:absolute;top:100%;left:0;right:44px;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:200px;overflow:auto"></div>
+      </div>
+      <div id="tor-form-pareja" class="hidden" style="margin-bottom:12px;background:var(--gray-light);border-radius:var(--r);padding:10px">
+        <div style="font-size:11px;font-weight:700;color:var(--text3);margin-bottom:6px">ARMAR PAREJA</div>
+        <div style="display:flex;gap:8px;align-items:flex-start;flex-wrap:wrap">
+          <div style="position:relative;flex:1;min-width:180px">
+            <input id="tor-p1" placeholder="Jugador 1" oninput="sugTorP(1)" autocomplete="off">
+            <div id="tor-p1-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+          </div>
+          <div style="position:relative;flex:1;min-width:180px">
+            <input id="tor-p2" placeholder="Jugador 2" oninput="sugTorP(2)" autocomplete="off">
+            <div id="tor-p2-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+          </div>
+          <button class="btn p sm" onclick="addParejaCompleta()" type="button"><i class="ti ti-plus"></i> Agregar pareja</button>
+        </div>
+      </div>
+      <div id="tor-cupos" style="font-size:11px;color:var(--text3);margin-bottom:8px"></div>
+      <div id="tor-ins-list"></div>
+    </div>
+    <div id="tor-pane-rondas" class="hidden"><div id="tor-rondas"></div></div>
+    <div id="tor-pane-tabla" class="hidden"><div id="tor-tabla"></div></div>
+  </div>
 </div>
 <!-- VENTAS DIRECTAS -->
 <div class="sec" id="sec-ventas">
@@ -886,6 +924,53 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
   </div>
 </div>
+<div class="mbg hidden" id="m-tor-pareja">
+  <div class="modal" style="max-width:420px">
+    <div class="modal-header"><div class="modal-title" id="m-tor-pareja-title">Editar pareja</div><button class="btn icon-only" onclick="cM('m-tor-pareja')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="edp-num">
+    <div class="fr" style="position:relative">
+      <lbl>Jugador 1</lbl>
+      <input id="edp-1" oninput="sugEdp(1)" autocomplete="off">
+      <div id="edp-1-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+    </div>
+    <div class="fr" style="position:relative">
+      <lbl>Jugador 2</lbl>
+      <input id="edp-2" oninput="sugEdp(2)" autocomplete="off">
+      <div id="edp-2-drop" class="hidden" style="position:absolute;top:100%;left:0;right:0;background:#fff;border:1px solid var(--border);border-radius:var(--r);box-shadow:0 4px 12px rgba(0,0,0,.08);z-index:20;max-height:180px;overflow:auto"></div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:10px">Los partidos y puntos de la pareja se mantienen.</div>
+    <div id="edp-err" class="hidden alert warning" style="margin-bottom:.875rem"></div>
+    <div class="modal-actions"><button class="btn" onclick="cM('m-tor-pareja')">Cancelar</button><button class="btn p" onclick="guardarEdpPareja()"><i class="ti ti-check"></i> Guardar</button></div>
+  </div>
+</div>
+<div class="mbg hidden" id="m-torneo">
+  <div class="modal" style="max-width:460px">
+    <div class="modal-header"><div class="modal-title">Nuevo torneo / americano</div><button class="btn icon-only" onclick="cM('m-torneo')"><i class="ti ti-x"></i></button></div>
+    <input type="hidden" id="tor-id">
+    <div class="fr"><lbl>Bloque de agenda</lbl><select id="tor-bloqueo" onchange="syncTorNombre()"></select>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Primero crea el bloque en la Agenda como "Torneo / Americano".</div></div>
+    <div class="fr"><lbl>Nombre del torneo</lbl><input id="tor-nombre" placeholder="Ej: Americano 4ta"></div>
+    <div class="fr"><lbl>Formato</lbl><select id="tor-formato">
+      <option value="parejas_fijas">Parejas fijas — tu armas las parejas, ranking por pareja</option>
+      <option value="rotativo">Rotativo — el sistema arma las parejas, ranking individual</option>
+    </select></div>
+    <div class="fr c2">
+      <div><lbl>Puntos al ganador</lbl><input type="number" id="tor-pg" value="2"></div>
+      <div><lbl>Puntos al perdedor</lbl><input type="number" id="tor-pp" value="0"></div>
+    </div>
+    <div class="fr">
+      <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
+        <input type="checkbox" id="tor-sm" style="width:auto">Sumar tambien los games al puntaje</label>
+      <div style="font-size:11px;color:var(--text3);margin-top:4px">Si esta activo, cada jugador suma los games que hizo ademas de los puntos por ganar.</div>
+    </div>
+    <div class="fr c2">
+      <div><lbl>Canchas a usar</lbl><select id="tor-canchas"></select></div>
+      <div><lbl>Valor inscripcion $</lbl><input type="number" id="tor-valor" value="0"></div>
+    </div>
+    <div id="tor-err" class="hidden alert warning" style="margin-bottom:.875rem"></div>
+    <div class="modal-actions"><button class="btn" onclick="cM('m-torneo')">Cancelar</button><button class="btn p" onclick="guardarTorneo()"><i class="ti ti-check"></i> Crear torneo</button></div>
+  </div>
+</div>
 <div class="mbg hidden" id="m-bloqueo">
   <div class="modal" style="max-width:460px">
     <div class="modal-header"><div class="modal-title" id="m-bloqueo-title">Nuevo bloqueo / evento</div><button class="btn icon-only" onclick="cM('m-bloqueo')"><i class="ti ti-x"></i></button></div>
@@ -1048,7 +1133,7 @@ body[data-role="owner"] .owner-only{display:block!important}
   </div>
 </div>
 <script>
-const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'}};
+const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'},torneo:{label:'Torneo / Americano',icon:'ti-trophy',bg:'#DBEAFE',border:'#3B82F6',text:'#1D4ED8'}};
 const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
@@ -1505,12 +1590,587 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
-function rTorneos(){
+let torFiltro='curso';
+function torFiltrar(k){torFiltro=k;rTorneos();}
+async function refetchTorneos(){
+  const{data,error}=await sb.from('torneos').select('*').order('fecha',{ascending:false});
+  if(error){console.error('Error cargando torneos:',error);D.torneos=[];return false;}
+  D.torneos=(data||[]).map(t=>({id:t.id,bloqueoId:t.bloqueo_id,nombre:t.nombre,fecha:t.fecha,estado:t.estado,
+    puntosGanador:t.puntos_ganador,puntosPerdedor:t.puntos_perdedor,sumarMarcador:t.sumar_marcador,
+    valorInscripcion:t.valor_inscripcion,notas:t.notas,formato:t.formato||'rotativo',canchasUsadas:t.canchas_usadas}));
+  return true;
+}
+async function rTorneos(){
   const cont=g('torneos-list');if(!cont)return;
-  cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aún no hay torneos. Crea uno con Nuevo torneo.</div></div>';
+  if(!D.torneos)await refetchTorneos();
+  const ts=D.torneos||[];
+  if(!ts.length){
+    cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-trophy" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aun no hay torneos. Crea uno con Nuevo torneo.</div></div>';
+    return;
+  }
+  const card=t=>{
+    const b=(D.bloqueos||[]).find(x=>x.id===t.bloqueoId);
+    const hor=b?`${b.horaInicio}-${b.horaFin}`:'sin bloque';
+    const fin=t.estado==='finalizado';
+    const est={inscripcion:'Inscripcion abierta',en_curso:'En curso',finalizado:'Finalizado'}[t.estado]||t.estado;
+    const fmt2=t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo';
+    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer;${fin?'opacity:.75':''}" onclick="abrirTorneo('${t.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-trophy" style="color:${fin?'var(--text3)':'#3B82F6'}"></i> ${t.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${hor} · ${fmt2}</div></div>
+        <span class="badge ${fin?'':'bg'}" style="${fin?'background:#DCFCE7;color:#166534':''}">${fin?'✅ ':''}${est}</span>
+      </div></div>`;
+  };
+  const activos=ts.filter(t=>t.estado!=='finalizado');
+  const fins=ts.filter(t=>t.estado==='finalizado');
+  if(torFiltro==='curso'&&!activos.length&&fins.length)torFiltro='fin';
+  const lista=torFiltro==='fin'?fins:activos;
+  const link=(k,txt,n)=>{const on=torFiltro===k;
+    return `<span onclick="torFiltrar('${k}')" style="cursor:pointer;font-size:13px;font-weight:${on?'700':'500'};color:${on?'var(--blue)':'var(--text2)'}">${txt} (${n})</span>`;};
+  cont.innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+      ${link('curso','En curso',activos.length)}
+      <span style="color:var(--border)">|</span>
+      ${link('fin','Finalizados',fins.length)}
+    </div>`
+    +(lista.length?lista.map(card).join('')
+      :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin torneos '+(torFiltro==='fin'?'finalizados':'en curso')+'.</div>');
 }
 function nuevoTorneo(){
-  alert('Próximamente: crear torneo. (esqueleto listo)');
+  const sel=g('tor-bloqueo');if(!sel)return;
+  const usados=new Set((D.torneos||[]).map(t=>t.bloqueoId));
+  const libres=(D.bloqueos||[]).filter(b=>b.tipo==='torneo'&&!usados.has(b.id));
+  if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
+  sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
+  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=false;g('tor-valor').value=0;g('tor-formato').value='parejas_fijas';
+  const nc=(D.canchas||[]).length||1;const sc=g('tor-canchas');
+  sc.innerHTML=Array.from({length:nc},(_,i)=>`<option value="${i+1}"${i+1===nc?' selected':''}>${i+1} cancha${i>0?'s':''}</option>`).join('');
+  g('tor-err').classList.add('hidden');
+  syncTorNombre();
+  g('m-torneo').classList.remove('hidden');
+}
+function syncTorNombre(){
+  const b=(D.bloqueos||[]).find(x=>x.id===g('tor-bloqueo').value);
+  g('tor-nombre').value=b&&b.titulo?b.titulo:'';
+}
+async function guardarTorneo(){
+  const bid=g('tor-bloqueo').value;const nombre=g('tor-nombre').value.trim();
+  const err=g('tor-err');
+  if(!nombre){err.textContent='Ponle un nombre al torneo.';err.classList.remove('hidden');return;}
+  const b=(D.bloqueos||[]).find(x=>x.id===bid);if(!b){err.textContent='Selecciona un bloque valido.';err.classList.remove('hidden');return;}
+  const{data,error}=await sb.from('torneos').insert({bloqueo_id:bid,nombre,fecha:b.fecha,estado:'inscripcion',
+    puntos_ganador:parseInt(g('tor-pg').value)||0,puntos_perdedor:parseInt(g('tor-pp').value)||0,
+    sumar_marcador:g('tor-sm').checked,valor_inscripcion:parseInt(g('tor-valor').value)||0,formato:g('tor-formato').value,canchas_usadas:parseInt(g('tor-canchas').value)||null}).select().single();
+  if(error){err.textContent='No se pudo crear: '+error.message;err.classList.remove('hidden');return;}
+  audit('Creo torneo','torneos',nombre);
+  await refetchTorneos();cM('m-torneo');rTorneos();
+}
+let torAct=null;
+function volverTorneos(){torAct=null;g('tor-vista-detalle').classList.add('hidden');g('tor-vista-lista').classList.remove('hidden');rTorneos();}
+function nomIns(i){if(!i)return'?';if(i.jugador_id){const j=(D.jugadores||[]).find(x=>x.id===i.jugador_id);if(j)return j.nombre;}return i.nombre_libre||'?';}
+function insById(id){return(torAct.inscritos||[]).find(x=>x.id===id);}
+async function abrirTorneo(id){
+  const t=(D.torneos||[]).find(x=>x.id===id);if(!t)return;
+  const[ins,ron]=await Promise.all([
+    sb.from('torneo_inscritos').select('*').eq('torneo_id',id),
+    sb.from('torneo_rondas').select('*').eq('torneo_id',id).order('numero')
+  ]);
+  const rondas=ron.data||[];let partidos=[];
+  if(rondas.length){const rp=await sb.from('torneo_partidos').select('*').in('ronda_id',rondas.map(r=>r.id));partidos=rp.data||[];}
+  torAct={torneo:t,inscritos:ins.data||[],rondas,partidos};
+  torTabAct='inscritos';
+  g('tor-vista-lista').classList.add('hidden');g('tor-vista-detalle').classList.remove('hidden');
+  rTorneoDetalle();
+}
+let torTabAct='inscritos';
+function torTab(t){
+  torTabAct=t;
+  ['inscritos','rondas','tabla'].forEach(x=>{
+    const el=g('tor-pane-'+x);if(el)el.classList.toggle('hidden',x!==t);
+  });
+  rTorTabs();
+}
+function rTorTabs(){
+  const cont=g('tor-tabs');if(!cont||!torAct)return;
+  const nIns=esParejas()?gruposParejas().length:torAct.inscritos.filter(i=>i.activo).length;
+  const tabs=[
+    {k:'inscritos',l:esParejas()?'Parejas':'Inscritos',n:nIns},
+    {k:'rondas',l:'Rondas',n:torAct.rondas.length},
+    {k:'tabla',l:'Posiciones',n:null}
+  ];
+  cont.innerHTML=tabs.map(t=>{
+    const on=t.k===torTabAct;
+    return `<button onclick="torTab('${t.k}')" style="background:none;border:none;border-bottom:2px solid ${on?'var(--blue)':'transparent'};color:${on?'var(--blue)':'var(--text2)'};font-weight:${on?'700':'600'};font-size:13px;padding:9px 14px;cursor:pointer;margin-bottom:-2px;font-family:'Poppins',sans-serif">${t.l}${t.n!==null?' ('+t.n+')':''}</button>`;
+  }).join('');
+}
+function rTorneoDetalle(){if(!torAct)return;
+  const pf=esParejas();
+  g('tor-form-indiv').classList.toggle('hidden',pf);
+  g('tor-form-pareja').classList.toggle('hidden',!pf);
+  rTorTabs();torTab(torTabAct);rTorAcciones();rTorCupos();rTorHead();rTorInscritos();rTorRondas();rTorTabla();}
+function canchasTorneo(){
+  const all=D.canchas||[];
+  const n=torAct&&torAct.torneo.canchasUsadas;
+  return n?all.slice(0,n):all;
+}
+function rondasRecomendadas(nParejas,nCanchas){
+  const porRonda=Math.min(nCanchas,Math.floor(nParejas/2));
+  if(porRonda<1)return{rondas:0,porRonda:0,partidosPorPareja:0,cruces:0};
+  const cruces=nParejas*(nParejas-1)/2;
+  // Todas las parejas se enfrentan entre si: se cubren TODOS los cruces.
+  // La ultima ronda puede quedar con canchas libres, no importa.
+  const rondas=Math.ceil(cruces/porRonda);
+  return{rondas,porRonda,partidosPorPareja:nParejas-1,cruces};
+}
+function cruzesJugados(){
+  const set=new Set();
+  torAct.partidos.forEach(p=>{
+    const ia=insById(p.a1),ib=insById(p.b1);
+    if(!ia||!ib)return;
+    set.add([ia.pareja_num,ib.pareja_num].sort((a,b)=>a-b).join('|'));
+  });
+  return set.size;
+}
+function rTorCupos(){
+  const el=g('tor-cupos');if(!el)return;
+  const nc=canchasTorneo().length;
+  if(esParejas()){
+    const comp=gruposParejas().filter(gr=>gr.ins.length===2).length;
+    const cupos=Math.min(nc*2,Math.floor(comp/2)*2);
+    const desc=Math.max(0,comp-cupos);
+    let txt=nc+' cancha'+(nc>1?'s':'')+' · '+comp+' pareja'+(comp!==1?'s':'')+(desc?' · descansan '+desc+' por ronda':'');
+    if(comp>=2){
+      const rec=rondasRecomendadas(comp,nc);
+      const hechas=torAct.rondas.length;
+      const jugados=cruzesJugados();
+      txt+=' · ronda '+hechas+' de '+rec.rondas+' ('+rec.partidosPorPareja+' partidos por pareja) · '+jugados+'/'+rec.cruces+' cruces';
+      if(jugados>=rec.cruces)txt+=' ✅ torneo completo';
+    }
+    el.textContent=txt;
+  }else{
+    const n=torAct.inscritos.filter(i=>i.activo).length;
+    const cupos=Math.min(nc*4,Math.floor(n/4)*4);
+    const desc=Math.max(0,n-cupos);
+    el.textContent=nc+' canchas · caben '+(nc*4)+' jugadores por ronda'+(n?' · '+n+' inscritos'+(desc?' · descansan '+desc+' por ronda':''):'');
+  }
+}
+function rTorAcciones(){
+  const cont=g('tor-acciones');if(!cont||!torAct)return;
+  const fin=torAct.torneo.estado==='finalizado';
+  cont.innerHTML=fin
+    ?`<button class="btn ao" onclick="compartirTabla()"><i class="ti ti-share"></i> Compartir</button>
+      <button class="btn ao" onclick="reabrirTorneo()"><i class="ti ti-lock-open"></i> Reabrir</button>
+      <button class="btn d ao" onclick="eliminarTorneo()"><i class="ti ti-trash"></i> Eliminar</button>`
+    :`<button class="btn d ao" onclick="eliminarTorneo()"><i class="ti ti-trash"></i> Eliminar</button>
+      <button class="btn ao" onclick="compartirTabla()"><i class="ti ti-share"></i> Compartir</button>
+      <button class="btn ao" onclick="borrarUltimaRonda()"><i class="ti ti-rotate-2"></i> Borrar ultima ronda</button>
+      <button class="btn ao" onclick="finalizarTorneo()"><i class="ti ti-flag-check"></i> Finalizar</button>
+      <button class="btn p ao" onclick="generarRonda()"><i class="ti ti-plus"></i> Generar ronda</button>`;
+}
+function rTorHead(){
+  const t=torAct.torneo;const act=torAct.inscritos.filter(i=>i.activo);
+  const pag=torAct.inscritos.filter(i=>i.estado_pago==='pagado').length;
+  const rec=pag*(t.valorInscripcion||0);const pend=Math.max(0,(act.length-pag))*(t.valorInscripcion||0);
+  g('tor-det-head').innerHTML=`<div class="card" style="padding:14px">
+    <div style="font-weight:700;font-size:17px"><i class="ti ti-trophy" style="color:#3B82F6"></i> ${t.nombre}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px">${fmtD(new Date(t.fecha+'T12:00:00'))} · ${t.formato==='parejas_fijas'?'Parejas fijas':'Rotativo'} · ${canchasTorneo().length} cancha${canchasTorneo().length>1?'s':''} · ${t.puntosGanador} pts al ganador · ${t.puntosPerdedor} al perdedor${t.sumarMarcador?' · suma games':''}</div>
+    <div class="g4" style="margin-top:12px">
+      <div class="met"><div class="ml">${t.formato==='parejas_fijas'?'Parejas':'Inscritos'}</div><div class="mv">${t.formato==='parejas_fijas'?Math.floor(act.length/2):act.length}</div></div>
+      <div class="met"><div class="ml">Pagados</div><div class="mv">${pag} / ${act.length}</div></div>
+      <div class="met"><div class="ml">Recaudado</div><div class="mv">${fmt(rec)}</div></div>
+      <div class="met"><div class="ml">Por cobrar</div><div class="mv">${fmt(pend)}</div></div>
+    </div></div>`;
+}
+function esParejas(){return torAct&&torAct.torneo.formato==='parejas_fijas';}
+function gruposParejas(){
+  const m={};torAct.inscritos.forEach(i=>{const n=i.pareja_num||0;(m[n]=m[n]||[]).push(i);});
+  return Object.keys(m).map(n=>({num:parseInt(n),ins:m[n]})).sort((a,b)=>a.num-b.num);
+}
+function nomPareja(gr){return gr.ins.map(nomIns).join(' / ');}
+function rTorInscritos(){
+  const cont=g('tor-ins-list');const ins=torAct.inscritos;
+  if(!ins.length){cont.innerHTML='<div style="font-size:12px;color:var(--text3);padding:6px 0">Aun no hay inscritos.</div>';return;}
+  if(esParejas()){
+    cont.innerHTML='<div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:10px">'+gruposParejas().map(gr=>{
+      const completa=gr.ins.length===2;
+      const todosPag=gr.ins.every(i=>i.estado_pago==='pagado');
+      return `<div style="border:1px solid ${todosPag?'#BBF7D0':'var(--border)'};border-radius:var(--r);padding:10px 12px;background:${todosPag?'#F0FDF4':'#fff'}">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+          <span style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px">PAREJA ${gr.num}</span>
+          ${completa?'':'<span style="font-size:10px;color:#92400E;font-weight:600">falta 1</span>'}
+          <button class="btn sm icon-only ao" onclick="editarPareja(${gr.num})" style="margin-left:auto;padding:2px 6px"><i class="ti ti-pencil" style="font-size:12px"></i></button>
+          <button class="btn sm d icon-only ao" onclick="quitarPareja(${gr.num})" style="padding:2px 6px"><i class="ti ti-x" style="font-size:12px"></i></button>
+        </div>
+        ${gr.ins.map(i=>{const pag=i.estado_pago==='pagado';
+          return `<div style="display:flex;align-items:center;gap:6px;padding:2px 0">
+            <span style="flex:1;font-size:13px;font-weight:600">${nomIns(i)}</span>
+            <span onclick="togTorPago('${i.id}')" style="cursor:pointer;font-size:10px;font-weight:700;padding:2px 8px;border-radius:10px;background:${pag?'#DCFCE7':'#FEF3C7'};color:${pag?'#166534':'#92400E'}">${pag?'PAGADO':'PENDIENTE'}</span>
+          </div>`;}).join('')}
+      </div>`;}).join('')+'</div>';
+    return;
+  }
+  cont.innerHTML=ins.map(i=>{const pag=i.estado_pago==='pagado';
+    return `<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border)">
+      <span style="flex:1;font-size:13px">${nomIns(i)}</span>
+      <button class="btn sm ${pag?'p':''}" onclick="togTorPago('${i.id}')" style="font-size:11px">${pag?'Pagado':'Pendiente'}</button>
+      <button class="btn sm d icon-only ao" onclick="quitarTorInscrito('${i.id}')"><i class="ti ti-x"></i></button>
+    </div>`;}).join('');
+}
+function sugTorP(n){
+  const inp=g('tor-p'+n);const d=g('tor-p'+n+'-drop');
+  const q=(inp.value||'').toLowerCase().trim();
+  inp.dataset.jid='';
+  if(!q){d.classList.add('hidden');return;}
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  const otro=g('tor-p'+(n===1?2:1));
+  if(otro&&otro.dataset.jid)ya.add(otro.dataset.jid);
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="pickTorP(${n},'${j.id}','${j.nombre.replace(/'/g,"\\'")}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+function pickTorP(n,jid,nombre){
+  const inp=g('tor-p'+n);inp.value=nombre;inp.dataset.jid=jid;
+  g('tor-p'+n+'-drop').classList.add('hidden');
+}
+async function addParejaCompleta(){
+  const i1=g('tor-p1'),i2=g('tor-p2');
+  const n1=(i1.value||'').trim(),n2=(i2.value||'').trim();
+  if(!n1||!n2){alert('Completa los dos jugadores de la pareja.');return;}
+  const nums=torAct.inscritos.map(i=>i.pareja_num||0);
+  const num=(nums.length?Math.max(...nums):0)+1;
+  const arma=(nom,jid)=>{const p={torneo_id:torAct.torneo.id,pareja_num:num};
+    if(jid)p.jugador_id=jid;
+    else{const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===nom.toLowerCase());
+      if(j)p.jugador_id=j.id;else p.nombre_libre=nom;}
+    return p;};
+  const rows=[arma(n1,i1.dataset.jid),arma(n2,i2.dataset.jid)];
+  const{data,error}=await sb.from('torneo_inscritos').insert(rows).select();
+  if(error){alert('No se pudo agregar la pareja: '+error.message);return;}
+  torAct.inscritos.push(...(data||[]));
+  i1.value='';i2.value='';i1.dataset.jid='';i2.dataset.jid='';
+  g('tor-p1-drop').classList.add('hidden');g('tor-p2-drop').classList.add('hidden');
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
+}
+function editarPareja(num){
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  g('edp-num').value=num;
+  g('m-tor-pareja-title').textContent='Editar pareja '+num;
+  [1,2].forEach(n=>{
+    const ins=gr.ins[n-1];const inp=g('edp-'+n);
+    inp.value=ins?nomIns(ins):'';
+    inp.dataset.insId=ins?ins.id:'';
+    inp.dataset.jid=ins&&ins.jugador_id?ins.jugador_id:'';
+    g('edp-'+n+'-drop').classList.add('hidden');
+  });
+  g('edp-err').classList.add('hidden');
+  g('m-tor-pareja').classList.remove('hidden');
+}
+function sugEdp(n){
+  const inp=g('edp-'+n);const d=g('edp-'+n+'-drop');
+  const q=(inp.value||'').toLowerCase().trim();
+  inp.dataset.jid='';
+  if(!q){d.classList.add('hidden');return;}
+  const num=parseInt(g('edp-num').value);
+  const propios=new Set((gruposParejas().find(x=>x.num===num)?.ins||[]).map(i=>i.jugador_id).filter(Boolean));
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  propios.forEach(p=>ya.delete(p));
+  const otro=g('edp-'+(n===1?2:1));
+  if(otro&&otro.dataset.jid)ya.add(otro.dataset.jid);
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="pickEdp(${n},'${j.id}','${j.nombre.replace(/'/g,"\\'")}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+function pickEdp(n,jid,nombre){
+  const inp=g('edp-'+n);inp.value=nombre;inp.dataset.jid=jid;
+  g('edp-'+n+'-drop').classList.add('hidden');
+}
+async function guardarEdpPareja(){
+  const num=parseInt(g('edp-num').value);
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  const err=g('edp-err');
+  const vals=[1,2].map(n=>{const inp=g('edp-'+n);return{nom:(inp.value||'').trim(),jid:inp.dataset.jid||'',insId:inp.dataset.insId||''};});
+  if(vals.some(v=>!v.nom)){err.textContent='Completa los dos jugadores.';err.classList.remove('hidden');return;}
+  for(const v of vals){
+    if(!v.insId)continue;
+    const upd={jugador_id:null,nombre_libre:null};
+    if(v.jid)upd.jugador_id=v.jid;
+    else{const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===v.nom.toLowerCase());
+      if(j)upd.jugador_id=j.id;else upd.nombre_libre=v.nom;}
+    const{error}=await sb.from('torneo_inscritos').update(upd).eq('id',v.insId);
+    if(error){err.textContent='No se pudo guardar: '+error.message;err.classList.remove('hidden');return;}
+    const ins=torAct.inscritos.find(x=>x.id===v.insId);
+    if(ins){ins.jugador_id=upd.jugador_id;ins.nombre_libre=upd.nombre_libre;}
+  }
+  audit('Edito pareja','torneos',torAct.torneo.nombre+' · pareja '+num);
+  cM('m-tor-pareja');rTorneoDetalle();
+}
+async function togParejaPago(num){
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  const pag=gr.ins.every(i=>i.estado_pago==='pagado');const nuevo=pag?'pendiente':'pagado';
+  for(const i of gr.ins){await sb.from('torneo_inscritos').update({estado_pago:nuevo}).eq('id',i.id);i.estado_pago=nuevo;}
+  rTorHead();rTorInscritos();
+}
+async function quitarPareja(num){
+  const gr=gruposParejas().find(x=>x.num===num);if(!gr)return;
+  if(!confirm('Quitar la pareja '+num+' del torneo?'))return;
+  for(const i of gr.ins){
+    const{error}=await sb.from('torneo_inscritos').delete().eq('id',i.id);
+    if(error){alert('No se pudo quitar (puede tener partidos): '+error.message);return;}
+  }
+  torAct.inscritos=torAct.inscritos.filter(x=>(x.pareja_num||0)!==num);
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
+}
+function tablaActual(){
+  const act=torAct.inscritos.filter(i=>i.activo);
+  const t=torAct.torneo;
+  const cfg={puntosGanador:t.puntosGanador,puntosPerdedor:t.puntosPerdedor,sumarMarcador:t.sumarMarcador};
+  if(esParejas()){
+    const grs=gruposParejas().filter(gr=>gr.ins.length===2);
+    const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>{
+      const ia=insById(p.a1),ib=insById(p.b1);
+      return{pa:ia?ia.pareja_num:0,pb:ib?ib.pareja_num:0,marcadorA:p.marcador_a,marcadorB:p.marcador_b};})}));
+    return calcularTablaParejas(grs,hist,cfg);
+  }
+  const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>({a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2,marcadorA:p.marcador_a,marcadorB:p.marcador_b}))}));
+  return calcularTablaAmericano(act.map(i=>({id:i.id,nombre:nomIns(i)})),hist,cfg);
+}
+async function finalizarTorneo(){
+  const tb=tablaActual();
+  if(!tb.length||!tb.some(x=>x.pj>0)){alert('Todavia no hay resultados cargados.');return;}
+  const sinCargar=torAct.partidos.filter(p=>p.marcador_a==null||p.marcador_b==null).length;
+  let msg='Finalizar el torneo? La tabla queda congelada y no se generan mas rondas.';
+  if(sinCargar)msg='Hay '+sinCargar+' partido(s) sin marcador. '+msg;
+  if(!confirm(msg))return;
+  const{error}=await sb.from('torneos').update({estado:'finalizado'}).eq('id',torAct.torneo.id);
+  if(error){alert('No se pudo finalizar: '+error.message);return;}
+  torAct.torneo.estado='finalizado';await refetchTorneos();
+  audit('Finalizo torneo','torneos',torAct.torneo.nombre);
+  torTabAct='tabla';rTorneoDetalle();
+}
+async function reabrirTorneo(){
+  if(!confirm('Reabrir el torneo para seguir generando rondas?'))return;
+  const{error}=await sb.from('torneos').update({estado:'en_curso'}).eq('id',torAct.torneo.id);
+  if(error){alert('No se pudo reabrir: '+error.message);return;}
+  torAct.torneo.estado='en_curso';await refetchTorneos();rTorneoDetalle();
+}
+function compartirTabla(){
+  const t=torAct.torneo;const tb=tablaActual();
+  if(!tb.length){alert('Todavia no hay tabla.');return;}
+  const medalla=i=>i===0?'🥇':i===1?'🥈':i===2?'🥉':(i+1)+'.';
+  let txt='🏆 '+t.nombre+'\n'+fmtD(new Date(t.fecha+'T12:00:00'))+'\n\n';
+  tb.forEach((x,i)=>{txt+=medalla(i)+' '+x.nombre+' — '+x.pts+' pts ('+x.pg+'G '+x.pp+'P · '+x.gf+'/'+x.gc+')\n';});
+  if(t.estado==='finalizado')txt+='\nTorneo finalizado ✅';
+  navigator.clipboard.writeText(txt).then(
+    ()=>alert('Tabla copiada. Pegala en WhatsApp.'),
+    ()=>{prompt('Copia la tabla:',txt);}
+  );
+}
+async function eliminarTorneo(){
+  const t=torAct.torneo;
+  if(!confirm('Eliminar el torneo "'+t.nombre+'"? Se borran inscritos, rondas y resultados. No se puede deshacer.'))return;
+  const{error}=await sb.from('torneos').delete().eq('id',t.id);
+  if(error){alert('No se pudo eliminar: '+error.message);return;}
+  audit('Elimino torneo','torneos',t.nombre);
+  await refetchTorneos();volverTorneos();
+}
+function sugTorJug(){
+  const q=(g('tor-jug-input').value||'').toLowerCase().trim();const d=g('tor-jug-drop');
+  if(!q){d.classList.add('hidden');return;}
+  const ya=new Set(torAct.inscritos.map(i=>i.jugador_id).filter(Boolean));
+  const res=(D.jugadores||[]).filter(j=>j.nombre.toLowerCase().includes(q)&&!ya.has(j.id)).slice(0,6);
+  if(!res.length){d.classList.add('hidden');return;}
+  d.innerHTML=res.map(j=>`<div style="padding:8px 12px;cursor:pointer;font-size:13px" onmouseover="this.style.background='var(--gray-light)'" onmouseout="this.style.background=''" onclick="addTorInscrito('${j.id}')">${j.nombre}</div>`).join('');
+  d.classList.remove('hidden');
+}
+async function addTorInscrito(jid){
+  const inp=g('tor-jug-input');const payload={torneo_id:torAct.torneo.id};
+  if(jid)payload.jugador_id=jid;
+  else{const nom=(inp.value||'').trim();if(!nom)return;
+    const j=(D.jugadores||[]).find(x=>x.nombre.toLowerCase()===nom.toLowerCase());
+    if(j)payload.jugador_id=j.id;else payload.nombre_libre=nom;}
+  const{data,error}=await sb.from('torneo_inscritos').insert(payload).select().single();
+  if(error){alert('No se pudo inscribir: '+error.message);return;}
+  torAct.inscritos.push(data);inp.value='';g('tor-jug-drop').classList.add('hidden');
+  rTorCupos();rTorHead();rTorInscritos();rTorTabla();
+}
+async function togTorPago(id){
+  const i=insById(id);if(!i)return;
+  const nuevo=i.estado_pago==='pagado'?'pendiente':'pagado';
+  const{error}=await sb.from('torneo_inscritos').update({estado_pago:nuevo}).eq('id',id);
+  if(error){alert(error.message);return;}
+  i.estado_pago=nuevo;rTorHead();rTorInscritos();
+}
+async function quitarTorInscrito(id){
+  if(!confirm('Quitar a este jugador del torneo?'))return;
+  const{error}=await sb.from('torneo_inscritos').delete().eq('id',id);
+  if(error){alert('No se pudo quitar (puede tener partidos): '+error.message);return;}
+  torAct.inscritos=torAct.inscritos.filter(x=>x.id!==id);
+  rTorHead();rTorInscritos();rTorTabla();
+}
+function generarRondaParejas(nums,canchas,historial){
+  const k=(x,y)=>[x,y].sort((a,b)=>a-b).join('|');
+  // Cruces ya jugados y partidos por pareja
+  const jugado=new Set(),jug={};nums.forEach(n=>{jug[n]=0;});
+  (historial||[]).forEach(r=>{(r.partidos||[]).forEach(p=>{
+    jugado.add(k(p.pa,p.pb));
+    jug[p.pa]=(jug[p.pa]||0)+1;jug[p.pb]=(jug[p.pb]||0)+1;});});
+  if(nums.length<2)return{error:'Se necesitan al menos 2 parejas completas.'};
+  // Todos los cruces pendientes
+  const pend=[];
+  for(let i=0;i<nums.length;i++)for(let j=i+1;j<nums.length;j++){
+    if(!jugado.has(k(nums[i],nums[j])))pend.push([nums[i],nums[j]]);
+  }
+  if(!pend.length)return{error:'Ya se jugaron todos los cruces posibles ('+(nums.length*(nums.length-1)/2)+' partidos). El torneo esta completo.'};
+  // Priorizar cruces de las parejas que menos han jugado
+  pend.sort((x,y)=>(jug[x[0]]+jug[x[1]])-(jug[y[0]]+jug[y[1]])||Math.random()-0.5);
+  // Armar la ronda: ninguna pareja puede jugar dos veces
+  const usadas=new Set();const partidos=[];let ci=0;
+  for(const[a,b]of pend){
+    if(partidos.length>=canchas.length)break;
+    if(usadas.has(a)||usadas.has(b))continue;
+    usadas.add(a);usadas.add(b);
+    partidos.push({cancha:canchas[ci%canchas.length],pa:a,pb:b});ci++;
+  }
+  const descansan=nums.filter(n=>!usadas.has(n));
+  return{partidos,descansan};
+}
+async function generarRonda(){
+  if(torAct.torneo.estado==='finalizado'){alert('El torneo esta finalizado. Reabrilo para generar mas rondas.');return;}
+  const act=torAct.inscritos.filter(i=>i.activo);
+  if(act.length<4){alert('Necesitas al menos 4 inscritos.');return;}
+  const canchas=canchasTorneo();if(!canchas.length){alert('No hay canchas configuradas.');return;}
+  let res,rows0;
+  if(esParejas()){
+    const grs=gruposParejas().filter(gr=>gr.ins.length===2);
+    if(grs.length<2){alert('Necesitas al menos 2 parejas completas.');return;}
+    const pnum={};grs.forEach(gr=>{pnum[gr.num]=gr.ins;});
+    const histP=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>{
+      const ia=insById(p.a1),ib=insById(p.b1);
+      return{pa:ia?ia.pareja_num:0,pb:ib?ib.pareja_num:0};})}));
+    res=generarRondaParejas(grs.map(gr=>gr.num),canchas,histP);
+    if(res.error){alert(res.error);return;}
+    rows0=res.partidos.map(p=>({cancha:p.cancha,a1:pnum[p.pa][0].id,a2:pnum[p.pa][1].id,b1:pnum[p.pb][0].id,b2:pnum[p.pb][1].id}));
+  }else{
+    const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>({a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2}))}));
+    res=generarRondaAmericano(act.map(i=>({id:i.id})),canchas,hist);
+    if(res.error){alert(res.error);return;}
+    rows0=res.partidos;
+  }
+  const num=(torAct.rondas.length?Math.max(...torAct.rondas.map(r=>r.numero)):0)+1;
+  const{data:ron,error:e1}=await sb.from('torneo_rondas').insert({torneo_id:torAct.torneo.id,numero:num}).select().single();
+  if(e1){alert('No se pudo crear la ronda: '+e1.message);return;}
+  const rows=rows0.map(p=>({ronda_id:ron.id,cancha_id:p.cancha.id,a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2}));
+  const{data:pts,error:e2}=await sb.from('torneo_partidos').insert(rows).select();
+  if(e2){alert('No se pudieron crear los partidos: '+e2.message);return;}
+  torAct.rondas.push(ron);torAct.partidos.push(...(pts||[]));
+  if(torAct.torneo.estado==='inscripcion'){await sb.from('torneos').update({estado:'en_curso'}).eq('id',torAct.torneo.id);torAct.torneo.estado='en_curso';await refetchTorneos();}
+  torTabAct='rondas';rTorneoDetalle();
+  const ult=g('tor-rondas');if(ult&&ult.lastElementChild)ult.lastElementChild.scrollIntoView({behavior:'smooth',block:'center'});
+}
+async function borrarUltimaRonda(){
+  if(!torAct.rondas.length){alert('No hay rondas.');return;}
+  const ult=torAct.rondas[torAct.rondas.length-1];
+  if(!confirm('Borrar la ronda '+ult.numero+'? Se pierden sus marcadores.'))return;
+  const{error}=await sb.from('torneo_rondas').delete().eq('id',ult.id);
+  if(error){alert(error.message);return;}
+  torAct.rondas=torAct.rondas.filter(r=>r.id!==ult.id);
+  torAct.partidos=torAct.partidos.filter(p=>p.ronda_id!==ult.id);
+  rTorneoDetalle();
+}
+async function setMarcador(pid,lado,val){
+  const p=torAct.partidos.find(x=>x.id===pid);if(!p)return;
+  const v=val===''?null:parseInt(val);const campo=lado==='a'?'marcador_a':'marcador_b';
+  p[campo]=v;
+  const upd={};upd[campo]=v;
+  const{error}=await sb.from('torneo_partidos').update(upd).eq('id',pid);
+  if(error){console.error('Error guardando marcador:',error);return;}
+  rTorTabla();
+}
+function rTorRondas(){
+  const cont=g('tor-rondas');
+  if(!torAct.rondas.length){cont.innerHTML='<div class="card" style="padding:20px;text-align:center;color:var(--text3);font-size:13px">Aun no hay rondas. Usa "Generar ronda".</div>';return;}
+  cont.innerHTML=[...torAct.rondas].reverse().map(r=>{
+    const ps=torAct.partidos.filter(p=>p.ronda_id===r.id);
+    const jug=new Set();ps.forEach(p=>[p.a1,p.a2,p.b1,p.b2].forEach(x=>jug.add(x)));
+    const desc=torAct.inscritos.filter(i=>i.activo&&!jug.has(i.id)).map(nomIns);
+    return `<div class="card" style="padding:14px;margin-bottom:10px">
+      <div class="card-title">Ronda ${r.numero}</div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:10px">
+      ${ps.map(p=>{const cn=(D.canchas||[]).find(c=>c.id===p.cancha_id)?.nombre||'Cancha';
+        const hay=p.marcador_a!=null&&p.marcador_b!=null;
+        const gA=hay&&p.marcador_a>p.marcador_b,gB=hay&&p.marcador_b>p.marcador_a;
+        const fila=(nom,val,lado,gana)=>`<div style="display:flex;align-items:center;gap:8px;padding:5px 0">
+            <span style="flex:1;font-size:13px;font-weight:${gana?'700':'500'};color:${gana?'var(--text)':'var(--text2)'}">${nom}</span>
+            <input type="number" value="${val==null?'':val}" onchange="setMarcador('${p.id}','${lado}',this.value)" style="width:48px;text-align:center;padding:4px;font-weight:700">
+          </div>`;
+        return `<div style="border:1px solid var(--border);border-radius:var(--r);padding:10px 12px">
+          <div style="font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin-bottom:4px">${cn.toUpperCase()}</div>
+          ${fila(nomIns(insById(p.a1))+' / '+nomIns(insById(p.a2)),p.marcador_a,'a',gA)}
+          <div style="border-top:1px solid var(--border)"></div>
+          ${fila(nomIns(insById(p.b1))+' / '+nomIns(insById(p.b2)),p.marcador_b,'b',gB)}
+        </div>`;}).join('')}
+      </div>
+      ${desc.length?`<div style="font-size:11px;color:var(--text3);margin-top:8px">Descansan: ${desc.join(', ')}</div>`:''}
+    </div>`;}).join('');
+}
+function calcularTablaParejas(grs,historial,cfg){
+  const pg=cfg?.puntosGanador??2,pp=cfg?.puntosPerdedor??0,sm=cfg?.sumarMarcador??true;
+  const t={};grs.forEach(gr=>{t[gr.num]={num:gr.num,nombre:nomPareja(gr),pj:0,pg:0,pp:0,gf:0,gc:0,pts:0};});
+  (historial||[]).forEach(r=>{(r.partidos||[]).forEach(p=>{
+    if(p.marcadorA==null||p.marcadorB==null)return;
+    const gA=p.marcadorA>p.marcadorB,emp=p.marcadorA===p.marcadorB;
+    const ap=(num,gf,gc,gano)=>{const x=t[num];if(!x)return;
+      x.pj++;x.gf+=gf;x.gc+=gc;if(!emp){gano?x.pg++:x.pp++;}
+      x.pts+=(emp?(pg+pp)/2:gano?pg:pp);if(sm)x.pts+=gf;};
+    ap(p.pa,p.marcadorA,p.marcadorB,gA);ap(p.pb,p.marcadorB,p.marcadorA,!gA);
+  });});
+  return Object.values(t).sort((a,b)=>b.pts-a.pts||b.pg-a.pg||(b.gf-b.gc)-(a.gf-a.gc)||a.gc-b.gc);
+}
+function podioHtml(tb){
+  if(!torAct||torAct.torneo.estado!=='finalizado'||!tb||!tb.length)return '';
+  const top=tb.slice(0,3);const med=['🥇','🥈','🥉'];const bg=['#FEF9C3','#F1F5F9','#FEF3C7'];
+  return `<div class="card" style="padding:16px;margin-bottom:12px">
+    <div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin-bottom:10px">PODIO</div>
+    <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:10px">
+    ${top.map((x,i)=>`<div style="background:${bg[i]};border-radius:var(--r);padding:12px;text-align:center">
+      <div style="font-size:26px;line-height:1">${med[i]}</div>
+      <div style="font-weight:700;font-size:14px;margin-top:6px">${x.nombre}</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:2px">${x.pts} pts · ${x.pg}G ${x.pp}P</div>
+    </div>`).join('')}
+    </div></div>`;
+}
+function rTorTabla(){
+  const cont=g('tor-tabla');const act=torAct.inscritos.filter(i=>i.activo);
+  if(!act.length||!torAct.rondas.length){cont.innerHTML='';return;}
+  if(esParejas()){
+    const grs=gruposParejas().filter(gr=>gr.ins.length===2);
+    const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>{
+      const ia=insById(p.a1),ib=insById(p.b1);
+      return{pa:ia?ia.pareja_num:0,pb:ib?ib.pareja_num:0,marcadorA:p.marcador_a,marcadorB:p.marcador_b};})}));
+    const t0=torAct.torneo;
+    const tb=calcularTablaParejas(grs,hist,{puntosGanador:t0.puntosGanador,puntosPerdedor:t0.puntosPerdedor,sumarMarcador:t0.sumarMarcador});
+    cont.innerHTML=podioHtml(tb)+`<div class="card" style="padding:0;overflow:auto">
+      <div class="card-title" style="padding:14px 14px 0">Tabla de posiciones</div>
+      <table style="width:100%;border-collapse:collapse;font-size:13px">
+        <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
+          <th style="padding:8px 14px">#</th><th>Pareja</th><th>PJ</th><th>PG</th><th>PP</th><th>GF</th><th>GC</th><th style="padding-right:14px">Pts</th></tr></thead>
+        <tbody>${tb.map((x,i)=>`<tr style="border-top:1px solid var(--border)">
+          <td style="padding:8px 14px;font-weight:700">${i+1}</td><td>${x.nombre}</td><td>${x.pj}</td><td>${x.pg}</td><td>${x.pp}</td><td>${x.gf}</td><td>${x.gc}</td><td style="padding-right:14px;font-weight:700">${x.pts}</td></tr>`).join('')}</tbody>
+      </table></div>`;
+    return;
+  }
+  const hist=torAct.rondas.map(r=>({partidos:torAct.partidos.filter(p=>p.ronda_id===r.id).map(p=>({a1:p.a1,a2:p.a2,b1:p.b1,b2:p.b2,marcadorA:p.marcador_a,marcadorB:p.marcador_b}))}));
+  const t=torAct.torneo;
+  const tabla=calcularTablaAmericano(act.map(i=>({id:i.id,nombre:nomIns(i)})),hist,{puntosGanador:t.puntosGanador,puntosPerdedor:t.puntosPerdedor,sumarMarcador:t.sumarMarcador});
+  cont.innerHTML=podioHtml(tabla)+`<div class="card" style="padding:0;overflow:auto">
+    <div class="card-title" style="padding:14px 14px 0">Tabla de posiciones</div>
+    <table style="width:100%;border-collapse:collapse;font-size:13px">
+      <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
+        <th style="padding:8px 14px">#</th><th>Jugador</th><th>PJ</th><th>PG</th><th>PP</th><th>GF</th><th>GC</th><th style="padding-right:14px">Pts</th></tr></thead>
+      <tbody>${tabla.map((x,i)=>`<tr style="border-top:1px solid var(--border)">
+        <td style="padding:8px 14px;font-weight:700">${i+1}</td><td>${x.nombre}</td><td>${x.pj}</td><td>${x.pg}</td><td>${x.pp}</td><td>${x.gf}</td><td>${x.gc}</td><td style="padding-right:14px;font-weight:700">${x.pts}</td></tr>`).join('')}</tbody>
+    </table></div>`;
 }
 function S(s){
   if(s==='deudas')setTimeout(rDeudas,50);
@@ -1788,9 +2448,9 @@ function openBloqueo(id,fecha,horario,cid){
 function selBloqTipo(tipo){
   g('bl-tipos').dataset.sel=tipo;
   document.querySelectorAll('.bl-tipo-opt').forEach(el=>{const on=el.dataset.tipo===tipo;el.style.borderColor=on?BLOQ_TIPOS[el.dataset.tipo].border:'var(--border)';el.style.background=on?BLOQ_TIPOS[el.dataset.tipo].bg:'';el.style.color=on?BLOQ_TIPOS[el.dataset.tipo].text:'';});
-  const lb={mantenimiento:'Motivo / descripción',clase:'Detalle (opcional)',cumpleanos:'Nombre del cumpleañero',evento:'Descripción del evento'};g('bl-desc-lbl').textContent=lb[tipo]||'Motivo / descripción';
-  const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno'};g('bl-desc').placeholder=pl[tipo]||'';
-  const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
+  const lb={mantenimiento:'Motivo / descripción',clase:'Detalle (opcional)',cumpleanos:'Nombre del cumpleañero',evento:'Descripción del evento',torneo:'Nombre del torneo'};g('bl-desc-lbl').textContent=lb[tipo]||'Motivo / descripción';
+  const pl={mantenimiento:'Ej: Mantención de red',clase:'Ej: Clase grupal nivel intermedio',cumpleanos:'Ej: Cumpleaños de Martina',evento:'Ej: Torneo interno',torneo:'Ej: Americano Femenino Julio'};g('bl-desc').placeholder=pl[tipo]||'';
+  const vl={mantenimiento:'Costo del bloqueo $',clase:'Valor de la clase / arriendo $',cumpleanos:'Valor del arriendo $',evento:'Valor cobrado por el evento $',torneo:'Valor total del torneo $'};g('bl-valor-lbl').textContent=vl[tipo]||'Valor del bloque $';
   g('bl-clase-extra').classList.toggle('hidden',tipo!=='clase');
   var chkWrap=document.getElementById('bl-genIngreso-wrap');
   if(tipo==='clase'){g('bl-genIngreso').checked=true;g('bl-ingreso-wrap').classList.remove('hidden');chkWrap.style.display='none';}else{chkWrap.style.display='';tgBloqIngreso();}
@@ -2959,6 +3619,54 @@ function openVerCerrada(rid){
   g('m-ver-cerrada').classList.remove('hidden');
 }
 
+// ── MOTOR AMERICANO ──────────────────────────────────────
+function generarRondaAmericano(inscritos,canchas,historial){
+  const ids=inscritos.map(i=>i.id);const k=(x,y)=>[x,y].sort().join('|');
+  const jugados={},descansos={},juntos={},rivales={};
+  ids.forEach(i=>{jugados[i]=0;descansos[i]=0;});
+  (historial||[]).forEach(r=>{
+    const en=new Set();
+    (r.partidos||[]).forEach(p=>{
+      [p.a1,p.a2,p.b1,p.b2].forEach(j=>{en.add(j);if(jugados[j]!==undefined)jugados[j]++;});
+      juntos[k(p.a1,p.a2)]=(juntos[k(p.a1,p.a2)]||0)+1;
+      juntos[k(p.b1,p.b2)]=(juntos[k(p.b1,p.b2)]||0)+1;
+      [[p.a1,p.b1],[p.a1,p.b2],[p.a2,p.b1],[p.a2,p.b2]].forEach(([x,y])=>{rivales[k(x,y)]=(rivales[k(x,y)]||0)+1;});
+    });
+    ids.forEach(i=>{if(!en.has(i))descansos[i]++;});
+  });
+  const cupos=Math.min(canchas.length*4,Math.floor(ids.length/4)*4);
+  if(cupos<4)return{error:'Se necesitan al menos 4 jugadores activos.'};
+  const orden=[...ids].sort((a,b)=>jugados[a]-jugados[b]||descansos[b]-descansos[a]||Math.random()-0.5);
+  const juegan=orden.slice(0,cupos);const descansan=orden.slice(cupos);
+  const pool=[...juegan];const parejas=[];
+  while(pool.length>=2){
+    const p1=pool.shift();let mejor=pool[0],mc=Infinity;
+    pool.forEach(p2=>{const c=(juntos[k(p1,p2)]||0)*100+(rivales[k(p1,p2)]||0);if(c<mc){mc=c;mejor=p2;}});
+    pool.splice(pool.indexOf(mejor),1);parejas.push([p1,mejor]);
+  }
+  const partidos=[];const pp=[...parejas];let ci=0;
+  while(pp.length>=2){
+    const A=pp.shift();let mi=0,mc=Infinity;
+    pp.forEach((B,i)=>{let c=0;A.forEach(x=>B.forEach(y=>{c+=(rivales[k(x,y)]||0);}));if(c<mc){mc=c;mi=i;}});
+    const B=pp.splice(mi,1)[0];
+    partidos.push({cancha:canchas[ci%canchas.length],a1:A[0],a2:A[1],b1:B[0],b2:B[1]});ci++;
+  }
+  return{partidos,descansan};
+}
+function calcularTablaAmericano(inscritos,historial,cfg){
+  const pg=cfg?.puntosGanador??2,pperd=cfg?.puntosPerdedor??0,sm=cfg?.sumarMarcador??true;
+  const t={};inscritos.forEach(i=>{t[i.id]={id:i.id,nombre:i.nombre,pj:0,pg:0,pp:0,gf:0,gc:0,pts:0};});
+  (historial||[]).forEach(r=>{(r.partidos||[]).forEach(p=>{
+    if(p.marcadorA==null||p.marcadorB==null)return;
+    const gA=p.marcadorA>p.marcadorB,emp=p.marcadorA===p.marcadorB;
+    const ap=(eq,gf,gc,gano)=>{eq.forEach(j=>{const x=t[j];if(!x)return;
+      x.pj++;x.gf+=gf;x.gc+=gc;if(!emp){gano?x.pg++:x.pp++;}
+      x.pts+=(emp?(pg+pperd)/2:gano?pg:pperd);if(sm)x.pts+=gf;});};
+    ap([p.a1,p.a2],p.marcadorA,p.marcadorB,gA);
+    ap([p.b1,p.b2],p.marcadorB,p.marcadorA,!gA);
+  });});
+  return Object.values(t).sort((a,b)=>b.pts-a.pts||b.pg-a.pg||(b.gf-b.gc)-(a.gf-a.gc)||a.gc-b.gc);
+}
 // ── CAJA ──────────────────────────────────────────────────
 function cTab(t){cajaT=t;['hoy','custom'].forEach(x=>g('rtab-'+x).classList.toggle('active',x===t));
   const cr=g('caja-custom-range');
