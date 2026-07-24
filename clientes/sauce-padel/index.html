@@ -1640,7 +1640,7 @@ function nuevoTorneo(){
   const usados=new Set((D.torneos||[]).map(t=>t.bloqueoId));
   const libres=(D.bloqueos||[]).filter(b=>b.tipo==='torneo'&&!usados.has(b.id));
   if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
-  sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
+  sel.innerHTML=libres.map(b=>{const cn=b.canchaId==='todas'?'Todas las canchas':((D.canchas||[]).find(c=>c.id===b.canchaId)?.nombre||'Cancha');return `<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin} · ${cn}${b.titulo?' · '+b.titulo:''}</option>`;}).join('');
   g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=false;g('tor-valor').value=0;g('tor-formato').value='parejas_fijas';
   const nc=(D.canchas||[]).length||1;const sc=g('tor-canchas');
   sc.innerHTML=Array.from({length:nc},(_,i)=>`<option value="${i+1}"${i+1===nc?' selected':''}>${i+1} cancha${i>0?'s':''}</option>`).join('');
