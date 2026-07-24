@@ -945,7 +945,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
     <div class="fr">
       <label style="display:flex;align-items:center;gap:8px;font-size:13px;font-weight:600;cursor:pointer">
-        <input type="checkbox" id="tor-sm" style="width:auto" checked>Sumar tambien los games al puntaje</label>
+        <input type="checkbox" id="tor-sm" style="width:auto">Sumar tambien los games al puntaje</label>
       <div style="font-size:11px;color:var(--text3);margin-top:4px">Si esta activo, cada jugador suma los games que hizo ademas de los puntos por ganar.</div>
     </div>
     <div class="fr c2">
@@ -1609,7 +1609,7 @@ function nuevoTorneo(){
   const libres=(D.bloqueos||[]).filter(b=>b.tipo==='torneo'&&!usados.has(b.id));
   if(!libres.length){alert('Primero crea un bloque tipo "Torneo / Americano" en la Agenda.');return;}
   sel.innerHTML=libres.map(b=>`<option value="${b.id}">${fmtD(new Date(b.fecha+'T12:00:00'))} · ${b.horaInicio}-${b.horaFin}${b.titulo?' · '+b.titulo:''}</option>`).join('');
-  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=true;g('tor-valor').value=0;g('tor-formato').value='parejas_fijas';
+  g('tor-id').value='';g('tor-pg').value=2;g('tor-pp').value=0;g('tor-sm').checked=false;g('tor-valor').value=0;g('tor-formato').value='parejas_fijas';
   const nc=(D.canchas||[]).length||1;const sc=g('tor-canchas');
   sc.innerHTML=Array.from({length:nc},(_,i)=>`<option value="${i+1}"${i+1===nc?' selected':''}>${i+1} cancha${i>0?'s':''}</option>`).join('');
   g('tor-err').classList.add('hidden');
