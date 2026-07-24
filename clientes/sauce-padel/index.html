@@ -1590,6 +1590,8 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+let torFiltro='curso';
+function torFiltrar(k){torFiltro=k;rTorneos();}
 async function refetchTorneos(){
   const{data,error}=await sb.from('torneos').select('*').order('fecha',{ascending:false});
   if(error){console.error('Error cargando torneos:',error);D.torneos=[];return false;}
@@ -1621,11 +1623,17 @@ async function rTorneos(){
   };
   const activos=ts.filter(t=>t.estado!=='finalizado');
   const fins=ts.filter(t=>t.estado==='finalizado');
-  const titulo=(txt,n)=>`<div style="font-size:12px;font-weight:700;color:var(--text3);letter-spacing:.5px;margin:4px 0 10px">${txt} (${n})</div>`;
-  let html='';
-  if(activos.length)html+=titulo('EN CURSO',activos.length)+activos.map(card).join('');
-  if(fins.length)html+=(activos.length?'<div style="height:14px"></div>':'')+titulo('FINALIZADOS',fins.length)+fins.map(card).join('');
-  cont.innerHTML=html;
+  if(torFiltro==='curso'&&!activos.length&&fins.length)torFiltro='fin';
+  const lista=torFiltro==='fin'?fins:activos;
+  const link=(k,txt,n)=>{const on=torFiltro===k;
+    return `<span onclick="torFiltrar('${k}')" style="cursor:pointer;font-size:13px;font-weight:${on?'700':'500'};color:${on?'var(--blue)':'var(--text2)'}">${txt} (${n})</span>`;};
+  cont.innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+      ${link('curso','En curso',activos.length)}
+      <span style="color:var(--border)">|</span>
+      ${link('fin','Finalizados',fins.length)}
+    </div>`
+    +(lista.length?lista.map(card).join('')
+      :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin torneos '+(torFiltro==='fin'?'finalizados':'en curso')+'.</div>');
 }
 function nuevoTorneo(){
   const sel=g('tor-bloqueo');if(!sel)return;
