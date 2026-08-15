@@ -14,6 +14,8 @@
 
 </script>
 <style>
+.cf-spin i{animation:cfspin 0.8s linear infinite;display:inline-block}
+@keyframes cfspin{from{transform:rotate(0)}to{transform:rotate(360deg)}}
 *{box-sizing:border-box;margin:0;padding:0}body{font-family:'Poppins',sans-serif}
 /* feedback táctil visual */
 .btn:active,.btn:active *{transform:scale(0.96);opacity:0.85;transition:transform 0.08s,opacity 0.08s}
@@ -320,6 +322,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     <button class="nb" onclick="S('inventario')" id="nav-inventario"><i class="ti ti-package"></i>Inventario</button>
     <button class="nb" onclick="S('ventas')" id="nav-ventas"><i class="ti ti-shopping-bag"></i>Ventas directas</button>
     <button class="nb ao" onclick="S('torneos')" id="nav-torneos"><i class="ti ti-trophy"></i>Torneos</button>
+    <button class="nb" onclick="S('escalerillas')" id="nav-escalerillas"><i class="ti ti-stairs-up"></i>Escalerillas</button>
     <button class="nb ao" onclick="S('clases')" id="nav-clases"><i class="ti ti-school"></i>Clases</button>
     <button class="nb ao" onclick="S('caja')" id="nav-caja"><i class="ti ti-receipt"></i>Caja</button>
     <button class="nb" onclick="S('deudas')" id="nav-deudas"><i class="ti ti-cash"></i>Deudas</button>
@@ -350,6 +353,7 @@ body[data-role="owner"] .owner-only{display:block!important}
     </div>
     
     <div class="agenda-actions">
+      <button class="btn" id="btn-recargar" onclick="recargarTodo()" title="Recargar datos"><i class="ti ti-refresh"></i></button>
       <button class="btn p" onclick="openRes()"><i class="ti ti-plus"></i> Nueva reserva</button>
       <button class="btn" onclick="openBloqueo()"><i class="ti ti-calendar-event"></i> Clases / Eventos</button>
     </div>
@@ -393,6 +397,97 @@ body[data-role="owner"] .owner-only{display:block!important}
   <div class="card" style="padding:0;overflow:auto">
     <table><thead><tr><th>Producto</th><th>Categoría</th><th>Código</th><th>Precio venta</th><th>Stock</th><th>Mín.</th><th>Estado</th><th></th></tr></thead>
     <tbody id="itbody"></tbody></table></div>
+</div>
+<div class="modal hidden" id="m-esc-reto">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Nuevo reto</b><button class="x" onclick="cM('m-esc-reto')">&times;</button></div>
+    <div class="mbody">
+      <div id="er-retador" style="font-size:13px;font-weight:600;margin-bottom:10px"></div>
+      <label>Puede retar a</label>
+      <select id="er-retado"></select>
+      <div id="er-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-reto')">Cancelar</button>
+      <button class="btn p" onclick="guardarReto()">Crear reto</button>
+    </div>
+  </div>
+</div>
+<div class="modal hidden" id="m-esc-res">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Cargar resultado</b><button class="x" onclick="cM('m-esc-res')">&times;</button></div>
+    <div class="mbody">
+      <div id="es-info" style="font-size:13px;margin-bottom:10px"></div>
+      <label>Gano</label>
+      <select id="es-ganador"></select>
+      <label style="margin-top:10px">Marcador (opcional)</label>
+      <input id="es-marcador" placeholder="6-4 6-3">
+      <div id="es-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-res')">Cancelar</button>
+      <button class="btn p" onclick="guardarResultado()">Guardar</button>
+    </div>
+  </div>
+</div>
+<div class="modal hidden" id="m-esc-part">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Inscribir en la escalerilla</b><button class="x" onclick="cM('m-esc-part')">&times;</button></div>
+    <div class="mbody">
+      <label>Jugador 1</label>
+      <select id="ep-j1"></select>
+      <label style="margin-top:10px">Jugador 2</label>
+      <select id="ep-j2"></select>
+      <div style="font-size:12px;color:var(--text3);margin-top:6px">Si el jugador no esta registrado, dejalo en "-" y escribe el nombre abajo.</div>
+      <label style="margin-top:10px">O nombre libre</label>
+      <input id="ep-libre" placeholder="Perez / Soto">
+      <div id="ep-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-esc-part')">Cancelar</button>
+      <button class="btn p" onclick="guardarParticipante()">Inscribir</button>
+    </div>
+  </div>
+</div>
+<div class="modal hidden" id="m-escalerilla">
+  <div class="mbox" style="max-width:420px">
+    <div class="mhead"><b>Nueva escalerilla</b><button class="x" onclick="cM('m-escalerilla')">&times;</button></div>
+    <div class="mbody">
+      <label>Nombre</label>
+      <input id="esc-nombre" placeholder="Escalerilla 4ta">
+      <label style="margin-top:10px">Categoria</label>
+      <input id="esc-cat" placeholder="4ta">
+      <label style="margin-top:10px">Puede retar hasta (puestos arriba)</label>
+      <input id="esc-rango" type="number" value="3" min="1" max="10">
+      <label style="margin-top:10px">Dias de plazo para jugar el reto</label>
+      <input id="esc-plazo" type="number" value="7" min="1" max="60">
+      <div id="esc-err" class="hidden alert warning" style="margin-top:10px"></div>
+    </div>
+    <div class="mfoot">
+      <button class="btn" onclick="cM('m-escalerilla')">Cancelar</button>
+      <button class="btn p" onclick="guardarEscalerilla()">Crear</button>
+    </div>
+  </div>
+</div>
+<!-- ESCALERILLAS -->
+<div class="sec" id="sec-escalerillas">
+  <div id="esc-vista-lista">
+    <div class="rb"><div></div><button class="btn p ao" onclick="nuevaEscalerilla()"><i class="ti ti-plus"></i> Nueva escalerilla</button></div>
+    <div id="escalerillas-list"></div>
+  </div>
+  <div id="esc-vista-detalle" class="hidden">
+    <div class="rb">
+      <button class="btn" onclick="volverEscalerillas()"><i class="ti ti-arrow-left"></i> Volver</button>
+      <div style="display:flex;gap:6px;flex-wrap:wrap">
+        <button class="btn" onclick="compartirEscalerilla()"><i class="ti ti-share"></i> Compartir</button>
+        <button class="btn p" onclick="nuevoParticipante()"><i class="ti ti-plus"></i> Inscribir</button>
+        <button class="btn ao" id="esc-btn-fin" onclick="finalizarEscalerilla()"><i class="ti ti-flag"></i> Finalizar</button>
+      </div>
+    </div>
+    <div id="esc-det-head"></div>
+    <div id="esc-det-tabla"></div>
+    <div id="esc-det-retos"></div>
+  </div>
 </div>
 <!-- TORNEOS / AMERICANOS -->
 <div class="sec" id="sec-torneos">
@@ -703,6 +798,7 @@ body[data-role="owner"] .owner-only{display:block!important}
   <button class="mob-mas-item" onclick="S('inventario');closeMobMas()"><i class="ti ti-box"></i> Inventario</button>
   <button class="mob-mas-item" onclick="S('ventas');closeMobMas()"><i class="ti ti-shopping-bag"></i> Ventas directas</button>
   <button class="mob-mas-item ao" onclick="S('torneos');closeMobMas()"><i class="ti ti-trophy"></i> Torneos</button>
+  <button class="mob-mas-item" onclick="S('escalerillas');closeMobMas()"><i class="ti ti-stairs-up"></i> Escalerillas</button>
   <button class="mob-mas-item ao" onclick="S('clases');closeMobMas()"><i class="ti ti-school"></i> Clases</button>
   <button class="mob-mas-item ao" onclick="S('caja');closeMobMas()"><i class="ti ti-report-money"></i> Caja</button>
   <button class="mob-mas-item" onclick="S('deudas');closeMobMas()"><i class="ti ti-credit-card-off"></i> Deudas</button>
@@ -1135,7 +1231,7 @@ body[data-role="owner"] .owner-only{display:block!important}
 </div>
 <script>
 const BLOQ_TIPOS={mantenimiento:{label:'Mantenimiento',icon:'ti-tool',bg:'#E2E8F0',border:'#64748B',text:'#475569'},clase:{label:'Clase',icon:'ti-school',bg:'#EEEDFE',border:'#7C6FE8',text:'#534AB7'},cumpleanos:{label:'Cumpleaños',icon:'ti-cake',bg:'#FCE7F3',border:'#EC4899',text:'#BE185D'},evento:{label:'Evento',icon:'ti-confetti',bg:'#FEF3C7',border:'#F59E0B',text:'#92400E'},torneo:{label:'Torneo / Americano',icon:'ti-trophy',bg:'#DBEAFE',border:'#3B82F6',text:'#1D4ED8'}};
-const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',config:'Configuración'};
+const TITLES={agenda:'Agenda',turnos:'Turnos en curso',jugadores:'Jugadores',inventario:'Inventario',ventas:'Ventas directas',clases:'Clases',caja:'Caja',deudas:'Deudas',historial:'Historial',torneos:'Torneos',escalerillas:'Escalerillas',config:'Configuración'};
 const NIVELES_DEFAULT=['Iniciación','6ta Baja','6ta Media','6ta Alta','5ta Baja','5ta Media','5ta Alta','4ta Baja','4ta Media','4ta Alta','3ra Baja','3ra Media','3ra Alta','2da Baja','2da Media','2da Alta','1ra Baja','1ra Media','1ra Alta'];
 const NC={'Iniciación':{b:'#F1EFE8',t:'#5F5E5A'},'6ta Baja':{b:'#EAF3DE',t:'#3B6D11'},'6ta Media':{b:'#EAF3DE',t:'#3B6D11'},'6ta Alta':{b:'#EAF3DE',t:'#27500A'},'5ta Baja':{b:'#E6F1FB',t:'#185FA5'},'5ta Media':{b:'#E6F1FB',t:'#185FA5'},'5ta Alta':{b:'#E6F1FB',t:'#0C447C'},'4ta Baja':{b:'#EEEDFE',t:'#534AB7'},'4ta Media':{b:'#EEEDFE',t:'#534AB7'},'4ta Alta':{b:'#EEEDFE',t:'#3C3489'},'3ra Baja':{b:'#FAEEDA',t:'#854F0B'},'3ra Media':{b:'#FAEEDA',t:'#854F0B'},'3ra Alta':{b:'#FAEEDA',t:'#633806'},'2da Baja':{b:'#FAECE7',t:'#993C1D'},'2da Media':{b:'#FAECE7',t:'#993C1D'},'2da Alta':{b:'#FAECE7',t:'#712B13'},'1ra Baja':{b:'#FCEBEB',t:'#A32D2D'},'1ra Media':{b:'#FCEBEB',t:'#A32D2D'},'1ra Alta':{b:'#FCEBEB',t:'#791F1F'}};
 const FERIADOS_CHILE_2026=[
@@ -1252,11 +1348,18 @@ async function refetchDeudas(){
   D.deudas=(data||[]).map(d=>({id:d.id,jugador:d.jugador_nombre,telefono:d.telefono,fecha:d.fecha,concepto:d.concepto,monto:d.monto,pagado:d.pagado,estado:d.estado,bloqueado:d.bloqueado}));
   return true;
 }
+function _withTimeout(promise, ms, label){
+  return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout '+(label||'')+' '+ms+'ms')), ms))]);
+}
 async function fetchAllIn(table, col, ids){
   if(!ids||!ids.length)return[];
   const out=[];const size=1000;let from=0;
   while(true){
-    const{data,error}=await sb.from(table).select('*').in(col,ids).range(from,from+size-1);
+    let data, error;
+    try{
+      const _r = await _withTimeout(sb.from(table).select('*').in(col,ids).range(from,from+size-1), 15000, table);
+      data = _r.data; error = _r.error;
+    }catch(e){ console.error('fetchAllIn timeout', table, e.message); break; }
     if(error){console.error('fetchAllIn error',table,error);break;}
     if(!data||data.length===0)break;
     out.push(...data);
@@ -1347,6 +1450,13 @@ async function refrescarModulo(s){
     const ld2=g('cf-loading');if(ld2)ld2.style.display='none';
   }
 }
+async function recargarTodo(){
+  const btn=document.getElementById('btn-recargar');
+  if(btn)btn.classList.add('cf-spin');
+  try{ await cargarDatosDesdeSupabase(); rAll(); }
+  catch(e){ console.error('recargarTodo error', e); alert('No se pudo recargar. Revisa tu conexion e intenta de nuevo.'); }
+  if(btn)btn.classList.remove('cf-spin');
+}
 async function cargarDatosDesdeSupabase(){
   // Canchas: mapeo precio_normal->pN, precio_alto->pA (nombres cortos que ya usa el resto del código)
   const{data:canchas,error:errCanchas}=await sb.from('canchas').select('*').order('orden');
@@ -1396,7 +1506,13 @@ async function cargarDatosDesdeSupabase(){
   await refetchJugadores();
 
   // Reservas + tablas relacionadas (jugadores, productos, pagos, cortesías)
-  const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
+  let{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
+  // Reintento standalone: si canchas cargaron pero reservas vino vacia/erronea, reintentar 1 vez
+  if((errRes || !(reservasRaw&&reservasRaw.length)) && (D.canchas&&D.canchas.length)){
+    await new Promise(r=>setTimeout(r,1200));
+    const _retry=await sb.from('reservas').select('*');
+    if(!_retry.error && _retry.data){ reservasRaw=_retry.data; errRes=null; }
+  }
   if(errRes){console.error('Error cargando reservas:',errRes);D.reservas=[];}
   else{
     const resIds=(reservasRaw||[]).map(r=>r.id);
@@ -1591,6 +1707,272 @@ async function audit(accion, entidad, detalle){
   }catch(e){}
 }
 async function doLogout(){await sb.auth.signOut();role=null;D.perfil={};g('main-app').classList.add('hidden');g('login-screen').style.display='flex';g('login-pass').value='';g('lerr').classList.add('hidden');}
+let escFiltro='activa';
+function escFiltrar(k){escFiltro=k;rEscalerillas();}
+async function refetchEscalerillas(){
+  const{data,error}=await sb.from('escalerillas').select('*').order('fecha_inicio',{ascending:false});
+  if(error){console.error('Error cargando escalerillas:',error);D.escalerillas=[];return false;}
+  D.escalerillas=(data||[]).map(e=>({id:e.id,nombre:e.nombre,categoria:e.categoria,tipo:e.tipo,
+    estado:e.estado,fechaInicio:e.fecha_inicio,fechaFin:e.fecha_fin,rangoReto:e.rango_reto,diasPlazo:e.dias_plazo}));
+  return true;
+}
+function nuevaEscalerilla(){
+  g('esc-nombre').value='';g('esc-cat').value='';g('esc-rango').value=3;g('esc-plazo').value=7;
+  g('esc-err').classList.add('hidden');
+  g('m-escalerilla').classList.remove('hidden');
+}
+async function guardarEscalerilla(){
+  const nombre=g('esc-nombre').value.trim();const err=g('esc-err');
+  if(!nombre){err.textContent='Ponle un nombre a la escalerilla.';err.classList.remove('hidden');return;}
+  const{error}=await sb.from('escalerillas').insert({nombre,categoria:g('esc-cat').value.trim()||null,
+    rango_reto:parseInt(g('esc-rango').value)||3,dias_plazo:parseInt(g('esc-plazo').value)||7});
+  if(error){err.textContent='No se pudo crear: '+error.message;err.classList.remove('hidden');return;}
+  audit('Creo escalerilla','escalerillas',nombre);
+  await refetchEscalerillas();cM('m-escalerilla');rEscalerillas();
+}
+async function rEscalerillas(){
+  const cont=g('escalerillas-list');if(!cont)return;
+  if(!D.escalerillas)await refetchEscalerillas();
+  const es=D.escalerillas||[];
+  if(!es.length){
+    cont.innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3)"><i class="ti ti-stairs-up" style="font-size:32px;opacity:.4"></i><div style="margin-top:8px;font-size:13px">Aun no hay escalerillas. Crea una con Nueva escalerilla.</div></div>';
+    return;
+  }
+  const card=e=>{
+    const fin=e.estado==='finalizada';
+    return `<div class="card" style="padding:14px;margin-bottom:10px;cursor:pointer;${fin?'opacity:.75':''}" onclick="abrirEscalerilla('${e.id}')">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:10px">
+        <div><div style="font-weight:700;font-size:15px"><i class="ti ti-stairs-up" style="color:${fin?'var(--text3)':'#3B82F6'}"></i> ${e.nombre}</div>
+        <div style="font-size:12px;color:var(--text2);margin-top:3px">${e.categoria?e.categoria+' · ':''}reta hasta ${e.rangoReto} puestos · ${e.diasPlazo} dias de plazo</div></div>
+        <span class="badge ${fin?'':'bg'}" style="${fin?'background:#DCFCE7;color:#166534':''}">${fin?'✅ Finalizada':'Activa'}</span>
+      </div></div>`;
+  };
+  const act=es.filter(e=>e.estado!=='finalizada');
+  const fins=es.filter(e=>e.estado==='finalizada');
+  if(escFiltro==='activa'&&!act.length&&fins.length)escFiltro='fin';
+  const lista=escFiltro==='fin'?fins:act;
+  const link=(k,txt,n)=>{const on=escFiltro===k;
+    return `<span onclick="escFiltrar('${k}')" style="cursor:pointer;font-size:13px;font-weight:${on?'700':'500'};color:${on?'var(--blue)':'var(--text2)'}">${txt} (${n})</span>`;};
+  cont.innerHTML=`<div style="display:flex;gap:10px;align-items:center;margin-bottom:14px">
+      ${link('activa','Activas',act.length)}
+      <span style="color:var(--border)">|</span>
+      ${link('fin','Finalizadas',fins.length)}
+    </div>`
+    +(lista.length?lista.map(card).join('')
+      :'<div style="font-size:13px;color:var(--text3);padding:20px 0;text-align:center">Sin escalerillas '+(escFiltro==='fin'?'finalizadas':'activas')+'.</div>');
+}
+let escAct=null;
+function telParticipante(pid){
+  const p=(escAct.parts||[]).find(x=>x.id===pid);if(!p)return null;
+  const j=(D.jugadores||[]).find(x=>x.id===p.jugador1_id);
+  return j&&j.telefono?j.telefono.replace(/[^0-9]/g,''):null;
+}
+function avisarReto(rid){
+  const r=escAct.retos.find(x=>x.id===rid);if(!r)return;
+  const a=nomPart(escAct.parts.find(x=>x.id===r.retador_id));
+  const b=nomPart(escAct.parts.find(x=>x.id===r.retado_id));
+  const tel=telParticipante(r.retado_id)||telParticipante(r.retador_id);
+  const msg=`Hola! Tienes un reto pendiente en la ${escAct.esc.nombre}: ${a} vs ${b}. Tienen hasta el ${r.fecha_limite} para jugarlo. Coordinen la cancha en el club!`;
+  const url=tel?`https://wa.me/${tel.startsWith('56')?tel:'56'+tel}?text=${encodeURIComponent(msg)}`:`https://wa.me/?text=${encodeURIComponent(msg)}`;
+  window.open(url,'_blank');
+}
+async function finalizarEscalerilla(){
+  if(!escAct)return;
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  if(pend.length&&!confirm('Hay '+pend.length+' reto(s) pendientes sin jugar. Finalizar igual?'))return;
+  if(!confirm('Finalizar la temporada? Se congela la tabla y no se pueden crear retos nuevos.'))return;
+  const{error}=await sb.from('escalerillas').update({estado:'finalizada',fecha_fin:new Date().toISOString().slice(0,10)}).eq('id',escAct.esc.id);
+  if(error){alert('No se pudo: '+error.message);return;}
+  audit('Finalizo escalerilla','escalerillas',escAct.esc.nombre);
+  await refetchEscalerillas();await recargarEscAct();
+}
+async function reabrirEscalerilla(){
+  if(!escAct)return;
+  if(!confirm('Reabrir la temporada?'))return;
+  const{error}=await sb.from('escalerillas').update({estado:'activa',fecha_fin:null}).eq('id',escAct.esc.id);
+  if(error){alert('No se pudo: '+error.message);return;}
+  audit('Reabrio escalerilla','escalerillas',escAct.esc.nombre);
+  await refetchEscalerillas();await recargarEscAct();
+}
+function compartirEscalerilla(){
+  if(!escAct)return;
+  const e=escAct.esc;const act=escAct.parts.filter(p=>p.activo);
+  let txt='🪜 '+e.nombre+(e.categoria?' · '+e.categoria:'')+'\n\n';
+  act.forEach(p=>{
+    const fl=p.posicion_anterior==null?'':(p.posicion<p.posicion_anterior?' ↑':(p.posicion>p.posicion_anterior?' ↓':''));
+    txt+=p.posicion+'. '+nomPart(p)+' ('+p.ganados+'G '+p.perdidos+'P)'+fl+'\n';
+  });
+  txt+=e.estado==='finalizada'?'\nTemporada finalizada ✅':'\nRetos abiertos: quien quiera subir, a retar! ⚔';
+  navigator.clipboard.writeText(txt).then(()=>alert('Tabla copiada. Pegala en el grupo de WhatsApp.'),()=>alert('No se pudo copiar.'));
+}
+function volverEscalerillas(){escAct=null;g('esc-vista-detalle').classList.add('hidden');g('esc-vista-lista').classList.remove('hidden');rEscalerillas();}
+function nomPart(p){
+  if(!p)return'?';
+  const n1=p.jugador1_id?((D.jugadores||[]).find(x=>x.id===p.jugador1_id)||{}).nombre:null;
+  const n2=p.jugador2_id?((D.jugadores||[]).find(x=>x.id===p.jugador2_id)||{}).nombre:null;
+  if(n1&&n2)return n1+' / '+n2;
+  if(n1)return n1;
+  return p.nombre_libre||'?';
+}
+async function abrirEscalerilla(id){
+  const e=(D.escalerillas||[]).find(x=>x.id===id);if(!e)return;
+  const[pa,re]=await Promise.all([
+    sb.from('escalerilla_participantes').select('*').eq('escalerilla_id',id).order('posicion'),
+    sb.from('escalerilla_retos').select('*').eq('escalerilla_id',id).order('created_at',{ascending:false})
+  ]);
+  escAct={esc:e,parts:(pa.data||[]),retos:(re.data||[])};
+  g('esc-vista-lista').classList.add('hidden');
+  g('esc-vista-detalle').classList.remove('hidden');
+  rEscDetalle();
+}
+async function recargarEscAct(){if(escAct)await abrirEscalerilla(escAct.esc.id);}
+function rEscDetalle(){
+  if(!escAct)return;
+  const e=escAct.esc;
+  const act=escAct.parts.filter(p=>p.activo);
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  const bf=g('esc-btn-fin');if(bf)bf.style.display=e.estado==='finalizada'?'none':'';
+  g('esc-det-head').innerHTML=`<div class="card" style="padding:14px;margin-bottom:12px">
+    <div style="font-weight:700;font-size:17px"><i class="ti ti-stairs-up" style="color:#3B82F6"></i> ${e.nombre}</div>
+    <div style="font-size:12px;color:var(--text2);margin-top:4px">${e.categoria?e.categoria+' · ':''}${act.length} inscritos · reta hasta ${e.rangoReto} puestos · ${pend.length} retos pendientes</div>
+  </div>`;
+  if(!act.length){
+    g('esc-det-tabla').innerHTML='<div class="card" style="padding:24px;text-align:center;color:var(--text3);font-size:13px">Aun no hay inscritos. Usa el boton Inscribir.</div>';
+    g('esc-det-retos').innerHTML='';
+    return;
+  }
+  const ocup=new Set();pend.forEach(r=>{ocup.add(r.retador_id);ocup.add(r.retado_id);});
+  const flecha=p=>{
+    if(p.posicion_anterior==null)return'<span style="color:var(--text3)">—</span>';
+    if(p.posicion<p.posicion_anterior)return'<span style="color:#16A34A;font-weight:700">↑ '+(p.posicion_anterior-p.posicion)+'</span>';
+    if(p.posicion>p.posicion_anterior)return'<span style="color:#DC2626;font-weight:700">↓ '+(p.posicion-p.posicion_anterior)+'</span>';
+    return'<span style="color:var(--text3)">—</span>';
+  };
+  let podio='';
+  if(e.estado==='finalizada'){
+    const top=act.slice(0,3);const med=['🥇','🥈','🥉'];
+    podio=`<div class="card" style="padding:16px;margin-bottom:12px;text-align:center">
+      <div style="font-weight:700;font-size:15px;margin-bottom:10px">Temporada finalizada</div>
+      ${top.map((x,i)=>`<div style="font-size:15px;margin:4px 0">${med[i]} <b>${nomPart(x)}</b> <span style="color:var(--text3);font-size:13px">· ${x.ganados}G ${x.perdidos}P</span></div>`).join('')}
+      <button class="btn ao" style="margin-top:12px" onclick="reabrirEscalerilla()"><i class="ti ti-rotate"></i> Reabrir</button>
+    </div>`;
+  }
+  g('esc-det-tabla').innerHTML=podio+`<div class="card" style="overflow-x:auto"><table style="width:100%;border-collapse:collapse;font-size:13px">
+    <thead><tr style="text-align:left;color:var(--text3);font-size:11px">
+      <th style="padding:8px 14px">#</th><th>Pareja</th><th></th><th>PJ</th><th>PG</th><th>PP</th><th style="padding-right:14px"></th></tr></thead>
+    <tbody>${act.map(p=>`<tr style="border-top:1px solid var(--border)">
+      <td style="padding:9px 14px;font-weight:700">${p.posicion}</td>
+      <td style="font-weight:600">${nomPart(p)}</td>
+      <td>${flecha(p)}</td>
+      <td>${p.jugados}</td><td>${p.ganados}</td><td>${p.perdidos}</td>
+      <td style="padding-right:14px;text-align:right;white-space:nowrap">${p.posicion>1&&!ocup.has(p.id)&&e.estado!=='finalizada'?`<button class="btn" style="padding:3px 9px;font-size:12px" onclick="nuevoReto('${p.id}')" title="Retar">⚔</button> `:''}<button class="btn ao" style="padding:3px 9px;font-size:12px" onclick="borrarParticipante('${p.id}')"><i class="ti ti-trash"></i></button></td>
+    </tr>`).join('')}</tbody>
+  </table></div>`;
+  rEscRetos();
+}
+function rEscRetos(){
+  const c=g('esc-det-retos');if(!c||!escAct)return;
+  const pend=escAct.retos.filter(r=>r.estado==='pendiente');
+  const jug=escAct.retos.filter(r=>r.estado==='jugado').slice(0,10);
+  const pid=id=>nomPart(escAct.parts.find(x=>x.id===id));
+  let h='';
+  if(pend.length){
+    h+='<div style="font-weight:700;font-size:14px;margin:18px 0 8px">Retos pendientes</div>';
+    h+=pend.map(r=>{
+      const venc=r.fecha_limite<new Date().toISOString().slice(0,10);
+      return `<div class="card" style="padding:12px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:10px;flex-wrap:wrap">
+        <div><div style="font-size:13px;font-weight:600">${pid(r.retador_id)} <span style="color:var(--text3)">reta a</span> ${pid(r.retado_id)}</div>
+        <div style="font-size:11px;color:${venc?'#DC2626':'var(--text3)'};margin-top:3px">${venc?'⚠ Vencio el ':'Hasta el '}${r.fecha_limite}</div></div>
+        <div style="display:flex;gap:6px">
+          <button class="btn" style="padding:4px 10px;font-size:12px" onclick="avisarReto('${r.id}')" title="Avisar por WhatsApp">💬</button>
+          <button class="btn p" style="padding:4px 10px;font-size:12px" onclick="cargarResultado('${r.id}')">Cargar resultado</button>
+          <button class="btn" style="padding:4px 10px;font-size:12px" onclick="cancelarReto('${r.id}')">Anular</button>
+        </div></div>`;}).join('');
+  }
+  if(jug.length){
+    h+='<div style="font-weight:700;font-size:14px;margin:18px 0 8px">Ultimos resultados</div>';
+    h+='<div class="card" style="padding:0">'+jug.map(r=>{
+      const gano=r.ganador_id===r.retador_id;
+      return `<div style="padding:10px 14px;border-bottom:1px solid var(--border);font-size:13px">
+        <span style="font-weight:${gano?'700':'400'}">${pid(r.retador_id)}</span>
+        <span style="color:var(--text3)"> vs </span>
+        <span style="font-weight:${gano?'400':'700'}">${pid(r.retado_id)}</span>
+        <span style="color:var(--text3);font-size:12px"> · ${r.marcador||''} · ${r.fecha_jugado||''}</span>
+      </div>`;}).join('')+'</div>';
+  }
+  c.innerHTML=h;
+}
+function nuevoReto(pid){
+  const p=escAct.parts.find(x=>x.id===pid);if(!p)return;
+  const e=escAct.esc;
+  const ocup=new Set();escAct.retos.filter(r=>r.estado==='pendiente').forEach(r=>{ocup.add(r.retador_id);ocup.add(r.retado_id);});
+  const cand=escAct.parts.filter(x=>x.activo&&x.posicion<p.posicion&&(p.posicion-x.posicion)<=e.rangoReto&&!ocup.has(x.id));
+  if(!cand.length){alert('No hay a quien retar ahora mismo (o ya tienen retos abiertos).');return;}
+  g('er-retador').innerHTML=`#${p.posicion} ${nomPart(p)} reta a:`;
+  g('er-retado').innerHTML=cand.map(x=>`<option value="${x.id}">#${x.posicion} ${nomPart(x)}</option>`).join('');
+  g('er-retado').dataset.retador=pid;
+  g('er-err').classList.add('hidden');
+  g('m-esc-reto').classList.remove('hidden');
+}
+async function guardarReto(){
+  const err=g('er-err');
+  const retador=g('er-retado').dataset.retador,retado=g('er-retado').value;
+  const{error}=await sb.rpc('crear_reto_escalerilla',{p_retador:retador,p_retado:retado});
+  if(error){err.textContent=error.message;err.classList.remove('hidden');return;}
+  audit('Creo reto','escalerillas',escAct.esc.nombre);
+  cM('m-esc-reto');await recargarEscAct();
+}
+function cargarResultado(rid){
+  const r=escAct.retos.find(x=>x.id===rid);if(!r)return;
+  const a=escAct.parts.find(x=>x.id===r.retador_id),b=escAct.parts.find(x=>x.id===r.retado_id);
+  g('es-info').innerHTML=`<b>${nomPart(a)}</b> vs <b>${nomPart(b)}</b>`;
+  g('es-ganador').innerHTML=`<option value="${a.id}">${nomPart(a)}</option><option value="${b.id}">${nomPart(b)}</option>`;
+  g('es-ganador').dataset.reto=rid;
+  g('es-marcador').value='';g('es-err').classList.add('hidden');
+  g('m-esc-res').classList.remove('hidden');
+}
+async function guardarResultado(){
+  const err=g('es-err');
+  const{error}=await sb.rpc('resolver_reto_escalerilla',{p_reto:g('es-ganador').dataset.reto,
+    p_ganador:g('es-ganador').value,p_marcador:g('es-marcador').value.trim()||null});
+  if(error){err.textContent=error.message;err.classList.remove('hidden');return;}
+  audit('Cargo resultado escalerilla','escalerillas',escAct.esc.nombre);
+  cM('m-esc-res');await recargarEscAct();
+}
+async function cancelarReto(rid){
+  if(!confirm('Anular este reto?'))return;
+  const{error}=await sb.from('escalerilla_retos').update({estado:'cancelado'}).eq('id',rid);
+  if(error){alert('No se pudo: '+error.message);return;}
+  await recargarEscAct();
+}
+function optsJug(sel){
+  const js=(D.jugadores||[]).slice().sort((a,b)=>a.nombre.localeCompare(b.nombre));
+  g(sel).innerHTML='<option value="">-</option>'+js.map(j=>`<option value="${j.id}">${j.nombre}</option>`).join('');
+}
+function nuevoParticipante(){
+  if(!escAct)return;
+  optsJug('ep-j1');optsJug('ep-j2');
+  g('ep-libre').value='';g('ep-err').classList.add('hidden');
+  g('m-esc-part').classList.remove('hidden');
+}
+async function guardarParticipante(){
+  const err=g('ep-err');
+  const j1=g('ep-j1').value||null,j2=g('ep-j2').value||null,libre=g('ep-libre').value.trim();
+  if(!j1&&!libre){err.textContent='Elige un jugador o escribe un nombre libre.';err.classList.remove('hidden');return;}
+  if(j1&&j2&&j1===j2){err.textContent='No puede ser el mismo jugador dos veces.';err.classList.remove('hidden');return;}
+  const max=escAct.parts.reduce((m,p)=>Math.max(m,p.posicion),0);
+  const{error}=await sb.from('escalerilla_participantes').insert({escalerilla_id:escAct.esc.id,
+    jugador1_id:j1,jugador2_id:j2,nombre_libre:(!j1?libre:null),posicion:max+1});
+  if(error){err.textContent='No se pudo inscribir: '+error.message;err.classList.remove('hidden');return;}
+  audit('Inscribio en escalerilla','escalerillas',escAct.esc.nombre);
+  cM('m-esc-part');await recargarEscAct();
+}
+async function borrarParticipante(pid){
+  if(!confirm('Sacar a este participante de la escalerilla?'))return;
+  const{error}=await sb.from('escalerilla_participantes').delete().eq('id',pid);
+  if(error){alert('No se pudo: '+error.message);return;}
+  await recargarEscAct();
+}
 let torFiltro='curso';
 function torFiltrar(k){torFiltro=k;rTorneos();}
 async function refetchTorneos(){
@@ -2178,6 +2560,7 @@ function S(s){
   if(s==='clases')setTimeout(rClases,50);if(s==='historial')setTimeout(rHistorial,50);
   if(s==='ventas'){setTimeout(rVD,50);}
   if(s==='torneos')setTimeout(rTorneos,50);
+  if(s==='escalerillas')setTimeout(rEscalerillas,50);
   document.querySelectorAll('.sec').forEach(x=>x.classList.remove('active'));document.querySelectorAll('.nb').forEach(x=>x.classList.remove('active'));
   g('sec-'+s).classList.add('active');g('nav-'+s).classList.add('active');g('topbar-title').textContent=TITLES[s]||s;
   if(s==='config'){rCfg();rPromos();rTramos();rMembs();rNivelesCfg();rFeriados();rUsuarios();setTimeout(initConfigAcordeon,60);}if(s==='caja')rCaja();
