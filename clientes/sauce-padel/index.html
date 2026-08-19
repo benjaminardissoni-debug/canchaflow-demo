@@ -1353,18 +1353,24 @@ function _withTimeout(promise, ms, label){
 }
 async function fetchAllIn(table, col, ids){
   if(!ids||!ids.length)return[];
-  const out=[];const size=1000;let from=0;
-  while(true){
-    let data, error;
-    try{
-      const _r = await _withTimeout(sb.from(table).select('*').in(col,ids).range(from,from+size-1), 15000, table);
-      data = _r.data; error = _r.error;
-    }catch(e){ console.error('fetchAllIn timeout', table, e.message); break; }
-    if(error){console.error('fetchAllIn error',table,error);break;}
-    if(!data||data.length===0)break;
-    out.push(...data);
-    if(data.length<size)break;
-    from+=size;
+  const out=[];
+  const CHUNK=200;        // trocea los IDs para no exceder el largo de URL (evita 400)
+  const size=1000;
+  for(let i=0;i<ids.length;i+=CHUNK){
+    const slice=ids.slice(i,i+CHUNK);
+    let from=0;
+    while(true){
+      let data,error;
+      try{
+        const _r=await _withTimeout(sb.from(table).select('*').in(col,slice).range(from,from+size-1),15000,table);
+        data=_r.data;error=_r.error;
+      }catch(e){console.error('fetchAllIn timeout/err',table,e.message);break;}
+      if(error){console.error('fetchAllIn error',table,error);break;}
+      if(!data||data.length===0)break;
+      out.push(...data);
+      if(data.length<size)break;
+      from+=size;
+    }
   }
   return out;
 }
