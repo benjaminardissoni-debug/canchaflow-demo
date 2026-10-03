@@ -1351,6 +1351,22 @@ async function refetchDeudas(){
 function _withTimeout(promise, ms, label){
   return Promise.race([promise, new Promise((_,rej)=>setTimeout(()=>rej(new Error('timeout '+(label||'')+' '+ms+'ms')), ms))]);
 }
+async function fetchAllReservas(){
+  const out=[];const size=1000;let from=0;
+  while(true){
+    let data,error;
+    try{
+      const _r=await _withTimeout(sb.from('reservas').select('*').order('creado_at',{ascending:true}).range(from,from+size-1),15000,'reservas');
+      data=_r.data;error=_r.error;
+    }catch(e){console.error('fetchAllReservas timeout',e.message);break;}
+    if(error){console.error('fetchAllReservas error',error);break;}
+    if(!data||data.length===0)break;
+    out.push(...data);
+    if(data.length<size)break;
+    from+=size;
+  }
+  return out;
+}
 async function fetchAllIn(table, col, ids){
   if(!ids||!ids.length)return[];
   const out=[];
@@ -1375,7 +1391,7 @@ async function fetchAllIn(table, col, ids){
   return out;
 }
 async function refetchReservas(){
-  const{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
+  const reservasRaw=await fetchAllReservas();const errRes=null;
   if(errRes){console.error('Error cargando reservas:',errRes);return false;}
   const resIds=(reservasRaw||[]).map(r=>r.id);
   let rJugRows=[],rProdRows=[],rPagoRows=[],rCortRows=[];
@@ -1512,11 +1528,11 @@ async function cargarDatosDesdeSupabase(){
   await refetchJugadores();
 
   // Reservas + tablas relacionadas (jugadores, productos, pagos, cortesías)
-  let{data:reservasRaw,error:errRes}=await sb.from('reservas').select('*');
+  let reservasRaw=await fetchAllReservas();let errRes=null;
   // Reintento standalone: si canchas cargaron pero reservas vino vacia/erronea, reintentar 1 vez
   if((errRes || !(reservasRaw&&reservasRaw.length)) && (D.canchas&&D.canchas.length)){
     await new Promise(r=>setTimeout(r,1200));
-    const _retry=await sb.from('reservas').select('*');
+    const _retry={data:await fetchAllReservas(),error:null};
     if(!_retry.error && _retry.data){ reservasRaw=_retry.data; errRes=null; }
   }
   if(errRes){console.error('Error cargando reservas:',errRes);D.reservas=[];}
